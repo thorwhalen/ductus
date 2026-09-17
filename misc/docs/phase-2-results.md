@@ -144,6 +144,16 @@ Not accuracy — **dependencies**. `DEFAULT_DETECTORS` has to work on `pip insta
 
 ## Does the proxy model change the answer?
 
+Yes, and more than the fixture did. This is the lever Phase 1 named as cheapest-untried, and it turns out to have been understating the case: **the CPU-sized defaults are the weakest rung by a wide margin**, and Phase 1's "gate not cleared" verdict was as much an artifact of the proxy models as of the fixture.
+
+`python misc/measure_model_ladder.py`, sentence granularity.
+
+### The rule for changing a shipped default, fixed before the second half was seen
+
+The llmtrace numbers below were in hand when this was written; the RoFT numbers were not. Stating it here rather than afterwards:
+
+> A default proxy model changes only if the better pair wins **on both fixtures**. One fixture with 40 decisive machine segments, where a one-document difference moves a percentage point, is not a basis for changing what every user downloads.
+
 <!-- LADDER -->
 
 ## What was not done, and what it would take
