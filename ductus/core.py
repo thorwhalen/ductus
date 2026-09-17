@@ -129,4 +129,9 @@ def gauge(
         segments=segments,
         detectors=names,
         segmenter=segmenter if isinstance(segmenter, str) else "custom",
+        # Which scorer produced these labels. Still "uncalibrated" -- nothing here is
+        # a calibrated probability and nothing ever will be -- but since Phase 2 there
+        # is more than one scorer, and two reports that do not say which one ran are
+        # not comparable. See misc/docs/what-calibration-means-here.md.
+        calibration=f"uncalibrated ({getattr(aggregate, '__name__', 'custom')})",
     )

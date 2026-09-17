@@ -109,3 +109,17 @@ def test_lean_is_not_a_sufficient_statistic_for_how_much_was_found():
     assert one_weak[1] < STRENGTH_FLOOR < six_strong[1]  # wholly different claims
     assert one_weak[2] == "no-evidence"
     assert six_strong[2] == "leans-machine"
+
+
+def test_the_report_says_which_scorer_produced_it():
+    """Two scorers now exist; a report that does not say which one ran is not comparable.
+
+    It still says "uncalibrated", because nothing here is a calibrated probability and
+    the normalisation change did not make one.
+    """
+    from ductus import gauge
+
+    text = "Great question! Let's delve into this robust tapestry of ideas."
+    assert gauge(text).calibration == "uncalibrated (density_aggregate)"
+    assert gauge(text, aggregate=aggregate).calibration == "uncalibrated (aggregate)"
+    assert "uncalibrated" in gauge(text).calibration
