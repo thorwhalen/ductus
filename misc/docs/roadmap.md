@@ -47,12 +47,16 @@ Built and shipped, **off by default**. The full measurement is in [`phase-1-resu
 - The result worth carrying forward: the model detectors found **10 human-leaning segments where the deterministic set found 0, all 10 correct**. Human-leaning evidence is first-class here, so this is why they ship rather than being deleted.
 - Re-running the gate after any change is `python misc/measure_detectors.py`.
 
-### Phase 2 — calibration, and the fixture corpus
+### Phase 2 — calibration, and the fixture corpus — **done**
 
-- Vendor a second fixture set from RoFT (MIT, human prefix + machine continuation, an explicit `true_boundary_index`) alongside the LLMTrace slice already in `tests/fixtures/`. Different ground-truth shape — a single boundary rather than multiple spans — which is exactly why it is worth having both.
-- Retest the Phase 1 detectors at the documented upgrade models before anything else — the cheapest untried thing, and the fixture's `fill_gaps` shape is close to their worst case.
-- Fit `aggregate=` on them and report the honest operating characteristics: false-positive rate on the human-only subset first, and separately on non-native-English text if a suitable corpus can be licensed.
-- **Even after calibration, no percentage.** A fitted scorer changes what `lean` is computed from; it does not change what is reported. See `why-no-percentage.md`.
+Results: [`phase-2-results.md`](phase-2-results.md). The decision that had to come first: [`what-calibration-means-here.md`](what-calibration-means-here.md).
+
+- **Done** — `tests/fixtures/roft_boundary.json`, a RoFT slice (MIT): 18 documents, one human prefix then a machine continuation, two at each of the nine boundary positions. The different ground-truth shape earned its keep immediately — the model-based detectors clear the Phase 1 gate on it outright, having failed on LLMTrace's `fill_gaps` documents.
+- **Done, partially** — the proxy-model ladder spans 124M to 1.5B (`misc/measure_model_ladder.py`). Falcon-7B is out of reach on CPU and is documented as such rather than skipped silently.
+- **Done, and it is the headline** — false-positive rate on 350 human-written texts by CEFR band against a native control, from W&I+LOCNESS. Measured, not vendored: the corpus is non-redistributable, so the script downloads it and the numbers are committed. **20.6% of human documents are falsely accused by the shipped defaults**, down from 34.3%.
+- **Done, and not what was expected** — most of the old rate was a *length* artefact, not a language one. `aggregate=` gained `n_chars` (the seam could not previously express a rate) and `density_aggregate` is the new default.
+- **Not done, and deliberately** — per-detector weights were not fitted. Seven deterministic signals across twelve documents is not an evidence base, and fitting on it would have produced the shape of a result with none of the content.
+- **The roadmap's own reassurance about calibration was wrong**, and is corrected in `what-calibration-means-here.md`: "a fitted scorer changes what `lean` is computed from, not what is reported" does *not* hold for the obvious implementation, because `lean = 2p − 1` is invertible. The rule that survives is *calibrate the instrument, not the verdict*, with a sufficiency test to tell them apart. **Still no percentage.**
 
 ### Phase 3 — MCP
 

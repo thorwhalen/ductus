@@ -2,6 +2,8 @@
 
 **They ship, and they ship off by default.** Fast-DetectGPT and Binoculars are implemented, registered and usable — `--detectors fast-detect-gpt` — but they are not in `DEFAULT_DETECTORS`, because they did not clear the gate the roadmap set for them. This document is the measurement, including the numbers that are unflattering, because a gate you move after seeing the result is not a gate.
 
+*Phase 2 note: these numbers were measured with the then-default length-blind scorer. They reproduce unchanged under the `density_aggregate` default that replaced it — the LLMTrace documents are all short enough that length normalisation does not bite, so the gate verdict below still stands. What did change is that the model-based detectors clear this gate outright on a fixture with a different shape; see [`phase-2-results.md`](phase-2-results.md).*
+
 Reproduce it with `python misc/measure_detectors.py` (needs the `[local]` extra; the proxy models download on first run). The design being evaluated is in [`curvature-as-evidence.md`](curvature-as-evidence.md).
 
 ## The criterion, fixed before the numbers were looked at

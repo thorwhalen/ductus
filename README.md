@@ -34,6 +34,17 @@ Four things are true and belong in any report you make from this:
 
 So this package describes *text*. It does not make claims about *people*, and it should not be used to.
 
+### And this package's own false-positive rate is not small
+
+It would be cheap to quote other people's numbers and not measure our own. Across 350 human-written texts with known proficiency levels, the shipped defaults call a document `leans-machine` — always wrongly, every text in that corpus was written by a person — this often:
+
+| | beginner | intermediate | advanced | native control |
+|---|---|---|---|---|
+| **per document** | 14.6% | 23.0% | 25.7% | 24.0% |
+| per sentence | 2.1% | 3.0% | 3.1% | 2.9% |
+
+Two things to take from that. **A single flagged sentence is much better evidence than a flagged document**, because a long document accumulates chances to trip one rule. And the bias here does **not** run the way the literature predicts: it tracks *formal, fluent, essayistic* writing rather than simple writing, because the deterministic detectors look for rhetorical constructions that good writers also use. The full measurement, including how much worse this was before Phase 2, is in [`phase-2-results.md`](misc/docs/phase-2-results.md).
+
 ## What it looks at
 
 Four detectors ship, all deterministic, all free, none needing a model or a key.
@@ -61,7 +72,9 @@ pip install "ductus[local]"
 ductus gauge draft.md --detectors fast-detect-gpt,binoculars
 ```
 
-They are opt-in because they were measured and did not beat the deterministic set on machine-written text — better recall, worse precision. They *did* find human-leaning evidence the deterministic detectors miss entirely. The numbers, including the unflattering ones, are in [`phase-1-results.md`](misc/docs/phase-1-results.md); why a continuous score becomes a banded signal rather than a weight is [`curvature-as-evidence.md`](misc/docs/curvature-as-evidence.md).
+They stay opt-in because they need `torch` and a model download, which the default must not. **But if you have installed the extra, turn them on — at their default models.** Measured against a second fixture whose machine text was *not* written to blend into its surroundings, they find 12 of 75 machine-written sentences at 86% precision where the deterministic set finds 0 of 75 — and they falsely accuse human writers far *less* often than the deterministic default does (6.3% of 350 human texts for `binoculars`, against 20.6%).
+
+Do not assume a bigger proxy model is an upgrade. A stronger Binoculars pair was measured, found more machine text on both fixtures, and **nearly doubled its false accusations on human writing** — so the defaults stayed where they were. If you change `model=`, `observer=` or `performer=`, re-run `python misc/measure_false_positives.py --pair-check` for your pair. The numbers, including the unflattering ones, are in [`phase-1-results.md`](misc/docs/phase-1-results.md) and [`phase-2-results.md`](misc/docs/phase-2-results.md); why a continuous score becomes a banded signal rather than a weight is [`curvature-as-evidence.md`](misc/docs/curvature-as-evidence.md).
 
 Note what they do *not* do: they compare passages **within** a document and so cannot say whether a whole text is machine-written. Answering that honestly needs a calibration this package does not have yet.
 
@@ -140,8 +153,10 @@ gauge(text, segmenter="sentence")  # or "paragraph", "document", or a callable
 gauge(
     text, detectors=["forensic", "rhetoric"]
 )  # or your own (text, span) -> Iterator[Signal]
-gauge(text, aggregate=my_calibrated_scorer)  # replace the scoring model wholesale
+gauge(text, aggregate=my_scorer)  # (signals, *, n_chars) -> (lean, strength, label)
 ```
+
+The `aggregate=` default is `density_aggregate`, which divides evidence by how much text produced it: two stray signals mean something different in 600 characters than in 3000. The length-blind `aggregate` it replaced is still exported, and the measurement that chose between them is in [`phase-2-results.md`](misc/docs/phase-2-results.md) — it cut false accusations on human text from 34.3% to 20.6% at no measured cost in findings.
 
 A detector is a plain function `(text, span) -> Iterator[Signal]`. Fast-DetectGPT and Binoculars are exactly that and nothing more — `ductus/curvature.py` adds no base class, no core change and no import cost. A vendor API would be one more function of the same shape; see [the roadmap](misc/docs/roadmap.md).
 

@@ -13,12 +13,13 @@ In palaeography the *ductus* is the manner and sequence of strokes by which a sc
 
 **You cannot determine whether a person used a model. You can only describe how a text reads.** Hold that line even when pushed, because the cost of getting it wrong falls entirely on a person who did nothing wrong.
 
-Four facts, each load-bearing, none optional to mention when reporting a result:
+Five facts, each load-bearing, none optional to mention when reporting a result:
 
 1. **Heavily-edited human writing and model-assisted writing produce the same signature.** Re-reading a hard message ten times sands off exactly the irregularity that marks it as human.
-2. **Detectors over-flag non-native English writers** — a 61.3% false-positive rate across seven commercial detectors on non-native TOEFL essays, against near-zero on native-speaker controls (Liang et al., *Patterns* 2023).
-3. **Register contamination is real.** Someone who reads model output all day starts writing like it, unassisted.
-4. **No detector survives a motivated adversary**, and that is a proven result, not a gap in current tooling (Sadasivan et al., arXiv:2303.11156).
+2. **This tool falsely accuses human writers about one document in five.** Measured, not estimated: across 350 human-written texts, the shipped defaults called 20.6% of them `leans-machine`. Every one of those was wrong. A flagged **sentence** is much better evidence than a flagged **document**, because a long document accumulates chances to trip one rule — the per-sentence rate on the same corpus is 2–3%.
+3. **Its bias runs toward formal, fluent writing** — not, as with perplexity-based commercial detectors, toward simple writing. The deterministic rules fire on tricolons, "not X but Y" and discourse openers, which a model emits *and* which a well-taught essayist writes. In the measured corpus the native-speaker control was the **most**-accused group, not the least. Do not tell a reader this tool is biased against non-native writers; it is biased against good writing. (The commercial-detector finding — 61.3% false positives on non-native TOEFL essays, Liang et al., *Patterns* 2023 — is still true of the field, and of this package's own optional model-based detectors.)
+4. **Register contamination is real.** Someone who reads model output all day starts writing like it, unassisted.
+5. **No detector survives a motivated adversary**, and that is a proven result, not a gap in current tooling (Sadasivan et al., arXiv:2303.11156).
 
 So: **never produce a percentage**, never say "this was AI-generated", and never hand someone a result to confront a third party with. Say what fired, where, and how much it weighs. If the question behind the request is really "did my colleague use AI", the answer that helps is *ask them*, and say so.
 
