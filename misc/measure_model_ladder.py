@@ -19,13 +19,20 @@ it does not establish where the curve flattens. Anyone with a GPU should pass
 
 from __future__ import annotations
 
+import gc
 import json
 import time
 from functools import partial
 from pathlib import Path
 
 from ductus import gauge
-from ductus.curvature import binoculars, fast_detect_gpt
+from ductus.curvature import (
+    _binoculars_profile,
+    _fast_detect_profile,
+    _load,
+    binoculars,
+    fast_detect_gpt,
+)
 
 FIXTURES = {
     "llmtrace": Path(__file__).parent.parent
@@ -58,6 +65,21 @@ RUNGS = {
         ),
     ],
 }
+
+
+def release_models() -> None:
+    """Drop every cached model between rungs.
+
+    :func:`ductus.curvature._load` keeps models warm, which is what you want when a
+    session scores several texts with one detector. A sweep is the opposite case: it
+    touches four models, and holding all of them resident is ~10GB in float32, which
+    on a CPU box means swapping rather than computing -- measured at 4 minutes of CPU
+    per 35 minutes of wall clock before this was added.
+    """
+    _fast_detect_profile.cache_clear()
+    _binoculars_profile.cache_clear()
+    _load.cache_clear()
+    gc.collect()
 
 
 def ai_fraction(span, intervals) -> float:
@@ -96,6 +118,7 @@ def main() -> None:
         print("|---|---|---|---|---|---|")
         for name, rungs in RUNGS.items():
             for label, detector in rungs:
+                release_models()
                 h, f, t, a, d, secs = score(detector, documents)
                 print(
                     f"| {name} | {label} | {_pct(h, t)} | {_pct(h, f)} | "
