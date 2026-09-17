@@ -85,6 +85,7 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.data.html">ductus.data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.detect.html">ductus.detect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.mcp.html">ductus.mcp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.render.html">ductus.render</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.score.html">ductus.score</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.segment.html">ductus.segment</a></li>
@@ -307,6 +308,16 @@
 </div>
 <p>A quote that no longer occurs is dropped rather than mis-anchored, so re-running after an edit is safe.</p>
 </section>
+<section id="mcp">
+<h2>MCP<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#mcp" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#mcp'">¶</a></h2>
+<p>The same verbs the CLI dispatches, as MCP tools:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[mcp]"</span>
+</span><span id="line-2">ductus-mcp<span class="w">                    </span><span class="c1"># stdio, for a local agent host</span>
+</span></code></pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">gauge</span></code>, <code class="docutils literal notranslate"><span class="pre">detectors</span></code>, <code class="docutils literal notranslate"><span class="pre">segmenters</span></code> and <code class="docutils literal notranslate"><span class="pre">tells</span></code>. <code class="docutils literal notranslate"><span class="pre">install_skills</span></code> is deliberately absent: it symlinks into an agent host’s skills directory, and a person typing that at a CLI chose to in a way a remote caller did not.</p>
+<p>There is <strong>no second verb list</strong>. <code class="docutils literal notranslate"><span class="pre">ductus.mcp.TOOL_REFS</span></code> is derived from the one list the CLI already dispatches, so the two surfaces cannot drift — and a verb that changes the host declares that at its own definition rather than by appearing in some other list. <code class="docutils literal notranslate"><span class="pre">middleware=</span></code> and <code class="docutils literal notranslate"><span class="pre">auth=</span></code> pass straight through <code class="docutils literal notranslate"><span class="pre">mk_mcp()</span></code> for a deployed server.</p>
+</section>
 <section id="seams">
 <h2>Seams<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#seams" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#seams'">¶</a></h2>
 <p>Three, each one keyword argument, each defaulting to something that genuinely works:</p>
@@ -336,6 +347,7 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pip<span class="w"> </span>install<span class="w"> </span>ductus<span class="w">              </span><span class="c1"># the core: pyyaml and cw, nothing else</span>
 </span><span id="line-2">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[local]"</span><span class="w">     </span><span class="c1"># + Fast-DetectGPT and Binoculars: offline, no API key, opt-in</span>
 </span><span id="line-3">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[api]"</span><span class="w">       </span><span class="c1"># + vendor detector adapters</span>
+</span><span id="line-4">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[mcp]"</span><span class="w">       </span><span class="c1"># + the MCP server (`ductus-mcp`)</span>
 </span></code></pre></div>
 </div>
 </section>
@@ -349,7 +361,7 @@
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-17 15:45 UTC from <a href="https://github.com/thorwhalen/ductus/commit/d6339fce087d03f391e921f1a3ba2065b45f0f0d">d6339fc</a> (main) · ductus 0.0.5 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-17 15:55 UTC from <a href="https://github.com/thorwhalen/ductus/commit/d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27">d09cd67</a> (main) · ductus 0.0.6 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -364,6 +376,7 @@
 </ul>
 </li>
 <li><a :data-current="activeSection === '#agent-skills'" class="reference internal" href="#agent-skills">Agent skills</a></li>
+<li><a :data-current="activeSection === '#mcp'" class="reference internal" href="#mcp">MCP</a></li>
 <li><a :data-current="activeSection === '#seams'" class="reference internal" href="#seams">Seams</a></li>
 <li><a :data-current="activeSection === '#spans-survive-editing'" class="reference internal" href="#spans-survive-editing">Spans survive editing</a></li>
 <li><a :data-current="activeSection === '#relationship-to-deslop'" class="reference internal" href="#relationship-to-deslop">Relationship to <code class="docutils literal notranslate"><span class="pre">deslop</span></code></a></li>
@@ -382,7 +395,7 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=282f96c0"></script>
+<script src="_static/documentation_options.js?v=1fd71caa"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

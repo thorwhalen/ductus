@@ -86,6 +86,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.data.html">ductus.data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.detect.html">ductus.detect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ductus.mcp.html">ductus.mcp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.render.html">ductus.render</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.score.html">ductus.score</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.segment.html">ductus.segment</a></li>
@@ -144,13 +145,16 @@ this one list. Adding a surface never means writing a second implementation.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#ductus.tools.gauge" title="ductus.tools.gauge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gauge</span></code></a>(source, *[, format, segmenter, ...])</p></td>
 <td><p>Gauge how machine-written a text reads, and render the result.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.tools.install_skills" title="ductus.tools.install_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_skills</span></code></a>(*[, target, write])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.tools.host_mutating" title="ductus.tools.host_mutating"><code class="xref py py-obj docutils literal notranslate"><span class="pre">host_mutating</span></code></a>(fn)</p></td>
+<td><p>Mark a verb that changes the machine it runs on, rather than only reading.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ductus.tools.install_skills" title="ductus.tools.install_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_skills</span></code></a>(*[, target, write])</p></td>
 <td><p>Link this package's shipped skills into an agent host's skills directory.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#ductus.tools.segmenters" title="ductus.tools.segmenters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">segmenters</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.tools.segmenters" title="ductus.tools.segmenters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">segmenters</span></code></a>()</p></td>
 <td><p>The available ways of cutting the text into scored units.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.tools.tells" title="ductus.tools.tells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tells</span></code></a>(*[, tier])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#ductus.tools.tells" title="ductus.tools.tells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tells</span></code></a>(*[, tier])</p></td>
 <td><p>The tells catalogue, optionally filtered to one tier (E, W or S).</p></td>
 </tr>
 </tbody>
@@ -185,6 +189,20 @@ an agent’s own readings, folded in alongside the deterministic ones. With
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="n">gauge</span><span class="p">(</span><span class="s2">"Sent it Friday. Two sites, not five."</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 </span><span id="line-2"><span class="go">'# Reading'</span>
+</span></code></pre></div>
+</div>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="ductus.tools.host_mutating">
+<span class="sig-prename descclassname"><span class="pre">ductus.tools.</span></span><span class="sig-name descname"><span class="pre">host_mutating</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/tools.html#host_mutating"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.tools.host_mutating" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.tools.host_mutating'">¶</a></dt>
+<dd><p>Mark a verb that changes the machine it runs on, rather than only reading.</p>
+<p>Declared at the definition site so surfaces can filter on it without anyone
+writing a second list of verbs. A CLI user invoking one of these chose to; a
+remote MCP caller did not necessarily, so <a class="reference internal" href="ductus.mcp.html#module-ductus.mcp" title="ductus.mcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ductus.mcp</span></code></a> leaves them out.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="n">host_mutating</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">mutates_host</span>
+</span><span id="line-2"><span class="go">True</span>
+</span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="nb">getattr</span><span class="p">(</span><span class="n">segmenters</span><span class="p">,</span> <span class="s2">"mutates_host"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+</span><span id="line-4"><span class="go">False</span>
 </span></code></pre></div>
 </div>
 </dd></dl>
@@ -240,6 +258,7 @@ an agent’s own readings, folded in alongside the deterministic ones. With
 <ul>
 <li><a :data-current="activeSection === '#ductus.tools.detectors'" class="reference internal" href="#ductus.tools.detectors"><code class="docutils literal notranslate"><span class="pre">detectors()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.tools.gauge'" class="reference internal" href="#ductus.tools.gauge"><code class="docutils literal notranslate"><span class="pre">gauge()</span></code></a></li>
+<li><a :data-current="activeSection === '#ductus.tools.host_mutating'" class="reference internal" href="#ductus.tools.host_mutating"><code class="docutils literal notranslate"><span class="pre">host_mutating()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.tools.install_skills'" class="reference internal" href="#ductus.tools.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.tools.segmenters'" class="reference internal" href="#ductus.tools.segmenters"><code class="docutils literal notranslate"><span class="pre">segmenters()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.tools.tells'" class="reference internal" href="#ductus.tools.tells"><code class="docutils literal notranslate"><span class="pre">tells()</span></code></a></li>
@@ -256,7 +275,7 @@ an agent’s own readings, folded in alongside the deterministic ones. With
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=282f96c0"></script>
+<script src="../_static/documentation_options.js?v=1fd71caa"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

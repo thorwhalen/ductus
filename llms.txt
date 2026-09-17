@@ -13,13 +13,14 @@
 - [ductus.curvature](_autosummary/ductus.curvature.html.md): Model-based detectors – the `[local]` extra. Two more functions of the same shape.
 - [ductus.data](_autosummary/ductus.data.html.md): Page content
 - [ductus.detect](_autosummary/ductus.detect.html.md): The detectors – the `detectors=` seam. Each one turns a span into evidence.
+- [ductus.mcp](_autosummary/ductus.mcp.html.md): The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.
 - [ductus.render](_autosummary/ductus.render.html.md): Turning a report into something a person reads: JSON, Markdown, or HTML.
 - [ductus.score](_autosummary/ductus.score.html.md): Turning evidence into a lean – the `aggregate=` seam.
 - [ductus.segment](_autosummary/ductus.segment.html.md): Cutting a text into the units that get scored – the `segmenter=` seam.
 - [ductus.tells](_autosummary/ductus.tells.html.md): The tells catalogue: named regular-expression patterns, tiered by confidence.
 - [ductus.tools](_autosummary/ductus.tools.html.md): The verb SSOT: plain functions, JSON-ready in, JSON-ready out.
 - [For AI agents](ai-agents.html.md): `ductus` ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on **2026-09-17 15:45 UTC** from commit <a href="https://github.com/tho...
+- [About this build](about-this-build.html.md): This documentation was built on **2026-09-17 15:55 UTC** from commit <a href="https://github.com/tho...
 
 ---
 

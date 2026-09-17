@@ -40,6 +40,7 @@
    curvature
    data
    detect
+   mcp
    render
    score
    segment

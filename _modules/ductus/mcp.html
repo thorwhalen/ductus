@@ -23,11 +23,11 @@
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#030711" />
   
-<link rel="alternate" type="text/markdown" href="score.html.md">
+<link rel="alternate" type="text/markdown" href="mcp.html.md">
 <link rel="describedby" href="../../llms.txt" type="text/markdown">
-  <title>ductus.score | ductus</title>
-  <meta property="og:title" content="ductus.score | ductus" />
-  <meta name="twitter:title" content="ductus.score | ductus" />
+  <title>ductus.mcp | ductus</title>
+  <meta property="og:title" content="ductus.mcp | ductus" />
+  <meta name="twitter:title" content="ductus.mcp | ductus" />
   <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
   <link rel="stylesheet" type="text/css" href="../../_static/theme.css?v=d6d7c91b" />
   <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -166,179 +166,166 @@
        href="../index.html">Module code</a>
     
 <div class="mr-1">/</div><span aria-current="page"
-        class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">ductus.score</span>
+        class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">ductus.mcp</span>
 </nav>
 
     <div id="content" role="main">
-      <h1>Source code for ductus.score</h1><div class="highlight"><pre>
-<span></span><code><span id="line-1"><span class="sd">"""Turning evidence into a lean -- the ``aggregate=`` seam.</span>
+      <h1>Source code for ductus.mcp</h1><div class="highlight"><pre>
+<span></span><code><span id="line-1"><span class="sd">"""The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.</span>
 </span><span id="line-2">
-</span><span id="line-3"><span class="sd">The deliberate design choice of this package lives here: **there is no</span>
-</span><span id="line-4"><span class="sd">percentage**. Every commercial detector emits a number like "87% AI", and that</span>
-</span><span id="line-5"><span class="sd">number is how people get falsely accused, because it reads as a calibrated</span>
-</span><span id="line-6"><span class="sd">probability and is nothing of the kind.</span>
-</span><span id="line-7">
-</span><span id="line-8"><span class="sd">What comes out instead is three things a reader can argue with:</span>
-</span><span id="line-9">
-</span><span id="line-10"><span class="sd">``lean``</span>
-</span><span id="line-11"><span class="sd">    -1 (all evidence argues human) to +1 (all evidence argues machine). It is a</span>
-</span><span id="line-12"><span class="sd">    ratio of the weights present, not a probability of anything.</span>
-</span><span id="line-13"><span class="sd">``strength``</span>
-</span><span id="line-14"><span class="sd">    0 to 1: how much evidence there was at all. A lean of +1.0 from one weak</span>
-</span><span id="line-15"><span class="sd">    signal is a different claim from +1.0 from six, and collapsing those into</span>
-</span><span id="line-16"><span class="sd">    one number is exactly the lie this module refuses to tell.</span>
-</span><span id="line-17"><span class="sd">``label``</span>
-</span><span id="line-18"><span class="sd">    One of :data:`ductus.base.LABELS`, and never finer than the evidence.</span>
-</span><span id="line-19">
-</span><span id="line-20"><span class="sd">Replacing this with a scorer calibrated on labelled data is one keyword</span>
-</span><span id="line-21"><span class="sd">argument; see ``misc/docs/roadmap.md``.</span>
-</span><span id="line-22">
-</span><span id="line-23"><span class="sd">&gt;&gt;&gt; from ductus.base import Signal</span>
-</span><span id="line-24"><span class="sd">&gt;&gt;&gt; aggregate([Signal("a", "machine", 0.5, "d"), Signal("b", "machine", 0.4, "d")])</span>
-</span><span id="line-25"><span class="sd">(1.0, 0.6, 'leans-machine')</span>
-</span><span id="line-26"><span class="sd">&gt;&gt;&gt; aggregate([Signal("a", "machine", 0.5, "d"), Signal("b", "human", 0.5, "d")])</span>
-</span><span id="line-27"><span class="sd">(0.0, 0.667, 'mixed-signals')</span>
-</span><span id="line-28"><span class="sd">&gt;&gt;&gt; aggregate([])</span>
-</span><span id="line-29"><span class="sd">(0.0, 0.0, 'no-evidence')</span>
-</span><span id="line-30"><span class="sd">"""</span>
-</span><span id="line-31">
-</span><span id="line-32"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-</span><span id="line-33">
-</span><span id="line-34"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-</span><span id="line-35">
-</span><span id="line-36"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Signal</span>
-</span><span id="line-37">
-</span><span id="line-38"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="line-39">    <span class="s2">"EVIDENCE_FULL"</span><span class="p">,</span>
-</span><span id="line-40">    <span class="s2">"LEAN_THRESHOLD"</span><span class="p">,</span>
-</span><span id="line-41">    <span class="s2">"REFERENCE_CHARS"</span><span class="p">,</span>
-</span><span id="line-42">    <span class="s2">"STRENGTH_FLOOR"</span><span class="p">,</span>
-</span><span id="line-43">    <span class="s2">"aggregate"</span><span class="p">,</span>
-</span><span id="line-44">    <span class="s2">"density_aggregate"</span><span class="p">,</span>
-</span><span id="line-45"><span class="p">]</span>
-</span><span id="line-46">
-</span><span id="line-47"><span class="c1">#: Beyond this, a segment is called as leaning one way.</span>
-</span><span id="line-48"><span class="n">LEAN_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.45</span>
-</span><span id="line-49"><span class="c1">#: Below this much total evidence, no label is claimed at all.</span>
-</span><span id="line-50"><span class="n">STRENGTH_FLOOR</span> <span class="o">=</span> <span class="mf">0.20</span>
-</span><span id="line-51"><span class="c1">#: The total signal weight at which ``strength`` saturates at 1.0. Not fitted --</span>
-</span><span id="line-52"><span class="c1">#: it is "about three moderate signals", chosen to be legible rather than exact.</span>
-</span><span id="line-53"><span class="n">EVIDENCE_FULL</span> <span class="o">=</span> <span class="mf">1.5</span>
-</span><span id="line-54"><span class="c1">#: How much text :func:`density_aggregate` treats as one "unit" of reading. Above this</span>
-</span><span id="line-55"><span class="c1">#: length a passage must produce proportionally more evidence to reach the same</span>
-</span><span id="line-56"><span class="c1">#: ``strength``. Selected on human-written text; see ``misc/docs/phase-2-results.md``.</span>
-</span><span id="line-57"><span class="n">REFERENCE_CHARS</span> <span class="o">=</span> <span class="mi">1000</span>
-</span><span id="line-58">
-</span><span id="line-59">
-</span><span id="line-60"><span class="k">def</span><span class="w"> </span><span class="nf">_directional</span><span class="p">(</span><span class="n">signals</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Signal</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-</span><span id="line-61"><span class="w">    </span><span class="sd">"""Machine, human and neutral weight in ``signals``.</span>
+</span><span id="line-3"><span class="sd">There is **no second verb list here**, and that is the whole design. :data:`TOOL_REFS`</span>
+</span><span id="line-4"><span class="sd">is *derived* from :data:`ductus.tools._dispatch_funcs` -- the same list ``cw`` builds</span>
+</span><span id="line-5"><span class="sd">the CLI from -- so the two surfaces cannot drift apart. The roadmap's rule is that a</span>
+</span><span id="line-6"><span class="sd">parity test between two surfaces means there are two implementations; the fix is to</span>
+</span><span id="line-7"><span class="sd">have one list, not two lists and a test that watches them.</span>
+</span><span id="line-8">
+</span><span id="line-9"><span class="sd">The refs are **strings**, resolved by ``py2mcp`` at call time, so ``ductus.tools``</span>
+</span><span id="line-10"><span class="sd">never imports MCP and neither does the core. ``py2mcp`` lives in the ``[mcp]`` extra</span>
+</span><span id="line-11"><span class="sd">and is imported only when a server is actually built.</span>
+</span><span id="line-12">
+</span><span id="line-13"><span class="sd">Verbs marked :func:`ductus.tools.host_mutating` are left out. ``install_skills``</span>
+</span><span id="line-14"><span class="sd">symlinks into an agent host's skills directory: a person typing it at a CLI chose to,</span>
+</span><span id="line-15"><span class="sd">a remote caller did not necessarily. That filter reads a property declared at the</span>
+</span><span id="line-16"><span class="sd">function's own definition, so it is still one list.</span>
+</span><span id="line-17">
+</span><span id="line-18"><span class="sd">``gauge(out=...)`` writes a file, and is *not* excluded -- writing the report you asked</span>
+</span><span id="line-19"><span class="sd">for is the verb doing its job. A deployed server that should not write anywhere is what</span>
+</span><span id="line-20"><span class="sd">``middleware=`` is for; it is passed straight through, along with ``auth=``.</span>
+</span><span id="line-21">
+</span><span id="line-22"><span class="sd">Run it::</span>
+</span><span id="line-23">
+</span><span id="line-24"><span class="sd">    pip install 'ductus[mcp]'</span>
+</span><span id="line-25"><span class="sd">    ductus-mcp                      # stdio, for a local agent host</span>
+</span><span id="line-26">
+</span><span id="line-27"><span class="sd">&gt;&gt;&gt; TOOL_REFS[:2]</span>
+</span><span id="line-28"><span class="sd">('ductus.tools:gauge', 'ductus.tools:detectors')</span>
+</span><span id="line-29"><span class="sd">&gt;&gt;&gt; all(ref.startswith("ductus.tools:") for ref in TOOL_REFS)</span>
+</span><span id="line-30"><span class="sd">True</span>
+</span><span id="line-31"><span class="sd">&gt;&gt;&gt; "ductus.tools:install_skills" in TOOL_REFS  # host-mutating, left out</span>
+</span><span id="line-32"><span class="sd">False</span>
+</span><span id="line-33"><span class="sd">"""</span>
+</span><span id="line-34">
+</span><span id="line-35"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+</span><span id="line-36">
+</span><span id="line-37"><span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
+</span><span id="line-38"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+</span><span id="line-39"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+</span><span id="line-40">
+</span><span id="line-41"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">_dispatch_funcs</span>
+</span><span id="line-42">
+</span><span id="line-43"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"INSTRUCTIONS"</span><span class="p">,</span> <span class="s2">"TOOL_REFS"</span><span class="p">,</span> <span class="s2">"main"</span><span class="p">,</span> <span class="s2">"mk_mcp"</span><span class="p">]</span>
+</span><span id="line-44">
+</span><span id="line-45"><span class="c1">#: One ref per read-only verb, derived from the CLI's own list. Never hand-written.</span>
+</span><span id="line-46"><span class="n">TOOL_REFS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+</span><span id="line-47">    <span class="sa">f</span><span class="s2">"ductus.tools:</span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="line-48">    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">_dispatch_funcs</span>
+</span><span id="line-49">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">"mutates_host"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+</span><span id="line-50"><span class="p">)</span>
+</span><span id="line-51">
+</span><span id="line-52"><span class="c1">#: What the server tells a model about itself. The limits are here rather than in a</span>
+</span><span id="line-53"><span class="c1">#: README because this is the only description an MCP client ever reads.</span>
+</span><span id="line-54"><span class="n">INSTRUCTIONS</span> <span class="o">=</span> <span class="s2">"""</span><span class="se">\</span>
+</span><span id="line-55"><span class="s2">Gauge which parts of a text read as machine-written, with every finding anchored to</span>
+</span><span id="line-56"><span class="s2">the exact characters that carry it.</span>
+</span><span id="line-57">
+</span><span id="line-58"><span class="s2">This server never returns a percentage, a confidence, or a verdict about a person, and</span>
+</span><span id="line-59"><span class="s2">a caller should not synthesise one from what it does return. It gives a lean in</span>
+</span><span id="line-60"><span class="s2">[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each</span>
+</span><span id="line-61"><span class="s2">with a quote that can be checked against the text.</span>
 </span><span id="line-62">
-</span><span id="line-63"><span class="sd">    &gt;&gt;&gt; from ductus.base import Signal</span>
-</span><span id="line-64"><span class="sd">    &gt;&gt;&gt; _directional([Signal("x", "machine", 0.4, "d"), Signal("y", "human", 0.1, "d")])</span>
-</span><span id="line-65"><span class="sd">    (0.4, 0.1, 0.0)</span>
-</span><span id="line-66"><span class="sd">    """</span>
-</span><span id="line-67">    <span class="k">return</span> <span class="p">(</span>
-</span><span id="line-68">        <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">signals</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">"machine"</span><span class="p">)),</span>
-</span><span id="line-69">        <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">signals</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">"human"</span><span class="p">)),</span>
-</span><span id="line-70">        <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">signals</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">"neutral"</span><span class="p">)),</span>
-</span><span id="line-71">    <span class="p">)</span>
-</span><span id="line-72">
-</span><span id="line-73">
-</span><span id="line-74"><span class="k">def</span><span class="w"> </span><span class="nf">_label</span><span class="p">(</span><span class="n">lean</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">strength</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">machine</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">human</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-75"><span class="w">    </span><span class="sd">"""The coarse call, from a lean and how much evidence stands behind it.</span>
-</span><span id="line-76">
-</span><span id="line-77"><span class="sd">    &gt;&gt;&gt; _label(1.0, 0.5, 0.75, 0.0), _label(1.0, 0.05, 0.07, 0.0)</span>
-</span><span id="line-78"><span class="sd">    ('leans-machine', 'no-evidence')</span>
-</span><span id="line-79"><span class="sd">    """</span>
-</span><span id="line-80">    <span class="k">if</span> <span class="n">strength</span> <span class="o">&lt;</span> <span class="n">STRENGTH_FLOOR</span><span class="p">:</span>
-</span><span id="line-81">        <span class="k">return</span> <span class="s2">"no-evidence"</span>
-</span><span id="line-82">    <span class="k">if</span> <span class="n">lean</span> <span class="o">&gt;=</span> <span class="n">LEAN_THRESHOLD</span><span class="p">:</span>
-</span><span id="line-83">        <span class="k">return</span> <span class="s2">"leans-machine"</span>
-</span><span id="line-84">    <span class="k">if</span> <span class="n">lean</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="n">LEAN_THRESHOLD</span><span class="p">:</span>
-</span><span id="line-85">        <span class="k">return</span> <span class="s2">"leans-human"</span>
-</span><span id="line-86">    <span class="k">if</span> <span class="n">machine</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">human</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="line-87">        <span class="k">return</span> <span class="s2">"mixed-signals"</span>
-</span><span id="line-88">    <span class="k">return</span> <span class="s2">"uncertain"</span>
-</span><span id="line-89">
+</span><span id="line-63"><span class="s2">Its false-positive rate on human-written text is measured and is not small: with the</span>
+</span><span id="line-64"><span class="s2">default detectors, about one document in five that a person wrote is called</span>
+</span><span id="line-65"><span class="s2">leans-machine. A flagged *sentence* is much better evidence than a flagged *document*.</span>
+</span><span id="line-66"><span class="s2">The bias runs toward formal, fluent, essayistic prose rather than toward simple prose.</span>
+</span><span id="line-67">
+</span><span id="line-68"><span class="s2">"No findings" is a weak result, not a clean bill.</span>
+</span><span id="line-69"><span class="s2">"""</span>
+</span><span id="line-70">
+</span><span id="line-71">
+</span><span id="line-72"><span class="k">def</span><span class="w"> </span><span class="nf">_resolve_annotations</span><span class="p">(</span><span class="o">*</span><span class="n">funcs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-73"><span class="w">    </span><span class="sd">"""Replace lazy string annotations with real types, in place.</span>
+</span><span id="line-74">
+</span><span id="line-75"><span class="sd">    Working around an upstream defect, and worth stating because it is invisible</span>
+</span><span id="line-76"><span class="sd">    otherwise. Under ``from __future__ import annotations`` -- which every module in</span>
+</span><span id="line-77"><span class="sd">    this package uses -- a function's ``__annotations__`` are strings. The schema</span>
+</span><span id="line-78"><span class="sd">    layer under ``fastmcp`` builds its validator from them without resolving them, and</span>
+</span><span id="line-79"><span class="sd">    every **keyword-only parameter loses its default**: calling ``gauge(source=...)``</span>
+</span><span id="line-80"><span class="sd">    fails with "Missing required keyword only argument" for `segmenter`, `detectors`,</span>
+</span><span id="line-81"><span class="sd">    `judgments`, `out` and `title`, none of which the caller should have to supply.</span>
+</span><span id="line-82">
+</span><span id="line-83"><span class="sd">    Since this package's convention is keyword-only from the second or third argument,</span>
+</span><span id="line-84"><span class="sd">    that would break every verb on this surface. Resolving the annotations eagerly is</span>
+</span><span id="line-85"><span class="sd">    semantically identical -- :func:`typing.get_type_hints` returns exactly what the</span>
+</span><span id="line-86"><span class="sd">    strings denote -- and it makes the defaults visible again.</span>
+</span><span id="line-87">
+</span><span id="line-88"><span class="sd">    Filed upstream; remove this when ``py2mcp``/``fastmcp`` resolve annotations</span>
+</span><span id="line-89"><span class="sd">    themselves.</span>
 </span><span id="line-90">
-<div class="viewcode-block" id="aggregate">
-<a class="viewcode-back" href="../../_autosummary/ductus.score.html#ductus.aggregate">[docs]</a>
-</span><span id="line-91"><span class="k">def</span><span class="w"> </span><span class="nf">aggregate</span><span class="p">(</span>
-</span><span id="line-92">    <span class="n">signals</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Signal</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">n_chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-93"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-</span><span id="line-94"><span class="w">    </span><span class="sd">"""Reduce evidence to ``(lean, strength, label)``. Length-blind, by construction.</span>
-</span><span id="line-95">
-</span><span id="line-96"><span class="sd">    Neutral signals count toward ``strength`` but never toward ``lean`` -- they</span>
-</span><span id="line-97"><span class="sd">    are real evidence that the passage is unusual without being evidence about</span>
-</span><span id="line-98"><span class="sd">    who wrote it.</span>
-</span><span id="line-99">
-</span><span id="line-100"><span class="sd">    ``n_chars`` is accepted and **deliberately ignored**. The seam passes it so a</span>
-</span><span id="line-101"><span class="sd">    scorer *can* reason about how much text produced the evidence; this one does not,</span>
-</span><span id="line-102"><span class="sd">    which is a choice with a measured cost: on human-written text the chance of a</span>
-</span><span id="line-103"><span class="sd">    false accusation rises from 11% to 74% with document length alone, because two</span>
-</span><span id="line-104"><span class="sd">    stray signals weigh the same in 600 characters as in 3000. See</span>
-</span><span id="line-105"><span class="sd">    :func:`density_aggregate` and ``misc/docs/phase-2-results.md``.</span>
+</span><span id="line-91"><span class="sd">    &gt;&gt;&gt; def verb(a, *, b="bee"): return f"{a}{b}"</span>
+</span><span id="line-92"><span class="sd">    &gt;&gt;&gt; verb.__annotations__ = {"a": "int", "b": "str"}  # the lazy state, explicitly</span>
+</span><span id="line-93"><span class="sd">    &gt;&gt;&gt; _resolve_annotations(verb)</span>
+</span><span id="line-94"><span class="sd">    &gt;&gt;&gt; verb.__annotations__</span>
+</span><span id="line-95"><span class="sd">    {'a': &lt;class 'int'&gt;, 'b': &lt;class 'str'&gt;}</span>
+</span><span id="line-96"><span class="sd">    &gt;&gt;&gt; verb(1)  # and the function itself is untouched</span>
+</span><span id="line-97"><span class="sd">    '1bee'</span>
+</span><span id="line-98"><span class="sd">    """</span>
+</span><span id="line-99">    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">funcs</span><span class="p">:</span>
+</span><span id="line-100">        <span class="k">try</span><span class="p">:</span>
+</span><span id="line-101">            <span class="n">fn</span><span class="o">.</span><span class="vm">__annotations__</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_type_hints</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+</span><span id="line-102">        <span class="k">except</span> <span class="p">(</span><span class="ne">NameError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+</span><span id="line-103">            <span class="c1"># An annotation naming something not importable at runtime. Leaving it</span>
+</span><span id="line-104">            <span class="c1"># lazy is what would have happened anyway, so the verb is no worse off.</span>
+</span><span id="line-105">            <span class="k">continue</span>
 </span><span id="line-106">
-</span><span id="line-107"><span class="sd">    &gt;&gt;&gt; from ductus.base import Signal</span>
-</span><span id="line-108"><span class="sd">    &gt;&gt;&gt; aggregate([Signal("x", "human", 0.6, "d")])</span>
-</span><span id="line-109"><span class="sd">    (-1.0, 0.4, 'leans-human')</span>
-</span><span id="line-110"><span class="sd">    &gt;&gt;&gt; aggregate([Signal("x", "neutral", 0.9, "d")])</span>
-</span><span id="line-111"><span class="sd">    (0.0, 0.6, 'uncertain')</span>
-</span><span id="line-112"><span class="sd">    """</span>
-</span><span id="line-113">    <span class="k">if</span> <span class="ow">not</span> <span class="n">signals</span><span class="p">:</span>
-</span><span id="line-114">        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"no-evidence"</span>
-</span><span id="line-115">
-</span><span id="line-116">    <span class="n">machine</span><span class="p">,</span> <span class="n">human</span><span class="p">,</span> <span class="n">neutral</span> <span class="o">=</span> <span class="n">_directional</span><span class="p">(</span><span class="n">signals</span><span class="p">)</span>
-</span><span id="line-117">    <span class="n">directional</span> <span class="o">=</span> <span class="n">machine</span> <span class="o">+</span> <span class="n">human</span>
-</span><span id="line-118">    <span class="n">total</span> <span class="o">=</span> <span class="n">directional</span> <span class="o">+</span> <span class="n">neutral</span>
-</span><span id="line-119">    <span class="k">if</span> <span class="n">total</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="line-120">        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"no-evidence"</span>
+</span><span id="line-107">
+<div class="viewcode-block" id="mk_mcp">
+<a class="viewcode-back" href="../../_autosummary/ductus.mcp.html#ductus.mcp.mk_mcp">[docs]</a>
+</span><span id="line-108"><span class="k">def</span><span class="w"> </span><span class="nf">mk_mcp</span><span class="p">(</span>
+</span><span id="line-109">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-110">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ductus"</span><span class="p">,</span>
+</span><span id="line-111">    <span class="n">refs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">TOOL_REFS</span><span class="p">,</span>
+</span><span id="line-112">    <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">INSTRUCTIONS</span><span class="p">,</span>
+</span><span id="line-113">    <span class="n">middleware</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-114">    <span class="n">auth</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-115"><span class="p">):</span>
+</span><span id="line-116"><span class="w">    </span><span class="sd">"""Build an MCP server exposing ``refs`` as tools.</span>
+</span><span id="line-117">
+</span><span id="line-118"><span class="sd">    ``middleware=`` and ``auth=`` pass straight through to ``py2mcp``. They are where</span>
+</span><span id="line-119"><span class="sd">    a deployed connector attaches metering and authentication without the core</span>
+</span><span id="line-120"><span class="sd">    learning that either exists.</span>
 </span><span id="line-121">
-</span><span id="line-122">    <span class="n">lean</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">machine</span> <span class="o">-</span> <span class="n">human</span><span class="p">)</span> <span class="o">/</span> <span class="n">directional</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">directional</span> <span class="k">else</span> <span class="mf">0.0</span>
-</span><span id="line-123">    <span class="n">strength</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span> <span class="o">/</span> <span class="n">EVIDENCE_FULL</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
-</span><span id="line-124">    <span class="k">return</span> <span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">_label</span><span class="p">(</span><span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">machine</span><span class="p">,</span> <span class="n">human</span><span class="p">)</span></div>
+</span><span id="line-122"><span class="sd">    Raises :class:`ImportError` with an actionable message when the extra is missing.</span>
+</span><span id="line-123"><span class="sd">    """</span>
+</span><span id="line-124">    <span class="k">try</span><span class="p">:</span>
+</span><span id="line-125">        <span class="kn">from</span><span class="w"> </span><span class="nn">py2mcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_mcp_from_refs</span>
+</span><span id="line-126">    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover - exercised only without the extra</span>
+</span><span id="line-127">        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+</span><span id="line-128">            <span class="s2">"the MCP surface needs the [mcp] extra:</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="line-129">            <span class="s2">"    pip install 'ductus[mcp]'</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="line-130">            <span class="s2">"which installs py2mcp. The library and the CLI need neither."</span>
+</span><span id="line-131">        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="line-132">
+</span><span id="line-133">    <span class="n">_resolve_annotations</span><span class="p">(</span><span class="o">*</span><span class="n">_dispatch_funcs</span><span class="p">)</span>
+</span><span id="line-134">    <span class="k">return</span> <span class="n">mk_mcp_from_refs</span><span class="p">(</span>
+</span><span id="line-135">        <span class="n">refs</span><span class="p">,</span>
+</span><span id="line-136">        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+</span><span id="line-137">        <span class="n">instructions</span><span class="o">=</span><span class="n">instructions</span><span class="p">,</span>
+</span><span id="line-138">        <span class="n">middleware</span><span class="o">=</span><span class="n">middleware</span><span class="p">,</span>
+</span><span id="line-139">        <span class="n">auth</span><span class="o">=</span><span class="n">auth</span><span class="p">,</span>
+</span><span id="line-140">    <span class="p">)</span></div>
 
-</span><span id="line-125">
-</span><span id="line-126">
-<div class="viewcode-block" id="density_aggregate">
-<a class="viewcode-back" href="../../_autosummary/ductus.score.html#ductus.density_aggregate">[docs]</a>
-</span><span id="line-127"><span class="k">def</span><span class="w"> </span><span class="nf">density_aggregate</span><span class="p">(</span>
-</span><span id="line-128">    <span class="n">signals</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Signal</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">n_chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-129"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-</span><span id="line-130"><span class="w">    </span><span class="sd">"""Like :func:`aggregate`, but ``strength`` is an evidence *rate*, not a total.</span>
-</span><span id="line-131">
-</span><span id="line-132"><span class="sd">    Two signals in 600 characters is a different claim from two in 3000, and the</span>
-</span><span id="line-133"><span class="sd">    length-blind scorer cannot tell them apart. This one divides the evidence by how</span>
-</span><span id="line-134"><span class="sd">    much text produced it, above a reference length of :data:`REFERENCE_CHARS`.</span>
-</span><span id="line-135">
-</span><span id="line-136"><span class="sd">    ``lean`` is untouched. It still reads ±1.0 off a single weak signal, and that</span>
-</span><span id="line-137"><span class="sd">    jaggedness is deliberate -- smoothing it is how ``lean`` would quietly become a</span>
-</span><span id="line-138"><span class="sd">    quantity-integrating score, which is to say a probability. See</span>
-</span><span id="line-139"><span class="sd">    ``misc/docs/what-calibration-means-here.md``.</span>
-</span><span id="line-140">
-</span><span id="line-141"><span class="sd">    The scaling only ever *divides*, never multiplies, so this scorer can only remove</span>
-</span><span id="line-142"><span class="sd">    accusations, never add one. Short passages behave exactly as before.</span>
-</span><span id="line-143">
-</span><span id="line-144"><span class="sd">    &gt;&gt;&gt; from ductus.base import Signal</span>
-</span><span id="line-145"><span class="sd">    &gt;&gt;&gt; evidence = [Signal("x", "machine", 0.4, "d")]</span>
-</span><span id="line-146"><span class="sd">    &gt;&gt;&gt; density_aggregate(evidence, n_chars=500)        # short: unchanged</span>
-</span><span id="line-147"><span class="sd">    (1.0, 0.267, 'leans-machine')</span>
-</span><span id="line-148"><span class="sd">    &gt;&gt;&gt; density_aggregate(evidence, n_chars=4000)       # the same evidence, spread thin</span>
-</span><span id="line-149"><span class="sd">    (1.0, 0.067, 'no-evidence')</span>
-</span><span id="line-150"><span class="sd">    &gt;&gt;&gt; density_aggregate(evidence) == aggregate(evidence)  # no length, no opinion</span>
-</span><span id="line-151"><span class="sd">    True</span>
-</span><span id="line-152"><span class="sd">    """</span>
-</span><span id="line-153">    <span class="n">machine</span><span class="p">,</span> <span class="n">human</span><span class="p">,</span> <span class="n">neutral</span> <span class="o">=</span> <span class="n">_directional</span><span class="p">(</span><span class="n">signals</span><span class="p">)</span>
-</span><span id="line-154">    <span class="n">directional</span> <span class="o">=</span> <span class="n">machine</span> <span class="o">+</span> <span class="n">human</span>
-</span><span id="line-155">    <span class="n">total</span> <span class="o">=</span> <span class="n">directional</span> <span class="o">+</span> <span class="n">neutral</span>
-</span><span id="line-156">    <span class="k">if</span> <span class="n">total</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="line-157">        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"no-evidence"</span>
-</span><span id="line-158">
-</span><span id="line-159">    <span class="n">scale</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="n">n_chars</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">REFERENCE_CHARS</span><span class="p">)</span>
-</span><span id="line-160">    <span class="n">lean</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">machine</span> <span class="o">-</span> <span class="n">human</span><span class="p">)</span> <span class="o">/</span> <span class="n">directional</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">directional</span> <span class="k">else</span> <span class="mf">0.0</span>
-</span><span id="line-161">    <span class="n">strength</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span> <span class="o">/</span> <span class="p">(</span><span class="n">EVIDENCE_FULL</span> <span class="o">*</span> <span class="n">scale</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
-</span><span id="line-162">    <span class="k">return</span> <span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">_label</span><span class="p">(</span><span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">machine</span><span class="p">,</span> <span class="n">human</span><span class="p">)</span></div>
+</span><span id="line-141">
+</span><span id="line-142">
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../_autosummary/ductus.mcp.html#ductus.mcp.main">[docs]</a>
+</span><span id="line-143"><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover - a blocking server loop</span>
+</span><span id="line-144"><span class="w">    </span><span class="sd">"""Serve on stdio. The ``ductus-mcp`` console script."""</span>
+</span><span id="line-145">    <span class="n">mk_mcp</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
 
+</span><span id="line-146">
+</span><span id="line-147">
+</span><span id="line-148"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+</span><span id="line-149">    <span class="n">main</span><span class="p">()</span>
 </span></code></pre></div>
     </div></div>
           </main>

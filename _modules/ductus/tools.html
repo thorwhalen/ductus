@@ -118,6 +118,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.data.html">ductus.data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.detect.html">ductus.detect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.mcp.html">ductus.mcp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.render.html">ductus.render</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.score.html">ductus.score</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.segment.html">ductus.segment</a></li>
@@ -202,212 +203,233 @@
 </span><span id="line-30">    <span class="s2">"_dispatch_funcs"</span><span class="p">,</span>
 </span><span id="line-31">    <span class="s2">"detectors"</span><span class="p">,</span>
 </span><span id="line-32">    <span class="s2">"gauge"</span><span class="p">,</span>
-</span><span id="line-33">    <span class="s2">"install_skills"</span><span class="p">,</span>
-</span><span id="line-34">    <span class="s2">"segmenters"</span><span class="p">,</span>
-</span><span id="line-35">    <span class="s2">"tells"</span><span class="p">,</span>
-</span><span id="line-36"><span class="p">]</span>
-</span><span id="line-37">
-</span><span id="line-38"><span class="n">FORMATS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"markdown"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">,</span> <span class="s2">"html"</span><span class="p">)</span>
-</span><span id="line-39">
+</span><span id="line-33">    <span class="s2">"host_mutating"</span><span class="p">,</span>
+</span><span id="line-34">    <span class="s2">"install_skills"</span><span class="p">,</span>
+</span><span id="line-35">    <span class="s2">"segmenters"</span><span class="p">,</span>
+</span><span id="line-36">    <span class="s2">"tells"</span><span class="p">,</span>
+</span><span id="line-37"><span class="p">]</span>
+</span><span id="line-38">
+</span><span id="line-39"><span class="n">FORMATS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"markdown"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">,</span> <span class="s2">"html"</span><span class="p">)</span>
 </span><span id="line-40">
-</span><span id="line-41"><span class="k">def</span><span class="w"> </span><span class="nf">_read_source</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-42"><span class="w">    </span><span class="sd">"""``source`` is a path if one exists, otherwise the text itself. ``-`` is stdin.</span>
-</span><span id="line-43">
-</span><span id="line-44"><span class="sd">    &gt;&gt;&gt; _read_source("not a path, just words")</span>
-</span><span id="line-45"><span class="sd">    'not a path, just words'</span>
-</span><span id="line-46"><span class="sd">    """</span>
-</span><span id="line-47">    <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s2">"-"</span><span class="p">:</span>
-</span><span id="line-48">        <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-</span><span id="line-49">
-</span><span id="line-50">        <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</span><span id="line-51">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4096</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
-</span><span id="line-52">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="line-53">            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</span><span id="line-54">    <span class="k">return</span> <span class="n">source</span>
-</span><span id="line-55">
+</span><span id="line-41">
+<div class="viewcode-block" id="host_mutating">
+<a class="viewcode-back" href="../../_autosummary/ductus.tools.html#ductus.tools.host_mutating">[docs]</a>
+</span><span id="line-42"><span class="k">def</span><span class="w"> </span><span class="nf">host_mutating</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+</span><span id="line-43"><span class="w">    </span><span class="sd">"""Mark a verb that changes the machine it runs on, rather than only reading.</span>
+</span><span id="line-44">
+</span><span id="line-45"><span class="sd">    Declared at the definition site so surfaces can filter on it without anyone</span>
+</span><span id="line-46"><span class="sd">    writing a second list of verbs. A CLI user invoking one of these chose to; a</span>
+</span><span id="line-47"><span class="sd">    remote MCP caller did not necessarily, so :mod:`ductus.mcp` leaves them out.</span>
+</span><span id="line-48">
+</span><span id="line-49"><span class="sd">    &gt;&gt;&gt; host_mutating(lambda: None).mutates_host</span>
+</span><span id="line-50"><span class="sd">    True</span>
+</span><span id="line-51"><span class="sd">    &gt;&gt;&gt; getattr(segmenters, "mutates_host", False)</span>
+</span><span id="line-52"><span class="sd">    False</span>
+</span><span id="line-53"><span class="sd">    """</span>
+</span><span id="line-54">    <span class="n">fn</span><span class="o">.</span><span class="n">mutates_host</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="line-55">    <span class="k">return</span> <span class="n">fn</span></div>
+
 </span><span id="line-56">
-</span><span id="line-57"><span class="k">def</span><span class="w"> </span><span class="nf">_signals_from_judgments</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">judgments</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
-</span><span id="line-58"><span class="w">    </span><span class="sd">"""Turn judgment records into signals anchored in ``text``.</span>
-</span><span id="line-59">
-</span><span id="line-60"><span class="sd">    A judgment is a dict with ``direction`` and one of ``quote`` or</span>
-</span><span id="line-61"><span class="sd">    ``start``/``end``, plus optional ``name``, ``weight`` and ``note``. This is</span>
-</span><span id="line-62"><span class="sd">    how an agent's reading of the text gets folded in beside the deterministic</span>
-</span><span id="line-63"><span class="sd">    detectors -- the shipped skills write this file.</span>
-</span><span id="line-64">
-</span><span id="line-65"><span class="sd">    &gt;&gt;&gt; t = "The cat sat on the mat."</span>
-</span><span id="line-66"><span class="sd">    &gt;&gt;&gt; s = _signals_from_judgments(t, [{"quote": "cat", "direction": "machine",</span>
-</span><span id="line-67"><span class="sd">    ...                                  "note": "an example", "weight": 0.4}])</span>
-</span><span id="line-68"><span class="sd">    &gt;&gt;&gt; s[0].span.quote, s[0].detector</span>
-</span><span id="line-69"><span class="sd">    ('cat', 'judge')</span>
-</span><span id="line-70"><span class="sd">    """</span>
-</span><span id="line-71">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">judgments</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="line-72">        <span class="n">judgments</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">_read_source</span><span class="p">(</span><span class="n">judgments</span><span class="p">))</span>
-</span><span id="line-73">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">judgments</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-</span><span id="line-74">        <span class="n">judgments</span> <span class="o">=</span> <span class="n">judgments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"judgments"</span><span class="p">,</span> <span class="n">judgments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"findings"</span><span class="p">,</span> <span class="p">[]))</span>
-</span><span id="line-75">
-</span><span id="line-76">    <span class="n">out</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Signal</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-77">    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">judgments</span> <span class="ow">or</span> <span class="p">():</span>
-</span><span id="line-78">        <span class="k">if</span> <span class="s2">"quote"</span> <span class="ow">in</span> <span class="n">j</span><span class="p">:</span>
-</span><span id="line-79">            <span class="n">start</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">"quote"</span><span class="p">])</span>
-</span><span id="line-80">            <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="line-81">                <span class="k">continue</span>  <span class="c1"># the quote no longer occurs: drop it rather than mis-anchor</span>
-</span><span id="line-82">            <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">"quote"</span><span class="p">])</span>
-</span><span id="line-83">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-84">            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">"start"</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">"end"</span><span class="p">])</span>
-</span><span id="line-85">        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span><span id="line-86">            <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-87">                <span class="n">name</span><span class="o">=</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"judgment"</span><span class="p">),</span>
-</span><span id="line-88">                <span class="n">direction</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">"direction"</span><span class="p">],</span>
-</span><span id="line-89">                <span class="n">weight</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"weight"</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">)),</span>
-</span><span id="line-90">                <span class="n">detector</span><span class="o">=</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"detector"</span><span class="p">,</span> <span class="s2">"judge"</span><span class="p">),</span>
-</span><span id="line-91">                <span class="n">value</span><span class="o">=</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"value"</span><span class="p">),</span>
-</span><span id="line-92">                <span class="n">note</span><span class="o">=</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"note"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
-</span><span id="line-93">                <span class="n">span</span><span class="o">=</span><span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"token"</span><span class="p">),</span>
-</span><span id="line-94">            <span class="p">)</span>
-</span><span id="line-95">        <span class="p">)</span>
-</span><span id="line-96">    <span class="k">return</span> <span class="n">out</span>
-</span><span id="line-97">
-</span><span id="line-98">
+</span><span id="line-57">
+</span><span id="line-58"><span class="k">def</span><span class="w"> </span><span class="nf">_read_source</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-59"><span class="w">    </span><span class="sd">"""``source`` is a path if one exists, otherwise the text itself. ``-`` is stdin.</span>
+</span><span id="line-60">
+</span><span id="line-61"><span class="sd">    &gt;&gt;&gt; _read_source("not a path, just words")</span>
+</span><span id="line-62"><span class="sd">    'not a path, just words'</span>
+</span><span id="line-63"><span class="sd">    """</span>
+</span><span id="line-64">    <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s2">"-"</span><span class="p">:</span>
+</span><span id="line-65">        <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+</span><span id="line-66">
+</span><span id="line-67">        <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="line-68">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4096</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+</span><span id="line-69">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="line-70">            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="line-71">    <span class="k">return</span> <span class="n">source</span>
+</span><span id="line-72">
+</span><span id="line-73">
+</span><span id="line-74"><span class="k">def</span><span class="w"> </span><span class="nf">_signals_from_judgments</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">judgments</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-75"><span class="w">    </span><span class="sd">"""Turn judgment records into signals anchored in ``text``.</span>
+</span><span id="line-76">
+</span><span id="line-77"><span class="sd">    A judgment is a dict with ``direction`` and one of ``quote`` or</span>
+</span><span id="line-78"><span class="sd">    ``start``/``end``, plus optional ``name``, ``weight`` and ``note``. This is</span>
+</span><span id="line-79"><span class="sd">    how an agent's reading of the text gets folded in beside the deterministic</span>
+</span><span id="line-80"><span class="sd">    detectors -- the shipped skills write this file.</span>
+</span><span id="line-81">
+</span><span id="line-82"><span class="sd">    &gt;&gt;&gt; t = "The cat sat on the mat."</span>
+</span><span id="line-83"><span class="sd">    &gt;&gt;&gt; s = _signals_from_judgments(t, [{"quote": "cat", "direction": "machine",</span>
+</span><span id="line-84"><span class="sd">    ...                                  "note": "an example", "weight": 0.4}])</span>
+</span><span id="line-85"><span class="sd">    &gt;&gt;&gt; s[0].span.quote, s[0].detector</span>
+</span><span id="line-86"><span class="sd">    ('cat', 'judge')</span>
+</span><span id="line-87"><span class="sd">    """</span>
+</span><span id="line-88">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">judgments</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-89">        <span class="n">judgments</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">_read_source</span><span class="p">(</span><span class="n">judgments</span><span class="p">))</span>
+</span><span id="line-90">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">judgments</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span id="line-91">        <span class="n">judgments</span> <span class="o">=</span> <span class="n">judgments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"judgments"</span><span class="p">,</span> <span class="n">judgments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"findings"</span><span class="p">,</span> <span class="p">[]))</span>
+</span><span id="line-92">
+</span><span id="line-93">    <span class="n">out</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Signal</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-94">    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">judgments</span> <span class="ow">or</span> <span class="p">():</span>
+</span><span id="line-95">        <span class="k">if</span> <span class="s2">"quote"</span> <span class="ow">in</span> <span class="n">j</span><span class="p">:</span>
+</span><span id="line-96">            <span class="n">start</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">"quote"</span><span class="p">])</span>
+</span><span id="line-97">            <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-98">                <span class="k">continue</span>  <span class="c1"># the quote no longer occurs: drop it rather than mis-anchor</span>
+</span><span id="line-99">            <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">"quote"</span><span class="p">])</span>
+</span><span id="line-100">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-101">            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">"start"</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">"end"</span><span class="p">])</span>
+</span><span id="line-102">        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span id="line-103">            <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-104">                <span class="n">name</span><span class="o">=</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"judgment"</span><span class="p">),</span>
+</span><span id="line-105">                <span class="n">direction</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">"direction"</span><span class="p">],</span>
+</span><span id="line-106">                <span class="n">weight</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"weight"</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">)),</span>
+</span><span id="line-107">                <span class="n">detector</span><span class="o">=</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"detector"</span><span class="p">,</span> <span class="s2">"judge"</span><span class="p">),</span>
+</span><span id="line-108">                <span class="n">value</span><span class="o">=</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"value"</span><span class="p">),</span>
+</span><span id="line-109">                <span class="n">note</span><span class="o">=</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"note"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+</span><span id="line-110">                <span class="n">span</span><span class="o">=</span><span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"token"</span><span class="p">),</span>
+</span><span id="line-111">            <span class="p">)</span>
+</span><span id="line-112">        <span class="p">)</span>
+</span><span id="line-113">    <span class="k">return</span> <span class="n">out</span>
+</span><span id="line-114">
+</span><span id="line-115">
 <div class="viewcode-block" id="gauge">
 <a class="viewcode-back" href="../../_autosummary/ductus.tools.html#ductus.tools.gauge">[docs]</a>
-</span><span id="line-99"><span class="k">def</span><span class="w"> </span><span class="nf">gauge</span><span class="p">(</span>
-</span><span id="line-100">    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-101">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-102">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"markdown"</span><span class="p">,</span>
-</span><span id="line-103">    <span class="n">segmenter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"paragraph"</span><span class="p">,</span>
-</span><span id="line-104">    <span class="n">detectors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-105">    <span class="n">judgments</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-106">    <span class="n">out</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-107">    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Reading"</span><span class="p">,</span>
-</span><span id="line-108"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-109"><span class="w">    </span><span class="sd">"""Gauge how machine-written a text reads, and render the result.</span>
-</span><span id="line-110">
-</span><span id="line-111"><span class="sd">    ``source`` is a file path, a literal string, or ``-`` for stdin.</span>
-</span><span id="line-112"><span class="sd">    ``format`` is one of markdown, json, html. ``detectors`` is a comma-separated</span>
-</span><span id="line-113"><span class="sd">    subset of the available detectors. ``judgments`` is a path to a JSON file of</span>
-</span><span id="line-114"><span class="sd">    an agent's own readings, folded in alongside the deterministic ones. With</span>
-</span><span id="line-115"><span class="sd">    ``out``, the result is written there and a one-line summary is returned.</span>
-</span><span id="line-116">
-</span><span id="line-117"><span class="sd">    &gt;&gt;&gt; gauge("Sent it Friday. Two sites, not five.").splitlines()[0]</span>
-</span><span id="line-118"><span class="sd">    '# Reading'</span>
-</span><span id="line-119"><span class="sd">    """</span>
-</span><span id="line-120">    <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">FORMATS</span><span class="p">:</span>
-</span><span id="line-121">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"format must be one of </span><span class="si">{</span><span class="n">FORMATS</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">format</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="line-122">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detectors</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="line-123">        <span class="n">detectors</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">detectors</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
-</span><span id="line-124">
-</span><span id="line-125">    <span class="n">text</span> <span class="o">=</span> <span class="n">_read_source</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-</span><span id="line-126">    <span class="n">extra</span> <span class="o">=</span> <span class="n">_signals_from_judgments</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">judgments</span><span class="p">)</span> <span class="k">if</span> <span class="n">judgments</span> <span class="k">else</span> <span class="p">()</span>
-</span><span id="line-127">    <span class="n">report</span> <span class="o">=</span> <span class="n">_gauge</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">segmenter</span><span class="o">=</span><span class="n">segmenter</span><span class="p">,</span> <span class="n">detectors</span><span class="o">=</span><span class="n">detectors</span><span class="p">,</span> <span class="n">extra_signals</span><span class="o">=</span><span class="n">extra</span><span class="p">)</span>
-</span><span id="line-128">
-</span><span id="line-129">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
-</span><span id="line-130">        <span class="n">rendered</span> <span class="o">=</span> <span class="n">to_json</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>
-</span><span id="line-131">    <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"html"</span><span class="p">:</span>
-</span><span id="line-132">        <span class="n">rendered</span> <span class="o">=</span> <span class="n">to_html</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">subtitle</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">n_chars</span><span class="si">}</span><span class="s2"> characters"</span><span class="p">)</span>
-</span><span id="line-133">    <span class="k">else</span><span class="p">:</span>
-</span><span id="line-134">        <span class="n">rendered</span> <span class="o">=</span> <span class="n">to_markdown</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
-</span><span id="line-135">
-</span><span id="line-136">    <span class="k">if</span> <span class="n">out</span><span class="p">:</span>
-</span><span id="line-137">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="line-138">            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
-</span><span id="line-139">        <span class="k">return</span> <span class="p">(</span>
-</span><span id="line-140">            <span class="sa">f</span><span class="s2">"wrote </span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span><span class="si">}</span><span class="s2"> bytes) -- </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2">, "</span>
-</span><span id="line-141">            <span class="sa">f</span><span class="s2">"lean </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">lean</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">signals</span><span class="p">)</span><span class="si">}</span><span class="s2"> signal(s)"</span>
-</span><span id="line-142">        <span class="p">)</span>
-</span><span id="line-143">    <span class="k">return</span> <span class="n">rendered</span></div>
-
-</span><span id="line-144">
+</span><span id="line-116"><span class="k">def</span><span class="w"> </span><span class="nf">gauge</span><span class="p">(</span>
+</span><span id="line-117">    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-118">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-119">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"markdown"</span><span class="p">,</span>
+</span><span id="line-120">    <span class="n">segmenter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"paragraph"</span><span class="p">,</span>
+</span><span id="line-121">    <span class="n">detectors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-122">    <span class="n">judgments</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-123">    <span class="n">out</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-124">    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Reading"</span><span class="p">,</span>
+</span><span id="line-125"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-126"><span class="w">    </span><span class="sd">"""Gauge how machine-written a text reads, and render the result.</span>
+</span><span id="line-127">
+</span><span id="line-128"><span class="sd">    ``source`` is a file path, a literal string, or ``-`` for stdin.</span>
+</span><span id="line-129"><span class="sd">    ``format`` is one of markdown, json, html. ``detectors`` is a comma-separated</span>
+</span><span id="line-130"><span class="sd">    subset of the available detectors. ``judgments`` is a path to a JSON file of</span>
+</span><span id="line-131"><span class="sd">    an agent's own readings, folded in alongside the deterministic ones. With</span>
+</span><span id="line-132"><span class="sd">    ``out``, the result is written there and a one-line summary is returned.</span>
+</span><span id="line-133">
+</span><span id="line-134"><span class="sd">    &gt;&gt;&gt; gauge("Sent it Friday. Two sites, not five.").splitlines()[0]</span>
+</span><span id="line-135"><span class="sd">    '# Reading'</span>
+</span><span id="line-136"><span class="sd">    """</span>
+</span><span id="line-137">    <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">FORMATS</span><span class="p">:</span>
+</span><span id="line-138">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"format must be one of </span><span class="si">{</span><span class="n">FORMATS</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">format</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="line-139">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detectors</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-140">        <span class="n">detectors</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">detectors</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+</span><span id="line-141">
+</span><span id="line-142">    <span class="n">text</span> <span class="o">=</span> <span class="n">_read_source</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</span><span id="line-143">    <span class="n">extra</span> <span class="o">=</span> <span class="n">_signals_from_judgments</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">judgments</span><span class="p">)</span> <span class="k">if</span> <span class="n">judgments</span> <span class="k">else</span> <span class="p">()</span>
+</span><span id="line-144">    <span class="n">report</span> <span class="o">=</span> <span class="n">_gauge</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">segmenter</span><span class="o">=</span><span class="n">segmenter</span><span class="p">,</span> <span class="n">detectors</span><span class="o">=</span><span class="n">detectors</span><span class="p">,</span> <span class="n">extra_signals</span><span class="o">=</span><span class="n">extra</span><span class="p">)</span>
 </span><span id="line-145">
+</span><span id="line-146">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span id="line-147">        <span class="n">rendered</span> <span class="o">=</span> <span class="n">to_json</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>
+</span><span id="line-148">    <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"html"</span><span class="p">:</span>
+</span><span id="line-149">        <span class="n">rendered</span> <span class="o">=</span> <span class="n">to_html</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">subtitle</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">n_chars</span><span class="si">}</span><span class="s2"> characters"</span><span class="p">)</span>
+</span><span id="line-150">    <span class="k">else</span><span class="p">:</span>
+</span><span id="line-151">        <span class="n">rendered</span> <span class="o">=</span> <span class="n">to_markdown</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+</span><span id="line-152">
+</span><span id="line-153">    <span class="k">if</span> <span class="n">out</span><span class="p">:</span>
+</span><span id="line-154">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="line-155">            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
+</span><span id="line-156">        <span class="k">return</span> <span class="p">(</span>
+</span><span id="line-157">            <span class="sa">f</span><span class="s2">"wrote </span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span><span class="si">}</span><span class="s2"> bytes) -- </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2">, "</span>
+</span><span id="line-158">            <span class="sa">f</span><span class="s2">"lean </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">lean</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">signals</span><span class="p">)</span><span class="si">}</span><span class="s2"> signal(s)"</span>
+</span><span id="line-159">        <span class="p">)</span>
+</span><span id="line-160">    <span class="k">return</span> <span class="n">rendered</span></div>
+
+</span><span id="line-161">
+</span><span id="line-162">
 <div class="viewcode-block" id="detectors">
 <a class="viewcode-back" href="../../_autosummary/ductus.tools.html#ductus.tools.detectors">[docs]</a>
-</span><span id="line-146"><span class="k">def</span><span class="w"> </span><span class="nf">detectors</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
-</span><span id="line-147"><span class="w">    </span><span class="sd">"""The available detectors and what each one looks at.</span>
-</span><span id="line-148">
-</span><span id="line-149"><span class="sd">    &gt;&gt;&gt; {d["name"] for d in detectors()} == set(DETECTORS)</span>
-</span><span id="line-150"><span class="sd">    True</span>
-</span><span id="line-151"><span class="sd">    """</span>
-</span><span id="line-152">    <span class="k">return</span> <span class="p">[</span>
-</span><span id="line-153">        <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"summary"</span><span class="p">:</span> <span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="vm">__doc__</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]}</span>
-</span><span id="line-154">        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">DETECTORS</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-</span><span id="line-155">    <span class="p">]</span></div>
+</span><span id="line-163"><span class="k">def</span><span class="w"> </span><span class="nf">detectors</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+</span><span id="line-164"><span class="w">    </span><span class="sd">"""The available detectors and what each one looks at.</span>
+</span><span id="line-165">
+</span><span id="line-166"><span class="sd">    &gt;&gt;&gt; {d["name"] for d in detectors()} == set(DETECTORS)</span>
+</span><span id="line-167"><span class="sd">    True</span>
+</span><span id="line-168"><span class="sd">    """</span>
+</span><span id="line-169">    <span class="k">return</span> <span class="p">[</span>
+</span><span id="line-170">        <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"summary"</span><span class="p">:</span> <span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="vm">__doc__</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]}</span>
+</span><span id="line-171">        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">DETECTORS</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</span><span id="line-172">    <span class="p">]</span></div>
 
-</span><span id="line-156">
-</span><span id="line-157">
+</span><span id="line-173">
+</span><span id="line-174">
 <div class="viewcode-block" id="segmenters">
 <a class="viewcode-back" href="../../_autosummary/ductus.tools.html#ductus.tools.segmenters">[docs]</a>
-</span><span id="line-158"><span class="k">def</span><span class="w"> </span><span class="nf">segmenters</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span id="line-159"><span class="w">    </span><span class="sd">"""The available ways of cutting the text into scored units.</span>
-</span><span id="line-160">
-</span><span id="line-161"><span class="sd">    &gt;&gt;&gt; segmenters()</span>
-</span><span id="line-162"><span class="sd">    ['paragraph', 'sentence', 'document']</span>
-</span><span id="line-163"><span class="sd">    """</span>
-</span><span id="line-164">    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">SEGMENTERS</span><span class="p">)</span></div>
+</span><span id="line-175"><span class="k">def</span><span class="w"> </span><span class="nf">segmenters</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span id="line-176"><span class="w">    </span><span class="sd">"""The available ways of cutting the text into scored units.</span>
+</span><span id="line-177">
+</span><span id="line-178"><span class="sd">    &gt;&gt;&gt; segmenters()</span>
+</span><span id="line-179"><span class="sd">    ['paragraph', 'sentence', 'document']</span>
+</span><span id="line-180"><span class="sd">    """</span>
+</span><span id="line-181">    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">SEGMENTERS</span><span class="p">)</span></div>
 
-</span><span id="line-165">
-</span><span id="line-166">
+</span><span id="line-182">
+</span><span id="line-183">
 <div class="viewcode-block" id="tells">
 <a class="viewcode-back" href="../../_autosummary/ductus.tools.html#ductus.tools.tells">[docs]</a>
-</span><span id="line-167"><span class="k">def</span><span class="w"> </span><span class="nf">tells</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">tier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-</span><span id="line-168"><span class="w">    </span><span class="sd">"""The tells catalogue, optionally filtered to one tier (E, W or S).</span>
-</span><span id="line-169">
-</span><span id="line-170"><span class="sd">    &gt;&gt;&gt; len(tells()) &gt; 10</span>
-</span><span id="line-171"><span class="sd">    True</span>
-</span><span id="line-172"><span class="sd">    &gt;&gt;&gt; {t["tier"] for t in tells(tier="E")}</span>
-</span><span id="line-173"><span class="sd">    {'E'}</span>
-</span><span id="line-174"><span class="sd">    """</span>
-</span><span id="line-175">    <span class="kn">from</span><span class="w"> </span><span class="nn">ductus.tells</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_rules</span>
-</span><span id="line-176">
-</span><span id="line-177">    <span class="k">return</span> <span class="p">[</span>
-</span><span id="line-178">        <span class="p">{</span>
-</span><span id="line-179">            <span class="s2">"id"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-</span><span id="line-180">            <span class="s2">"tier"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">tier</span><span class="p">,</span>
-</span><span id="line-181">            <span class="s2">"message"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
-</span><span id="line-182">            <span class="s2">"weight"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span>
-</span><span id="line-183">            <span class="s2">"patterns"</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">pattern</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">patterns</span><span class="p">],</span>
-</span><span id="line-184">        <span class="p">}</span>
-</span><span id="line-185">        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">load_rules</span><span class="p">()</span>
-</span><span id="line-186">        <span class="k">if</span> <span class="n">tier</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">r</span><span class="o">.</span><span class="n">tier</span> <span class="o">==</span> <span class="n">tier</span>
-</span><span id="line-187">    <span class="p">]</span></div>
+</span><span id="line-184"><span class="k">def</span><span class="w"> </span><span class="nf">tells</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">tier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+</span><span id="line-185"><span class="w">    </span><span class="sd">"""The tells catalogue, optionally filtered to one tier (E, W or S).</span>
+</span><span id="line-186">
+</span><span id="line-187"><span class="sd">    &gt;&gt;&gt; len(tells()) &gt; 10</span>
+</span><span id="line-188"><span class="sd">    True</span>
+</span><span id="line-189"><span class="sd">    &gt;&gt;&gt; {t["tier"] for t in tells(tier="E")}</span>
+</span><span id="line-190"><span class="sd">    {'E'}</span>
+</span><span id="line-191"><span class="sd">    """</span>
+</span><span id="line-192">    <span class="kn">from</span><span class="w"> </span><span class="nn">ductus.tells</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_rules</span>
+</span><span id="line-193">
+</span><span id="line-194">    <span class="k">return</span> <span class="p">[</span>
+</span><span id="line-195">        <span class="p">{</span>
+</span><span id="line-196">            <span class="s2">"id"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+</span><span id="line-197">            <span class="s2">"tier"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">tier</span><span class="p">,</span>
+</span><span id="line-198">            <span class="s2">"message"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+</span><span id="line-199">            <span class="s2">"weight"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span>
+</span><span id="line-200">            <span class="s2">"patterns"</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">pattern</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">patterns</span><span class="p">],</span>
+</span><span id="line-201">        <span class="p">}</span>
+</span><span id="line-202">        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">load_rules</span><span class="p">()</span>
+</span><span id="line-203">        <span class="k">if</span> <span class="n">tier</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">r</span><span class="o">.</span><span class="n">tier</span> <span class="o">==</span> <span class="n">tier</span>
+</span><span id="line-204">    <span class="p">]</span></div>
 
-</span><span id="line-188">
-</span><span id="line-189">
+</span><span id="line-205">
+</span><span id="line-206">
 <div class="viewcode-block" id="install_skills">
 <a class="viewcode-back" href="../../_autosummary/ductus.tools.html#ductus.tools.install_skills">[docs]</a>
-</span><span id="line-190"><span class="k">def</span><span class="w"> </span><span class="nf">install_skills</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-</span><span id="line-191"><span class="w">    </span><span class="sd">"""Link this package's shipped skills into an agent host's skills directory.</span>
-</span><span id="line-192">
-</span><span id="line-193"><span class="sd">    Defaults to ``~/.claude/skills``. Dry-run unless ``write`` is passed.</span>
-</span><span id="line-194">
-</span><span id="line-195"><span class="sd">    &gt;&gt;&gt; r = install_skills()</span>
-</span><span id="line-196"><span class="sd">    &gt;&gt;&gt; r["dry_run"], len(r["skills"]) &gt; 0</span>
-</span><span id="line-197"><span class="sd">    (True, True)</span>
-</span><span id="line-198"><span class="sd">    """</span>
-</span><span id="line-199">    <span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-</span><span id="line-200">    <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span id="line-201">
-</span><span id="line-202">    <span class="n">src</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">files</span><span class="p">(</span><span class="s2">"ductus.data"</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"skills"</span><span class="p">))</span>
-</span><span id="line-203">    <span class="n">dst</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">if</span> <span class="n">target</span> <span class="k">else</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"skills"</span>
-</span><span id="line-204">    <span class="n">names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">src</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span> <span class="k">if</span> <span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">())</span>
-</span><span id="line-205">
-</span><span id="line-206">    <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-207">    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
-</span><span id="line-208">        <span class="n">link</span> <span class="o">=</span> <span class="n">dst</span> <span class="o">/</span> <span class="n">name</span>
-</span><span id="line-209">        <span class="n">state</span> <span class="o">=</span> <span class="s2">"exists"</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"new"</span>
-</span><span id="line-210">        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"skill"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"link"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">),</span> <span class="s2">"state"</span><span class="p">:</span> <span class="n">state</span><span class="p">})</span>
-</span><span id="line-211">        <span class="k">if</span> <span class="n">write</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">link</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span id="line-212">            <span class="n">dst</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-213">            <span class="n">link</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">src</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span>
-</span><span id="line-214">    <span class="k">return</span> <span class="p">{</span>
-</span><span id="line-215">        <span class="s2">"source"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">src</span><span class="p">),</span>
-</span><span id="line-216">        <span class="s2">"target"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">dst</span><span class="p">),</span>
-</span><span id="line-217">        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="ow">not</span> <span class="n">write</span><span class="p">,</span>
-</span><span id="line-218">        <span class="s2">"skills"</span><span class="p">:</span> <span class="n">actions</span><span class="p">,</span>
-</span><span id="line-219">    <span class="p">}</span></div>
+</span><span id="line-207"><span class="nd">@host_mutating</span>
+</span><span id="line-208"><span class="k">def</span><span class="w"> </span><span class="nf">install_skills</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="line-209"><span class="w">    </span><span class="sd">"""Link this package's shipped skills into an agent host's skills directory.</span>
+</span><span id="line-210">
+</span><span id="line-211"><span class="sd">    Defaults to ``~/.claude/skills``. Dry-run unless ``write`` is passed.</span>
+</span><span id="line-212">
+</span><span id="line-213"><span class="sd">    &gt;&gt;&gt; r = install_skills()</span>
+</span><span id="line-214"><span class="sd">    &gt;&gt;&gt; r["dry_run"], len(r["skills"]) &gt; 0</span>
+</span><span id="line-215"><span class="sd">    (True, True)</span>
+</span><span id="line-216"><span class="sd">    """</span>
+</span><span id="line-217">    <span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+</span><span id="line-218">    <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span id="line-219">
+</span><span id="line-220">    <span class="n">src</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">files</span><span class="p">(</span><span class="s2">"ductus.data"</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"skills"</span><span class="p">))</span>
+</span><span id="line-221">    <span class="n">dst</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">if</span> <span class="n">target</span> <span class="k">else</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"skills"</span>
+</span><span id="line-222">    <span class="n">names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">src</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span> <span class="k">if</span> <span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">())</span>
+</span><span id="line-223">
+</span><span id="line-224">    <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-225">    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+</span><span id="line-226">        <span class="n">link</span> <span class="o">=</span> <span class="n">dst</span> <span class="o">/</span> <span class="n">name</span>
+</span><span id="line-227">        <span class="n">state</span> <span class="o">=</span> <span class="s2">"exists"</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"new"</span>
+</span><span id="line-228">        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"skill"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"link"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">),</span> <span class="s2">"state"</span><span class="p">:</span> <span class="n">state</span><span class="p">})</span>
+</span><span id="line-229">        <span class="k">if</span> <span class="n">write</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">link</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span id="line-230">            <span class="n">dst</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-231">            <span class="n">link</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">src</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span>
+</span><span id="line-232">    <span class="k">return</span> <span class="p">{</span>
+</span><span id="line-233">        <span class="s2">"source"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">src</span><span class="p">),</span>
+</span><span id="line-234">        <span class="s2">"target"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">dst</span><span class="p">),</span>
+</span><span id="line-235">        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="ow">not</span> <span class="n">write</span><span class="p">,</span>
+</span><span id="line-236">        <span class="s2">"skills"</span><span class="p">:</span> <span class="n">actions</span><span class="p">,</span>
+</span><span id="line-237">    <span class="p">}</span></div>
 
-</span><span id="line-220">
-</span><span id="line-221">
-</span><span id="line-222"><span class="c1">#: The SSOT the CLI, an MCP server and an HTTP app would all dispatch from.</span>
-</span><span id="line-223"><span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">gauge</span><span class="p">,</span> <span class="n">detectors</span><span class="p">,</span> <span class="n">segmenters</span><span class="p">,</span> <span class="n">tells</span><span class="p">,</span> <span class="n">install_skills</span><span class="p">]</span>
+</span><span id="line-238">
+</span><span id="line-239">
+</span><span id="line-240"><span class="c1">#: The SSOT the CLI, an MCP server and an HTTP app would all dispatch from.</span>
+</span><span id="line-241"><span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">gauge</span><span class="p">,</span> <span class="n">detectors</span><span class="p">,</span> <span class="n">segmenters</span><span class="p">,</span> <span class="n">tells</span><span class="p">,</span> <span class="n">install_skills</span><span class="p">]</span>
 </span></code></pre></div>
     </div></div>
           </main>
@@ -421,7 +443,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=282f96c0"></script>
+    <script src="../../_static/documentation_options.js?v=1fd71caa"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

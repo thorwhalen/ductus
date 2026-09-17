@@ -126,6 +126,19 @@ ductus gauge draft.md --judgments judgments.json --format html --out report.html
 
 A quote that no longer occurs is dropped rather than mis-anchored, so re-running after an edit is safe.
 
+## MCP
+
+The same verbs the CLI dispatches, as MCP tools:
+
+```bash
+pip install "ductus[mcp]"
+ductus-mcp                    # stdio, for a local agent host
+```
+
+`gauge`, `detectors`, `segmenters` and `tells`. `install_skills` is deliberately absent: it symlinks into an agent host’s skills directory, and a person typing that at a CLI chose to in a way a remote caller did not.
+
+There is **no second verb list**. `ductus.mcp.TOOL_REFS` is derived from the one list the CLI already dispatches, so the two surfaces cannot drift — and a verb that changes the host declares that at its own definition rather than by appearing in some other list. `middleware=` and `auth=` pass straight through `mk_mcp()` for a deployed server.
+
 ## Seams
 
 Three, each one keyword argument, each defaulting to something that genuinely works:
@@ -162,6 +175,7 @@ They are separate packages because they have different inputs. `deslop` needs a 
 pip install ductus              # the core: pyyaml and cw, nothing else
 pip install "ductus[local]"     # + Fast-DetectGPT and Binoculars: offline, no API key, opt-in
 pip install "ductus[api]"       # + vendor detector adapters
+pip install "ductus[mcp]"       # + the MCP server (`ductus-mcp`)
 ```
 
 ## References

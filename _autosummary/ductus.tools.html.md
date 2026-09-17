@@ -18,12 +18,13 @@ this one list. Adding a surface never means writing a second implementation.
 
 ### Functions
 
-| [`detectors`](#ductus.tools.detectors)()                                 | The available detectors and what each one looks at.                       |
-|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| [`gauge`](#ductus.tools.gauge)(source, \*[, format, segmenter, ...]) | Gauge how machine-written a text reads, and render the result.            |
-| [`install_skills`](#ductus.tools.install_skills)(\*[, target, write])         | Link this package's shipped skills into an agent host's skills directory. |
-| [`segmenters`](#ductus.tools.segmenters)()                                | The available ways of cutting the text into scored units.                 |
-| [`tells`](#ductus.tools.tells)(\*[, tier])                           | The tells catalogue, optionally filtered to one tier (E, W or S).         |
+| [`detectors`](#ductus.tools.detectors)()                                 | The available detectors and what each one looks at.                        |
+|----------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
+| [`gauge`](#ductus.tools.gauge)(source, \*[, format, segmenter, ...]) | Gauge how machine-written a text reads, and render the result.             |
+| [`host_mutating`](#ductus.tools.host_mutating)(fn)                           | Mark a verb that changes the machine it runs on, rather than only reading. |
+| [`install_skills`](#ductus.tools.install_skills)(\*[, target, write])         | Link this package's shipped skills into an agent host's skills directory.  |
+| [`segmenters`](#ductus.tools.segmenters)()                                | The available ways of cutting the text into scored units.                  |
+| [`tells`](#ductus.tools.tells)(\*[, tier])                           | The tells catalogue, optionally filtered to one tier (E, W or S).          |
 
 ### ductus.tools.detectors()
 
@@ -53,6 +54,21 @@ an agent’s own readings, folded in alongside the deterministic ones. With
 ```pycon
 >>> gauge("Sent it Friday. Two sites, not five.").splitlines()[0]
 '# Reading'
+```
+
+### ductus.tools.host_mutating(fn)
+
+Mark a verb that changes the machine it runs on, rather than only reading.
+
+Declared at the definition site so surfaces can filter on it without anyone
+writing a second list of verbs. A CLI user invoking one of these chose to; a
+remote MCP caller did not necessarily, so [`ductus.mcp`](ductus.mcp.html.md#module-ductus.mcp) leaves them out.
+
+```pycon
+>>> host_mutating(lambda: None).mutates_host
+True
+>>> getattr(segmenters, "mutates_host", False)
+False
 ```
 
 ### ductus.tools.install_skills(, target=None, write=False)

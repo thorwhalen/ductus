@@ -10,6 +10,7 @@ ductus.tools
    
       detectors
       gauge
+      host_mutating
       install_skills
       segmenters
       tells

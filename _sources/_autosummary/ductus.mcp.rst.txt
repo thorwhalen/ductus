@@ -1,0 +1,20 @@
+ductus.mcp
+==========
+
+.. automodule:: ductus.mcp
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      TOOL_REFS
+      INSTRUCTIONS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      main
+      mk_mcp
+   

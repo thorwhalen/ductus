@@ -1,4 +1,4 @@
-> built 2026-09-17 15:45 UTC from d6339fc (main) · ductus 0.0.5. Details: build_info.json
+> built 2026-09-17 15:55 UTC from d09cd67 (main) · ductus 0.0.6. Details: build_info.json
 
 # index.html.md
 
@@ -130,6 +130,19 @@ ductus gauge draft.md --judgments judgments.json --format html --out report.html
 
 A quote that no longer occurs is dropped rather than mis-anchored, so re-running after an edit is safe.
 
+## MCP
+
+The same verbs the CLI dispatches, as MCP tools:
+
+```bash
+pip install "ductus[mcp]"
+ductus-mcp                    # stdio, for a local agent host
+```
+
+`gauge`, `detectors`, `segmenters` and `tells`. `install_skills` is deliberately absent: it symlinks into an agent host’s skills directory, and a person typing that at a CLI chose to in a way a remote caller did not.
+
+There is **no second verb list**. `ductus.mcp.TOOL_REFS` is derived from the one list the CLI already dispatches, so the two surfaces cannot drift — and a verb that changes the host declares that at its own definition rather than by appearing in some other list. `middleware=` and `auth=` pass straight through `mk_mcp()` for a deployed server.
+
 ## Seams
 
 Three, each one keyword argument, each defaulting to something that genuinely works:
@@ -166,6 +179,7 @@ They are separate packages because they have different inputs. `deslop` needs a 
 pip install ductus              # the core: pyyaml and cw, nothing else
 pip install "ductus[local]"     # + Fast-DetectGPT and Binoculars: offline, no API key, opt-in
 pip install "ductus[api]"       # + vendor detector adapters
+pip install "ductus[mcp]"       # + the MCP server (`ductus-mcp`)
 ```
 
 ## References
@@ -1060,11 +1074,92 @@ True
 | [`curvature`](_autosummary/ductus.curvature.html.md#module-ductus.curvature) | Model-based detectors -- the `[local]` extra.                                    |
 | [`data`](_autosummary/ductus.data.html.md#module-ductus.data)           |                                                                                  |
 | [`detect`](_autosummary/ductus.detect.html.md#module-ductus.detect)       | The detectors -- the `detectors=` seam.                                          |
+| [`mcp`](_autosummary/ductus.mcp.html.md#module-ductus.mcp)             | The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.        |
 | [`render`](_autosummary/ductus.render.html.md#module-ductus.render)       | Turning a report into something a person reads: JSON, Markdown, or HTML.         |
 | [`score`](_autosummary/ductus.score.html.md#module-ductus.score)         | Turning evidence into a lean -- the `aggregate=` seam.                           |
 | [`segment`](_autosummary/ductus.segment.html.md#module-ductus.segment)     | Cutting a text into the units that get scored -- the `segmenter=` seam.          |
 | [`tells`](_autosummary/ductus.tells.html.md#module-ductus.tells)         | The tells catalogue: named regular-expression patterns, tiered by confidence.    |
 | [`tools`](_autosummary/ductus.tools.html.md#module-ductus.tools)         | The verb SSOT: plain functions, JSON-ready in, JSON-ready out.                   |
+
+
+# _autosummary/ductus.mcp.html.md
+
+# ductus.mcp
+
+The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.
+
+There is **no second verb list here**, and that is the whole design. [`TOOL_REFS`](_autosummary/ductus.mcp.html.md#ductus.mcp.TOOL_REFS)
+is *derived* from `ductus.tools._dispatch_funcs` – the same list `cw` builds
+the CLI from – so the two surfaces cannot drift apart. The roadmap’s rule is that a
+parity test between two surfaces means there are two implementations; the fix is to
+have one list, not two lists and a test that watches them.
+
+The refs are **strings**, resolved by `py2mcp` at call time, so `ductus.tools`
+never imports MCP and neither does the core. `py2mcp` lives in the `[mcp]` extra
+and is imported only when a server is actually built.
+
+Verbs marked [`ductus.tools.host_mutating()`](_autosummary/ductus.tools.html.md#ductus.tools.host_mutating) are left out. `install_skills`
+symlinks into an agent host’s skills directory: a person typing it at a CLI chose to,
+a remote caller did not necessarily. That filter reads a property declared at the
+function’s own definition, so it is still one list.
+
+`gauge(out=...)` writes a file, and is *not* excluded – writing the report you asked
+for is the verb doing its job. A deployed server that should not write anywhere is what
+`middleware=` is for; it is passed straight through, along with `auth=`.
+
+Run it:
+
+```default
+pip install 'ductus[mcp]'
+ductus-mcp                      # stdio, for a local agent host
+```
+
+```pycon
+>>> TOOL_REFS[:2]
+('ductus.tools:gauge', 'ductus.tools:detectors')
+>>> all(ref.startswith("ductus.tools:") for ref in TOOL_REFS)
+True
+>>> "ductus.tools:install_skills" in TOOL_REFS  # host-mutating, left out
+False
+```
+
+### Module Attributes
+
+| [`TOOL_REFS`](_autosummary/ductus.mcp.html.md#ductus.mcp.TOOL_REFS)    | One ref per read-only verb, derived from the CLI's own list.   |
+|---------------------------------------------------------------|----------------------------------------------------------------|
+| [`INSTRUCTIONS`](_autosummary/ductus.mcp.html.md#ductus.mcp.INSTRUCTIONS) | What the server tells a model about itself.                    |
+
+### Functions
+
+| [`main`](_autosummary/ductus.mcp.html.md#ductus.mcp.main)()                                      | Serve on stdio.                               |
+|----------------------------------------------------------------------------------------------|-----------------------------------------------|
+| [`mk_mcp`](_autosummary/ductus.mcp.html.md#ductus.mcp.mk_mcp)(\*[, name, refs, instructions, ...]) | Build an MCP server exposing `refs` as tools. |
+
+### ductus.mcp.INSTRUCTIONS *= 'Gauge which parts of a text read as machine-written, with every finding anchored to\\nthe exact characters that carry it.\\n\\nThis server never returns a percentage, a confidence, or a verdict about a person, and\\na caller should not synthesise one from what it does return. It gives a lean in\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\nwith a quote that can be checked against the text.\\n\\nIts false-positive rate on human-written text is measured and is not small: with the\\ndefault detectors, about one document in five that a person wrote is called\\nleans-machine. A flagged \*sentence\* is much better evidence than a flagged \*document\*.\\nThe bias runs toward formal, fluent, essayistic prose rather than toward simple prose.\\n\\n"No findings" is a weak result, not a clean bill.\\n'*
+
+What the server tells a model about itself. The limits are here rather than in a
+README because this is the only description an MCP client ever reads.
+
+### ductus.mcp.TOOL_REFS *: [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), ...]* *= ('ductus.tools:gauge', 'ductus.tools:detectors', 'ductus.tools:segmenters', 'ductus.tools:tells')*
+
+One ref per read-only verb, derived from the CLI’s own list. Never hand-written.
+
+### ductus.mcp.main()
+
+Serve on stdio. The `ductus-mcp` console script.
+
+* **Return type:**
+  [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
+### ductus.mcp.mk_mcp(, name='ductus', refs=('ductus.tools:gauge', 'ductus.tools:detectors', 'ductus.tools:segmenters', 'ductus.tools:tells'), instructions='Gauge which parts of a text read as machine-written, with every finding anchored to\\\\nthe exact characters that carry it.\\\\n\\\\nThis server never returns a percentage, a confidence, or a verdict about a person, and\\\\na caller should not synthesise one from what it does return. It gives a lean in\\\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\\\nwith a quote that can be checked against the text.\\\\n\\\\nIts false-positive rate on human-written text is measured and is not small: with the\\\\ndefault detectors, about one document in five that a person wrote is called\\\\nleans-machine. A flagged \*sentence\* is much better evidence than a flagged \*document\*.\\\\nThe bias runs toward formal, fluent, essayistic prose rather than toward simple prose.\\\\n\\\\n"No findings" is a weak result, not a clean bill.\\\\n', middleware=None, auth=None)
+
+Build an MCP server exposing `refs` as tools.
+
+`middleware=` and `auth=` pass straight through to `py2mcp`. They are where
+a deployed connector attaches metering and authentication without the core
+learning that either exists.
+
+Raises [`ImportError`](https://docs.python.org/3/builtins/exceptions.html#ImportError) with an actionable message when the extra is missing.
 
 
 # _autosummary/ductus.render.html.md
@@ -1501,12 +1596,13 @@ this one list. Adding a surface never means writing a second implementation.
 
 ### Functions
 
-| [`detectors`](_autosummary/ductus.tools.html.md#ductus.tools.detectors)()                                 | The available detectors and what each one looks at.                       |
-|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| [`gauge`](_autosummary/ductus.tools.html.md#ductus.tools.gauge)(source, \*[, format, segmenter, ...]) | Gauge how machine-written a text reads, and render the result.            |
-| [`install_skills`](_autosummary/ductus.tools.html.md#ductus.tools.install_skills)(\*[, target, write])         | Link this package's shipped skills into an agent host's skills directory. |
-| [`segmenters`](_autosummary/ductus.tools.html.md#ductus.tools.segmenters)()                                | The available ways of cutting the text into scored units.                 |
-| [`tells`](_autosummary/ductus.tools.html.md#ductus.tools.tells)(\*[, tier])                           | The tells catalogue, optionally filtered to one tier (E, W or S).         |
+| [`detectors`](_autosummary/ductus.tools.html.md#ductus.tools.detectors)()                                 | The available detectors and what each one looks at.                        |
+|----------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
+| [`gauge`](_autosummary/ductus.tools.html.md#ductus.tools.gauge)(source, \*[, format, segmenter, ...]) | Gauge how machine-written a text reads, and render the result.             |
+| [`host_mutating`](_autosummary/ductus.tools.html.md#ductus.tools.host_mutating)(fn)                           | Mark a verb that changes the machine it runs on, rather than only reading. |
+| [`install_skills`](_autosummary/ductus.tools.html.md#ductus.tools.install_skills)(\*[, target, write])         | Link this package's shipped skills into an agent host's skills directory.  |
+| [`segmenters`](_autosummary/ductus.tools.html.md#ductus.tools.segmenters)()                                | The available ways of cutting the text into scored units.                  |
+| [`tells`](_autosummary/ductus.tools.html.md#ductus.tools.tells)(\*[, tier])                           | The tells catalogue, optionally filtered to one tier (E, W or S).          |
 
 ### ductus.tools.detectors()
 
@@ -1536,6 +1632,21 @@ an agent’s own readings, folded in alongside the deterministic ones. With
 ```pycon
 >>> gauge("Sent it Friday. Two sites, not five.").splitlines()[0]
 '# Reading'
+```
+
+### ductus.tools.host_mutating(fn)
+
+Mark a verb that changes the machine it runs on, rather than only reading.
+
+Declared at the definition site so surfaces can filter on it without anyone
+writing a second list of verbs. A CLI user invoking one of these chose to; a
+remote MCP caller did not necessarily, so [`ductus.mcp`](_autosummary/ductus.mcp.html.md#module-ductus.mcp) leaves them out.
+
+```pycon
+>>> host_mutating(lambda: None).mutates_host
+True
+>>> getattr(segmenters, "mutates_host", False)
+False
 ```
 
 ### ductus.tools.install_skills(, target=None, write=False)
@@ -1586,18 +1697,18 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-17 15:45 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/d6339fce087d03f391e921f1a3ba2065b45f0f0d"><code>d6339fc</code></a> on branch <code>main</code>, for **ductus 0.0.5** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-17 15:55 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27"><code>d09cd67</code></a> on branch <code>main</code>, for **ductus 0.0.6** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.5) is behind the latest release on PyPI (0.0.6): `pip install ductus` gives newer code than these docs describe.
+- The documented version (0.0.6) is behind the latest release on PyPI (0.0.7): `pip install ductus` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/d6339fce087d03f391e921f1a3ba2065b45f0f0d"><code>d6339fce087d03f391e921f1a3ba2065b45f0f0d</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27"><code>d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -1608,9 +1719,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35242096377">35242096377</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35243186397">35243186397</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>d6339fce087d03f391e921f1a3ba2065b45f0f0d</code> (in the history of the built commit) |
+| Event commit | <code>d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1635,13 +1746,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.6/">0.0.6</a>, newer than the documented version (0.0.5).
+Latest release: <a href="https://pypi.org/project/ductus/0.0.7/">0.0.7</a>, newer than the documented version (0.0.6).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout d6339fce087d03f391e921f1a3ba2065b45f0f0d
+git checkout d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
