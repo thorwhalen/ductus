@@ -5,19 +5,17 @@ orphan: true
 
 # About this build
 
-This documentation was built on **2026-09-17 11:43 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/b232077979a230ddfa03492c976658999e70c432"><code>b232077</code></a> on branch <code>main</code>, for **ductus 0.0.3** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-17 12:10 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/b2fab6e82e2fb4363327871e19fa84a9e57dae5e"><code>b2fab6e</code></a> on branch <code>main</code>, for **ductus 0.0.4** (from <code>pyproject.toml</code>).
 
-:::{warning}
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.3) is behind the latest release on PyPI (0.0.4): `pip install ductus` gives newer code than these docs describe.
+:::{note}
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 :::
 
 ## Source
 
 | | |
 |---|---|
-| Commit | <a href="https://github.com/thorwhalen/ductus/commit/b232077979a230ddfa03492c976658999e70c432"><code>b232077979a230ddfa03492c976658999e70c432</code></a> |
+| Commit | <a href="https://github.com/thorwhalen/ductus/commit/b2fab6e82e2fb4363327871e19fa84a9e57dae5e"><code>b2fab6e82e2fb4363327871e19fa84a9e57dae5e</code></a> |
 | Branch | <code>main</code> |
 | Tags at this commit | none |
 | Working tree | clean |
@@ -28,9 +26,9 @@ The documentation and the package may be misaligned:
 | | |
 |---|---|
 | Repository | <code>thorwhalen/ductus</code> |
-| Run | <a href="https://github.com/thorwhalen/ductus/actions/runs/35217106809">35217106809</a> |
+| Run | <a href="https://github.com/thorwhalen/ductus/actions/runs/35219467476">35219467476</a> |
 | Ref | <code>refs/heads/main</code> |
-| Event commit | <code>b232077979a230ddfa03492c976658999e70c432</code> (in the history of the built commit) |
+| Event commit | <code>b2fab6e82e2fb4363327871e19fa84a9e57dae5e</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -55,13 +53,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.4/">0.0.4</a>, newer than the documented version (0.0.3).
+Latest release: <a href="https://pypi.org/project/ductus/0.0.4/">0.0.4</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout b232077979a230ddfa03492c976658999e70c432
+git checkout b2fab6e82e2fb4363327871e19fa84a9e57dae5e
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

@@ -51,6 +51,21 @@ Note that several of these argue *for* a human. A detector that can only ever ac
 
 The deterministic pass finds phrases, artifacts and a few shapes. **It cannot find prose that is machine-written and bland** — for that a model has to read it, which is what the shipped agent skills are for.
 
+Two model-based detectors also ship, behind the `[local]` extra and **off by default**:
+
+| Detector          | Finds                                                                                                                           | Cost                                    |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| `fast-detect-gpt` | Passages a language model finds markedly more predictable — or more surprising — than the rest of the same document             | one CPU pass with `gpt2`                |
+| `binoculars`      | The same comparison, via the cross-perplexity of a paired observer and performer, which generalises better to unseen generators | two CPU passes with `distilgpt2`/`gpt2` |
+```bash
+pip install "ductus[local]"
+ductus gauge draft.md --detectors fast-detect-gpt,binoculars
+```
+
+They are opt-in because they were measured and did not beat the deterministic set on machine-written text — better recall, worse precision. They *did* find human-leaning evidence the deterministic detectors miss entirely. The numbers, including the unflattering ones, are in [`phase-1-results.md`](); why a continuous score becomes a banded signal rather than a weight is [`curvature-as-evidence.md`]().
+
+Note what they do *not* do: they compare passages **within** a document and so cannot say whether a whole text is machine-written. Answering that honestly needs a calibration this package does not have yet.
+
 ## How it fits together
 
 The three amber boxes are the seams — each is one keyword argument. Everything below `Report` is a renderer, and renderers are pure functions of it: nothing in the analysis knows or cares which one you call, and adding a fourth changes nothing upstream.
@@ -110,7 +125,9 @@ gauge(
 gauge(text, aggregate=my_calibrated_scorer)  # replace the scoring model wholesale
 ```
 
-A detector is a plain function `(text, span) -> Iterator[Signal]`. There is no base class and nothing to register. Adding Fast-DetectGPT, Binoculars or a vendor API means writing one more function of that shape — see [the roadmap]().
+A detector is a plain function `(text, span) -> Iterator[Signal]`. Fast-DetectGPT and Binoculars are exactly that and nothing more — `ductus/curvature.py` adds no base class, no core change and no import cost. A vendor API would be one more function of the same shape; see [the roadmap]().
+
+`DETECTORS` is the registry of everything nameable; `DEFAULT_DETECTORS` is what `detectors=None` means. They are deliberately different lists — a detector joins the default by beating what is already there on `tests/fixtures/mixed_authorship.json`, which `python misc/measure_detectors.py` measures.
 
 For long documents, `iter_segments` is the streaming core and `gauge` is the batch facade over it.
 
@@ -128,7 +145,7 @@ They are separate packages because they have different inputs. `deslop` needs a 
 
 ```bash
 pip install ductus              # the core: pyyaml and cw, nothing else
-pip install "ductus[local]"     # + model-based detectors, offline, no API key
+pip install "ductus[local]"     # + Fast-DetectGPT and Binoculars: offline, no API key, opt-in
 pip install "ductus[api]"       # + vendor detector adapters
 ```
 

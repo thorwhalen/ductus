@@ -1,0 +1,25 @@
+ductus.curvature
+================
+
+.. automodule:: ductus.curvature
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      FAST_DETECT_MODEL
+      BINOCULARS_OBSERVER
+      BANDS
+      MIN_WINDOWS
+      MIN_TOKENS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      band_of
+      binoculars
+      fast_detect_gpt
+      robust_z
+   

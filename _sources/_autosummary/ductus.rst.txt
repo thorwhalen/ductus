@@ -36,6 +36,7 @@
 
    base
    core
+   curvature
    data
    detect
    render

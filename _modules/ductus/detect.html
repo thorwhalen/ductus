@@ -115,6 +115,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ductus.html">ductus</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.base.html">ductus.base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.core.html">ductus.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.data.html">ductus.data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.detect.html">ductus.detect</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.render.html">ductus.render</a></li>
@@ -189,388 +190,415 @@
 </span><span id="line-18"><span class="sd">    Burstiness -- the variance of sentence length. Weak evidence, and reported</span>
 </span><span id="line-19"><span class="sd">    as weak.</span>
 </span><span id="line-20">
-</span><span id="line-21"><span class="sd">Adding a model-based detector (Fast-DetectGPT, Binoculars, a vendor API) means</span>
-</span><span id="line-22"><span class="sd">writing one more function of this shape. Nothing else in the package changes.</span>
-</span><span id="line-23">
-</span><span id="line-24"><span class="sd">&gt;&gt;&gt; from ductus.base import Span</span>
-</span><span id="line-25"><span class="sd">&gt;&gt;&gt; t = "The results were not merely good, but transformative."</span>
-</span><span id="line-26"><span class="sd">&gt;&gt;&gt; [s.name for s in rhetoric(t, Span.of(t, 0, len(t)))]</span>
-</span><span id="line-27"><span class="sd">['not-x-but-y']</span>
-</span><span id="line-28"><span class="sd">&gt;&gt;&gt; t2 = "It matters — a lot — and always has."</span>
-</span><span id="line-29"><span class="sd">&gt;&gt;&gt; [s.name for s in forensic(t2, Span.of(t2, 0, len(t2)))]</span>
-</span><span id="line-30"><span class="sd">['em-dash', 'em-dash']</span>
-</span><span id="line-31"><span class="sd">"""</span>
-</span><span id="line-32">
-</span><span id="line-33"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-</span><span id="line-34">
-</span><span id="line-35"><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-</span><span id="line-36"><span class="kn">import</span><span class="w"> </span><span class="nn">statistics</span>
-</span><span id="line-37"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Sequence</span>
-</span><span id="line-38">
-</span><span id="line-39"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Signal</span><span class="p">,</span> <span class="n">Span</span>
-</span><span id="line-40"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.tells</span><span class="w"> </span><span class="kn">import</span> <span class="n">iter_tell_matches</span><span class="p">,</span> <span class="n">metrics</span>
-</span><span id="line-41">
-</span><span id="line-42"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"DETECTORS"</span><span class="p">,</span> <span class="s2">"detectors_from"</span><span class="p">,</span> <span class="s2">"forensic"</span><span class="p">,</span> <span class="s2">"rhetoric"</span><span class="p">,</span> <span class="s2">"rhythm"</span><span class="p">,</span> <span class="s2">"tells"</span><span class="p">]</span>
+</span><span id="line-21"><span class="sd">Two more ship behind the ``[local]`` extra -- ``fast-detect-gpt`` and</span>
+</span><span id="line-22"><span class="sd">``binoculars``, in :mod:`ductus.curvature`. They are registered here so they can be</span>
+</span><span id="line-23"><span class="sd">named, but whether they belong in :data:`DEFAULT_DETECTORS` is settled by</span>
+</span><span id="line-24"><span class="sd">measurement, not by being new -- see ``misc/docs/phase-1-results.md``.</span>
+</span><span id="line-25">
+</span><span id="line-26"><span class="sd">Adding another one -- a vendor API, a supervised classifier -- means writing one more</span>
+</span><span id="line-27"><span class="sd">function of this shape. Nothing else in the package changes.</span>
+</span><span id="line-28">
+</span><span id="line-29"><span class="sd">&gt;&gt;&gt; from ductus.base import Span</span>
+</span><span id="line-30"><span class="sd">&gt;&gt;&gt; t = "The results were not merely good, but transformative."</span>
+</span><span id="line-31"><span class="sd">&gt;&gt;&gt; [s.name for s in rhetoric(t, Span.of(t, 0, len(t)))]</span>
+</span><span id="line-32"><span class="sd">['not-x-but-y']</span>
+</span><span id="line-33"><span class="sd">&gt;&gt;&gt; t2 = "It matters — a lot — and always has."</span>
+</span><span id="line-34"><span class="sd">&gt;&gt;&gt; [s.name for s in forensic(t2, Span.of(t2, 0, len(t2)))]</span>
+</span><span id="line-35"><span class="sd">['em-dash', 'em-dash']</span>
+</span><span id="line-36"><span class="sd">"""</span>
+</span><span id="line-37">
+</span><span id="line-38"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+</span><span id="line-39">
+</span><span id="line-40"><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="line-41"><span class="kn">import</span><span class="w"> </span><span class="nn">statistics</span>
+</span><span id="line-42"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Sequence</span>
 </span><span id="line-43">
-</span><span id="line-44"><span class="n">_WORD_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[A-Za-z0-9’']+"</span><span class="p">)</span>
-</span><span id="line-45"><span class="n">_SENTENCE_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^.!?\n]+[.!?]?"</span><span class="p">)</span>
-</span><span id="line-46">
-</span><span id="line-47"><span class="n">_DISCOURSE_OPENERS</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="line-48">    <span class="s2">"however"</span><span class="p">,</span>
-</span><span id="line-49">    <span class="s2">"moreover"</span><span class="p">,</span>
-</span><span id="line-50">    <span class="s2">"furthermore"</span><span class="p">,</span>
-</span><span id="line-51">    <span class="s2">"additionally"</span><span class="p">,</span>
-</span><span id="line-52">    <span class="s2">"that said"</span><span class="p">,</span>
-</span><span id="line-53">    <span class="s2">"at the same time"</span><span class="p">,</span>
-</span><span id="line-54">    <span class="s2">"in addition"</span><span class="p">,</span>
-</span><span id="line-55">    <span class="s2">"importantly"</span><span class="p">,</span>
-</span><span id="line-56">    <span class="s2">"ultimately"</span><span class="p">,</span>
-</span><span id="line-57">    <span class="s2">"crucially"</span><span class="p">,</span>
-</span><span id="line-58">    <span class="s2">"notably"</span><span class="p">,</span>
-</span><span id="line-59">    <span class="s2">"overall"</span><span class="p">,</span>
-</span><span id="line-60"><span class="p">)</span>
-</span><span id="line-61">
+</span><span id="line-44"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Signal</span><span class="p">,</span> <span class="n">Span</span>
+</span><span id="line-45"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.curvature</span><span class="w"> </span><span class="kn">import</span> <span class="n">binoculars</span><span class="p">,</span> <span class="n">fast_detect_gpt</span>
+</span><span id="line-46"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.tells</span><span class="w"> </span><span class="kn">import</span> <span class="n">iter_tell_matches</span><span class="p">,</span> <span class="n">metrics</span>
+</span><span id="line-47">
+</span><span id="line-48"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="line-49">    <span class="s2">"DEFAULT_DETECTORS"</span><span class="p">,</span>
+</span><span id="line-50">    <span class="s2">"DETECTORS"</span><span class="p">,</span>
+</span><span id="line-51">    <span class="s2">"binoculars"</span><span class="p">,</span>
+</span><span id="line-52">    <span class="s2">"detectors_from"</span><span class="p">,</span>
+</span><span id="line-53">    <span class="s2">"fast_detect_gpt"</span><span class="p">,</span>
+</span><span id="line-54">    <span class="s2">"forensic"</span><span class="p">,</span>
+</span><span id="line-55">    <span class="s2">"rhetoric"</span><span class="p">,</span>
+</span><span id="line-56">    <span class="s2">"rhythm"</span><span class="p">,</span>
+</span><span id="line-57">    <span class="s2">"tells"</span><span class="p">,</span>
+</span><span id="line-58"><span class="p">]</span>
+</span><span id="line-59">
+</span><span id="line-60"><span class="n">_WORD_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[A-Za-z0-9’']+"</span><span class="p">)</span>
+</span><span id="line-61"><span class="n">_SENTENCE_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^.!?\n]+[.!?]?"</span><span class="p">)</span>
 </span><span id="line-62">
-</span><span id="line-63"><span class="k">def</span><span class="w"> </span><span class="nf">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Span</span><span class="p">:</span>
-</span><span id="line-64"><span class="w">    </span><span class="sd">"""A token-level span at document coordinates, given offsets inside ``span``."""</span>
-</span><span id="line-65">    <span class="k">return</span> <span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">start</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">end</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"token"</span><span class="p">)</span>
-</span><span id="line-66">
-</span><span id="line-67">
-</span><span id="line-68"><span class="c1"># Headings, list items, table rows, fenced code, quotes, link-only lines. These are</span>
-</span><span id="line-69"><span class="c1"># markup, not prose: judging them for terminal punctuation or stray line breaks</span>
-</span><span id="line-70"><span class="c1"># reports the document's *format* as evidence about its author, which is noise.</span>
-</span><span id="line-71"><span class="n">_MARKUP_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-</span><span id="line-72"><span class="w">    </span><span class="sa">r</span><span class="sd">"""^\s*(?:\#{1,6}\s        # heading</span>
-</span><span id="line-73"><span class="sd">            |[-*+]\s              # bullet</span>
-</span><span id="line-74"><span class="sd">            |\d+[.)]\s           # numbered item</span>
-</span><span id="line-75"><span class="sd">            |\|                   # table row</span>
-</span><span id="line-76"><span class="sd">            |&gt;\s                  # block quote</span>
-</span><span id="line-77"><span class="sd">            |```|~~~               # code fence</span>
-</span><span id="line-78"><span class="sd">            |\[[^\]]+\]:        # link reference</span>
-</span><span id="line-79"><span class="sd">            |[-=]{3,}\s*$         # rule / setext underline</span>
-</span><span id="line-80"><span class="sd">        )"""</span><span class="p">,</span>
-</span><span id="line-81">    <span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">,</span>
-</span><span id="line-82"><span class="p">)</span>
+</span><span id="line-63"><span class="n">_DISCOURSE_OPENERS</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="line-64">    <span class="s2">"however"</span><span class="p">,</span>
+</span><span id="line-65">    <span class="s2">"moreover"</span><span class="p">,</span>
+</span><span id="line-66">    <span class="s2">"furthermore"</span><span class="p">,</span>
+</span><span id="line-67">    <span class="s2">"additionally"</span><span class="p">,</span>
+</span><span id="line-68">    <span class="s2">"that said"</span><span class="p">,</span>
+</span><span id="line-69">    <span class="s2">"at the same time"</span><span class="p">,</span>
+</span><span id="line-70">    <span class="s2">"in addition"</span><span class="p">,</span>
+</span><span id="line-71">    <span class="s2">"importantly"</span><span class="p">,</span>
+</span><span id="line-72">    <span class="s2">"ultimately"</span><span class="p">,</span>
+</span><span id="line-73">    <span class="s2">"crucially"</span><span class="p">,</span>
+</span><span id="line-74">    <span class="s2">"notably"</span><span class="p">,</span>
+</span><span id="line-75">    <span class="s2">"overall"</span><span class="p">,</span>
+</span><span id="line-76"><span class="p">)</span>
+</span><span id="line-77">
+</span><span id="line-78">
+</span><span id="line-79"><span class="k">def</span><span class="w"> </span><span class="nf">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Span</span><span class="p">:</span>
+</span><span id="line-80"><span class="w">    </span><span class="sd">"""A token-level span at document coordinates, given offsets inside ``span``."""</span>
+</span><span id="line-81">    <span class="k">return</span> <span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">start</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">end</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"token"</span><span class="p">)</span>
+</span><span id="line-82">
 </span><span id="line-83">
-</span><span id="line-84">
-</span><span id="line-85"><span class="k">def</span><span class="w"> </span><span class="nf">_is_markup</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="line-86"><span class="w">    </span><span class="sd">"""Whether a segment is document structure rather than prose.</span>
-</span><span id="line-87">
-</span><span id="line-88"><span class="sd">    &gt;&gt;&gt; _is_markup("## A heading"), _is_markup("| a | b |"), _is_markup("- an item")</span>
-</span><span id="line-89"><span class="sd">    (True, True, True)</span>
-</span><span id="line-90"><span class="sd">    &gt;&gt;&gt; _is_markup("An ordinary sentence.")</span>
-</span><span id="line-91"><span class="sd">    False</span>
-</span><span id="line-92"><span class="sd">    """</span>
-</span><span id="line-93">    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_MARKUP_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">"```"</span> <span class="ow">in</span> <span class="n">s</span>
-</span><span id="line-94">
-</span><span id="line-95">
-</span><span id="line-96"><span class="c1"># --------------------------------------------------------------------------- tells</span>
-</span><span id="line-97">
-</span><span id="line-98"><span class="n">_QUOTED_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"`[^`\n]+`|</span><span class="se">\"</span><span class="s2">[^</span><span class="se">\"</span><span class="s2">\n]{0,200}</span><span class="se">\"</span><span class="s2">|[“][^”\n]{0,200}[”]"</span><span class="p">)</span>
+</span><span id="line-84"><span class="c1"># Headings, list items, table rows, fenced code, quotes, link-only lines. These are</span>
+</span><span id="line-85"><span class="c1"># markup, not prose: judging them for terminal punctuation or stray line breaks</span>
+</span><span id="line-86"><span class="c1"># reports the document's *format* as evidence about its author, which is noise.</span>
+</span><span id="line-87"><span class="n">_MARKUP_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+</span><span id="line-88"><span class="w">    </span><span class="sa">r</span><span class="sd">"""^\s*(?:\#{1,6}\s        # heading</span>
+</span><span id="line-89"><span class="sd">            |[-*+]\s              # bullet</span>
+</span><span id="line-90"><span class="sd">            |\d+[.)]\s           # numbered item</span>
+</span><span id="line-91"><span class="sd">            |\|                   # table row</span>
+</span><span id="line-92"><span class="sd">            |&gt;\s                  # block quote</span>
+</span><span id="line-93"><span class="sd">            |```|~~~               # code fence</span>
+</span><span id="line-94"><span class="sd">            |\[[^\]]+\]:        # link reference</span>
+</span><span id="line-95"><span class="sd">            |[-=]{3,}\s*$         # rule / setext underline</span>
+</span><span id="line-96"><span class="sd">        )"""</span><span class="p">,</span>
+</span><span id="line-97">    <span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">,</span>
+</span><span id="line-98"><span class="p">)</span>
 </span><span id="line-99">
 </span><span id="line-100">
-</span><span id="line-101"><span class="k">def</span><span class="w"> </span><span class="nf">_quoted_ranges</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-</span><span id="line-102"><span class="w">    </span><span class="sd">"""Character ranges inside inline code or quotation marks.</span>
+</span><span id="line-101"><span class="k">def</span><span class="w"> </span><span class="nf">_is_markup</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="line-102"><span class="w">    </span><span class="sd">"""Whether a segment is document structure rather than prose.</span>
 </span><span id="line-103">
-</span><span id="line-104"><span class="sd">    A tell inside quotation marks was written by whoever is being quoted, not by</span>
-</span><span id="line-105"><span class="sd">    the author of the text. Scoring it is how a document *about* machine writing</span>
-</span><span id="line-106"><span class="sd">    scores as machine-written -- this package's own README does exactly that.</span>
-</span><span id="line-107">
-</span><span id="line-108"><span class="sd">    &gt;&gt;&gt; _quoted_ranges('he said "delve" and `robust` too')</span>
-</span><span id="line-109"><span class="sd">    [(8, 15), (20, 28)]</span>
-</span><span id="line-110"><span class="sd">    &gt;&gt;&gt; _quoted_ranges("nothing quoted here")</span>
-</span><span id="line-111"><span class="sd">    []</span>
-</span><span id="line-112"><span class="sd">    """</span>
-</span><span id="line-113">    <span class="k">return</span> <span class="p">[(</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">())</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_QUOTED_RE</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span>
-</span><span id="line-114">
+</span><span id="line-104"><span class="sd">    &gt;&gt;&gt; _is_markup("## A heading"), _is_markup("| a | b |"), _is_markup("- an item")</span>
+</span><span id="line-105"><span class="sd">    (True, True, True)</span>
+</span><span id="line-106"><span class="sd">    &gt;&gt;&gt; _is_markup("An ordinary sentence.")</span>
+</span><span id="line-107"><span class="sd">    False</span>
+</span><span id="line-108"><span class="sd">    """</span>
+</span><span id="line-109">    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_MARKUP_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">"```"</span> <span class="ow">in</span> <span class="n">s</span>
+</span><span id="line-110">
+</span><span id="line-111">
+</span><span id="line-112"><span class="c1"># --------------------------------------------------------------------------- tells</span>
+</span><span id="line-113">
+</span><span id="line-114"><span class="n">_QUOTED_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"`[^`\n]+`|</span><span class="se">\"</span><span class="s2">[^</span><span class="se">\"</span><span class="s2">\n]{0,200}</span><span class="se">\"</span><span class="s2">|[“][^”\n]{0,200}[”]"</span><span class="p">)</span>
 </span><span id="line-115">
+</span><span id="line-116">
+</span><span id="line-117"><span class="k">def</span><span class="w"> </span><span class="nf">_quoted_ranges</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+</span><span id="line-118"><span class="w">    </span><span class="sd">"""Character ranges inside inline code or quotation marks.</span>
+</span><span id="line-119">
+</span><span id="line-120"><span class="sd">    A tell inside quotation marks was written by whoever is being quoted, not by</span>
+</span><span id="line-121"><span class="sd">    the author of the text. Scoring it is how a document *about* machine writing</span>
+</span><span id="line-122"><span class="sd">    scores as machine-written -- this package's own README does exactly that.</span>
+</span><span id="line-123">
+</span><span id="line-124"><span class="sd">    &gt;&gt;&gt; _quoted_ranges('he said "delve" and `robust` too')</span>
+</span><span id="line-125"><span class="sd">    [(8, 15), (20, 28)]</span>
+</span><span id="line-126"><span class="sd">    &gt;&gt;&gt; _quoted_ranges("nothing quoted here")</span>
+</span><span id="line-127"><span class="sd">    []</span>
+</span><span id="line-128"><span class="sd">    """</span>
+</span><span id="line-129">    <span class="k">return</span> <span class="p">[(</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">())</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_QUOTED_RE</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span>
+</span><span id="line-130">
+</span><span id="line-131">
 <div class="viewcode-block" id="tells">
 <a class="viewcode-back" href="../../_autosummary/ductus.detect.html#ductus.detect.tells">[docs]</a>
-</span><span id="line-116"><span class="k">def</span><span class="w"> </span><span class="nf">tells</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
-</span><span id="line-117"><span class="w">    </span><span class="sd">"""Catalogue phrase matches, as signals. Quoted text is skipped.</span>
-</span><span id="line-118">
-</span><span id="line-119"><span class="sd">    &gt;&gt;&gt; from ductus.base import Span</span>
-</span><span id="line-120"><span class="sd">    &gt;&gt;&gt; t = "Let's delve into it."</span>
-</span><span id="line-121"><span class="sd">    &gt;&gt;&gt; [(s.name, s.direction) for s in tells(t, Span.of(t, 0, len(t)))]</span>
-</span><span id="line-122"><span class="sd">    [('ai-vocabulary', 'machine')]</span>
-</span><span id="line-123"><span class="sd">    &gt;&gt;&gt; q = 'Models overuse "delve", so avoid it.'</span>
-</span><span id="line-124"><span class="sd">    &gt;&gt;&gt; list(tells(q, Span.of(q, 0, len(q))))</span>
-</span><span id="line-125"><span class="sd">    []</span>
-</span><span id="line-126"><span class="sd">    """</span>
-</span><span id="line-127">    <span class="kn">from</span><span class="w"> </span><span class="nn">ductus.tells</span><span class="w"> </span><span class="kn">import</span> <span class="n">TIER_WEIGHT</span>
-</span><span id="line-128">
-</span><span id="line-129">    <span class="n">quoted</span> <span class="o">=</span> <span class="n">_quoted_ranges</span><span class="p">(</span><span class="n">span</span><span class="o">.</span><span class="n">quote</span><span class="p">)</span>
-</span><span id="line-130">
-</span><span id="line-131">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">iter_tell_matches</span><span class="p">(</span><span class="n">span</span><span class="o">.</span><span class="n">quote</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">):</span>
-</span><span id="line-132">        <span class="n">rel_start</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span>
-</span><span id="line-133">        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">a</span> <span class="o">&lt;=</span> <span class="n">rel_start</span> <span class="o">&lt;</span> <span class="n">b</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">quoted</span><span class="p">):</span>
-</span><span id="line-134">            <span class="k">continue</span>  <span class="c1"># inside a quotation: not this author's words</span>
-</span><span id="line-135">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-136">            <span class="n">name</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">rule_id</span><span class="p">,</span>
-</span><span id="line-137">            <span class="n">direction</span><span class="o">=</span><span class="s2">"machine"</span><span class="p">,</span>
-</span><span id="line-138">            <span class="n">weight</span><span class="o">=</span><span class="n">TIER_WEIGHT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">tier</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">),</span>
-</span><span id="line-139">            <span class="n">detector</span><span class="o">=</span><span class="s2">"tells"</span><span class="p">,</span>
-</span><span id="line-140">            <span class="n">value</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">matched</span><span class="p">,</span>
-</span><span id="line-141">            <span class="n">note</span><span class="o">=</span><span class="sa">f</span><span class="s2">"tier </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">tier</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-</span><span id="line-142">            <span class="n">span</span><span class="o">=</span><span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"token"</span><span class="p">),</span>
-</span><span id="line-143">        <span class="p">)</span></div>
-
+</span><span id="line-132"><span class="k">def</span><span class="w"> </span><span class="nf">tells</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-133"><span class="w">    </span><span class="sd">"""Catalogue phrase matches, as signals. Quoted text is skipped.</span>
+</span><span id="line-134">
+</span><span id="line-135"><span class="sd">    &gt;&gt;&gt; from ductus.base import Span</span>
+</span><span id="line-136"><span class="sd">    &gt;&gt;&gt; t = "Let's delve into it."</span>
+</span><span id="line-137"><span class="sd">    &gt;&gt;&gt; [(s.name, s.direction) for s in tells(t, Span.of(t, 0, len(t)))]</span>
+</span><span id="line-138"><span class="sd">    [('ai-vocabulary', 'machine')]</span>
+</span><span id="line-139"><span class="sd">    &gt;&gt;&gt; q = 'Models overuse "delve", so avoid it.'</span>
+</span><span id="line-140"><span class="sd">    &gt;&gt;&gt; list(tells(q, Span.of(q, 0, len(q))))</span>
+</span><span id="line-141"><span class="sd">    []</span>
+</span><span id="line-142"><span class="sd">    """</span>
+</span><span id="line-143">    <span class="kn">from</span><span class="w"> </span><span class="nn">ductus.tells</span><span class="w"> </span><span class="kn">import</span> <span class="n">TIER_WEIGHT</span>
 </span><span id="line-144">
-</span><span id="line-145">
-</span><span id="line-146"><span class="c1"># ------------------------------------------------------------------------ forensic</span>
-</span><span id="line-147">
-</span><span id="line-148">
+</span><span id="line-145">    <span class="n">quoted</span> <span class="o">=</span> <span class="n">_quoted_ranges</span><span class="p">(</span><span class="n">span</span><span class="o">.</span><span class="n">quote</span><span class="p">)</span>
+</span><span id="line-146">
+</span><span id="line-147">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">iter_tell_matches</span><span class="p">(</span><span class="n">span</span><span class="o">.</span><span class="n">quote</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">):</span>
+</span><span id="line-148">        <span class="n">rel_start</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span>
+</span><span id="line-149">        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">a</span> <span class="o">&lt;=</span> <span class="n">rel_start</span> <span class="o">&lt;</span> <span class="n">b</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">quoted</span><span class="p">):</span>
+</span><span id="line-150">            <span class="k">continue</span>  <span class="c1"># inside a quotation: not this author's words</span>
+</span><span id="line-151">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-152">            <span class="n">name</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">rule_id</span><span class="p">,</span>
+</span><span id="line-153">            <span class="n">direction</span><span class="o">=</span><span class="s2">"machine"</span><span class="p">,</span>
+</span><span id="line-154">            <span class="n">weight</span><span class="o">=</span><span class="n">TIER_WEIGHT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">tier</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">),</span>
+</span><span id="line-155">            <span class="n">detector</span><span class="o">=</span><span class="s2">"tells"</span><span class="p">,</span>
+</span><span id="line-156">            <span class="n">value</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">matched</span><span class="p">,</span>
+</span><span id="line-157">            <span class="n">note</span><span class="o">=</span><span class="sa">f</span><span class="s2">"tier </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">tier</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="line-158">            <span class="n">span</span><span class="o">=</span><span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"token"</span><span class="p">),</span>
+</span><span id="line-159">        <span class="p">)</span></div>
+
+</span><span id="line-160">
+</span><span id="line-161">
+</span><span id="line-162"><span class="c1"># ------------------------------------------------------------------------ forensic</span>
+</span><span id="line-163">
+</span><span id="line-164">
 <div class="viewcode-block" id="forensic">
 <a class="viewcode-back" href="../../_autosummary/ductus.detect.html#ductus.detect.forensic">[docs]</a>
-</span><span id="line-149"><span class="k">def</span><span class="w"> </span><span class="nf">forensic</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
-</span><span id="line-150"><span class="w">    </span><span class="sd">"""Typographic and mechanical artifacts of how the text was produced.</span>
-</span><span id="line-151">
-</span><span id="line-152"><span class="sd">    Several of these argue for a *human*, which is the point: a detector that can</span>
-</span><span id="line-153"><span class="sd">    only ever accuse is not a measuring instrument.</span>
-</span><span id="line-154">
-</span><span id="line-155"><span class="sd">    &gt;&gt;&gt; from ductus.base import Span</span>
-</span><span id="line-156"><span class="sd">    &gt;&gt;&gt; t = "he said\\nand then left"</span>
-</span><span id="line-157"><span class="sd">    &gt;&gt;&gt; [s.name for s in forensic(t, Span.of(t, 0, len(t)))]</span>
-</span><span id="line-158"><span class="sd">    ['mid-sentence-newline', 'no-terminal-punctuation']</span>
-</span><span id="line-159"><span class="sd">    """</span>
-</span><span id="line-160">    <span class="n">s</span> <span class="o">=</span> <span class="n">span</span><span class="o">.</span><span class="n">quote</span>
-</span><span id="line-161">
-</span><span id="line-162">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"—"</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
-</span><span id="line-163">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-164">            <span class="s2">"em-dash"</span><span class="p">,</span>
-</span><span id="line-165">            <span class="s2">"machine"</span><span class="p">,</span>
-</span><span id="line-166">            <span class="mf">0.12</span><span class="p">,</span>
-</span><span id="line-167">            <span class="s2">"forensic"</span><span class="p">,</span>
-</span><span id="line-168">            <span class="s2">"—"</span><span class="p">,</span>
-</span><span id="line-169">            <span class="s2">"em dash; heavy use is a default-model habit, and absence "</span>
-</span><span id="line-170">            <span class="s2">"across a long text is a meaningful human signal"</span><span class="p">,</span>
-</span><span id="line-171">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
-</span><span id="line-172">        <span class="p">)</span>
-</span><span id="line-173">
-</span><span id="line-174">    <span class="n">straight</span><span class="p">,</span> <span class="n">curly</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">"'"</span><span class="p">),</span> <span class="n">s</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">"’"</span><span class="p">)</span>
-</span><span id="line-175">    <span class="k">if</span> <span class="n">straight</span> <span class="ow">and</span> <span class="n">curly</span><span class="p">:</span>
-</span><span id="line-176">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-177">            <span class="s2">"mixed-apostrophes"</span><span class="p">,</span>
-</span><span id="line-178">            <span class="s2">"human"</span><span class="p">,</span>
-</span><span id="line-179">            <span class="mf">0.35</span><span class="p">,</span>
-</span><span id="line-180">            <span class="s2">"forensic"</span><span class="p">,</span>
-</span><span id="line-181">            <span class="p">(</span><span class="n">straight</span><span class="p">,</span> <span class="n">curly</span><span class="p">),</span>
-</span><span id="line-182">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">straight</span><span class="si">}</span><span class="s2"> straight and </span><span class="si">{</span><span class="n">curly</span><span class="si">}</span><span class="s2"> curly apostrophes mixed -- "</span>
-</span><span id="line-183">            <span class="s2">"the trace of hand-editing pasted text"</span><span class="p">,</span>
-</span><span id="line-184">        <span class="p">)</span>
-</span><span id="line-185">
-</span><span id="line-186">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[ \t]+$"</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>
-</span><span id="line-187">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-188">            <span class="s2">"trailing-whitespace"</span><span class="p">,</span>
-</span><span id="line-189">            <span class="s2">"human"</span><span class="p">,</span>
-</span><span id="line-190">            <span class="mf">0.25</span><span class="p">,</span>
-</span><span id="line-191">            <span class="s2">"forensic"</span><span class="p">,</span>
-</span><span id="line-192">            <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-193">            <span class="s2">"trailing whitespace: a typing artifact, not something a model emits"</span><span class="p">,</span>
-</span><span id="line-194">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
-</span><span id="line-195">        <span class="p">)</span>
-</span><span id="line-196">
-</span><span id="line-197">    <span class="n">prose</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">_is_markup</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-</span><span id="line-198">
-</span><span id="line-199">    <span class="k">if</span> <span class="n">prose</span><span class="p">:</span>
-</span><span id="line-200">        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[a-z,;]\n[a-z]"</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
-</span><span id="line-201">            <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-202">                <span class="s2">"mid-sentence-newline"</span><span class="p">,</span>
-</span><span id="line-203">                <span class="s2">"human"</span><span class="p">,</span>
-</span><span id="line-204">                <span class="mf">0.45</span><span class="p">,</span>
-</span><span id="line-205">                <span class="s2">"forensic"</span><span class="p">,</span>
-</span><span id="line-206">                <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-207">                <span class="s2">"a hard line break inside a sentence -- a paste or typing artifact"</span><span class="p">,</span>
-</span><span id="line-208">                <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
-</span><span id="line-209">            <span class="p">)</span>
-</span><span id="line-210">
-</span><span id="line-211">    <span class="k">if</span> <span class="p">(</span>
-</span><span id="line-212">        <span class="n">prose</span>
-</span><span id="line-213">        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">_WORD_RE</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">4</span>
-</span><span id="line-214">        <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[.!?:;)\]</span><span class="se">\"</span><span class="s2">'’”]\s*$"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-</span><span id="line-215">    <span class="p">):</span>
-</span><span id="line-216">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-217">            <span class="s2">"no-terminal-punctuation"</span><span class="p">,</span>
-</span><span id="line-218">            <span class="s2">"human"</span><span class="p">,</span>
-</span><span id="line-219">            <span class="mf">0.30</span><span class="p">,</span>
-</span><span id="line-220">            <span class="s2">"forensic"</span><span class="p">,</span>
-</span><span id="line-221">            <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-222">            <span class="s2">"ends without terminal punctuation; models close their sentences"</span><span class="p">,</span>
-</span><span id="line-223">        <span class="p">)</span>
-</span><span id="line-224">
-</span><span id="line-225">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[  →✓✅❌]"</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
-</span><span id="line-226">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-227">            <span class="s2">"unicode-artifact"</span><span class="p">,</span>
-</span><span id="line-228">            <span class="s2">"machine"</span><span class="p">,</span>
-</span><span id="line-229">            <span class="mf">0.15</span><span class="p">,</span>
-</span><span id="line-230">            <span class="s2">"forensic"</span><span class="p">,</span>
-</span><span id="line-231">            <span class="sa">f</span><span class="s2">"U+</span><span class="si">{</span><span class="nb">ord</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">())</span><span class="si">:</span><span class="s2">04X</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-</span><span id="line-232">            <span class="sa">f</span><span class="s2">"U+</span><span class="si">{</span><span class="nb">ord</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">())</span><span class="si">:</span><span class="s2">04X</span><span class="si">}</span><span class="s2"> is rarely typed by hand"</span><span class="p">,</span>
-</span><span id="line-233">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
-</span><span id="line-234">        <span class="p">)</span></div>
+</span><span id="line-165"><span class="k">def</span><span class="w"> </span><span class="nf">forensic</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-166"><span class="w">    </span><span class="sd">"""Typographic and mechanical artifacts of how the text was produced.</span>
+</span><span id="line-167">
+</span><span id="line-168"><span class="sd">    Several of these argue for a *human*, which is the point: a detector that can</span>
+</span><span id="line-169"><span class="sd">    only ever accuse is not a measuring instrument.</span>
+</span><span id="line-170">
+</span><span id="line-171"><span class="sd">    &gt;&gt;&gt; from ductus.base import Span</span>
+</span><span id="line-172"><span class="sd">    &gt;&gt;&gt; t = "he said\\nand then left"</span>
+</span><span id="line-173"><span class="sd">    &gt;&gt;&gt; [s.name for s in forensic(t, Span.of(t, 0, len(t)))]</span>
+</span><span id="line-174"><span class="sd">    ['mid-sentence-newline', 'no-terminal-punctuation']</span>
+</span><span id="line-175"><span class="sd">    """</span>
+</span><span id="line-176">    <span class="n">s</span> <span class="o">=</span> <span class="n">span</span><span class="o">.</span><span class="n">quote</span>
+</span><span id="line-177">
+</span><span id="line-178">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"—"</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+</span><span id="line-179">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-180">            <span class="s2">"em-dash"</span><span class="p">,</span>
+</span><span id="line-181">            <span class="s2">"machine"</span><span class="p">,</span>
+</span><span id="line-182">            <span class="mf">0.12</span><span class="p">,</span>
+</span><span id="line-183">            <span class="s2">"forensic"</span><span class="p">,</span>
+</span><span id="line-184">            <span class="s2">"—"</span><span class="p">,</span>
+</span><span id="line-185">            <span class="s2">"em dash; heavy use is a default-model habit, and absence "</span>
+</span><span id="line-186">            <span class="s2">"across a long text is a meaningful human signal"</span><span class="p">,</span>
+</span><span id="line-187">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
+</span><span id="line-188">        <span class="p">)</span>
+</span><span id="line-189">
+</span><span id="line-190">    <span class="n">straight</span><span class="p">,</span> <span class="n">curly</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">"'"</span><span class="p">),</span> <span class="n">s</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">"’"</span><span class="p">)</span>
+</span><span id="line-191">    <span class="k">if</span> <span class="n">straight</span> <span class="ow">and</span> <span class="n">curly</span><span class="p">:</span>
+</span><span id="line-192">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-193">            <span class="s2">"mixed-apostrophes"</span><span class="p">,</span>
+</span><span id="line-194">            <span class="s2">"human"</span><span class="p">,</span>
+</span><span id="line-195">            <span class="mf">0.35</span><span class="p">,</span>
+</span><span id="line-196">            <span class="s2">"forensic"</span><span class="p">,</span>
+</span><span id="line-197">            <span class="p">(</span><span class="n">straight</span><span class="p">,</span> <span class="n">curly</span><span class="p">),</span>
+</span><span id="line-198">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">straight</span><span class="si">}</span><span class="s2"> straight and </span><span class="si">{</span><span class="n">curly</span><span class="si">}</span><span class="s2"> curly apostrophes mixed -- "</span>
+</span><span id="line-199">            <span class="s2">"the trace of hand-editing pasted text"</span><span class="p">,</span>
+</span><span id="line-200">        <span class="p">)</span>
+</span><span id="line-201">
+</span><span id="line-202">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[ \t]+$"</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>
+</span><span id="line-203">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-204">            <span class="s2">"trailing-whitespace"</span><span class="p">,</span>
+</span><span id="line-205">            <span class="s2">"human"</span><span class="p">,</span>
+</span><span id="line-206">            <span class="mf">0.25</span><span class="p">,</span>
+</span><span id="line-207">            <span class="s2">"forensic"</span><span class="p">,</span>
+</span><span id="line-208">            <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-209">            <span class="s2">"trailing whitespace: a typing artifact, not something a model emits"</span><span class="p">,</span>
+</span><span id="line-210">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
+</span><span id="line-211">        <span class="p">)</span>
+</span><span id="line-212">
+</span><span id="line-213">    <span class="n">prose</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">_is_markup</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</span><span id="line-214">
+</span><span id="line-215">    <span class="k">if</span> <span class="n">prose</span><span class="p">:</span>
+</span><span id="line-216">        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[a-z,;]\n[a-z]"</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+</span><span id="line-217">            <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-218">                <span class="s2">"mid-sentence-newline"</span><span class="p">,</span>
+</span><span id="line-219">                <span class="s2">"human"</span><span class="p">,</span>
+</span><span id="line-220">                <span class="mf">0.45</span><span class="p">,</span>
+</span><span id="line-221">                <span class="s2">"forensic"</span><span class="p">,</span>
+</span><span id="line-222">                <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-223">                <span class="s2">"a hard line break inside a sentence -- a paste or typing artifact"</span><span class="p">,</span>
+</span><span id="line-224">                <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
+</span><span id="line-225">            <span class="p">)</span>
+</span><span id="line-226">
+</span><span id="line-227">    <span class="k">if</span> <span class="p">(</span>
+</span><span id="line-228">        <span class="n">prose</span>
+</span><span id="line-229">        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">_WORD_RE</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">4</span>
+</span><span id="line-230">        <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[.!?:;)\]</span><span class="se">\"</span><span class="s2">'’”]\s*$"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+</span><span id="line-231">    <span class="p">):</span>
+</span><span id="line-232">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-233">            <span class="s2">"no-terminal-punctuation"</span><span class="p">,</span>
+</span><span id="line-234">            <span class="s2">"human"</span><span class="p">,</span>
+</span><span id="line-235">            <span class="mf">0.30</span><span class="p">,</span>
+</span><span id="line-236">            <span class="s2">"forensic"</span><span class="p">,</span>
+</span><span id="line-237">            <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-238">            <span class="s2">"ends without terminal punctuation; models close their sentences"</span><span class="p">,</span>
+</span><span id="line-239">        <span class="p">)</span>
+</span><span id="line-240">
+</span><span id="line-241">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[  →✓✅❌]"</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+</span><span id="line-242">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-243">            <span class="s2">"unicode-artifact"</span><span class="p">,</span>
+</span><span id="line-244">            <span class="s2">"machine"</span><span class="p">,</span>
+</span><span id="line-245">            <span class="mf">0.15</span><span class="p">,</span>
+</span><span id="line-246">            <span class="s2">"forensic"</span><span class="p">,</span>
+</span><span id="line-247">            <span class="sa">f</span><span class="s2">"U+</span><span class="si">{</span><span class="nb">ord</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">())</span><span class="si">:</span><span class="s2">04X</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="line-248">            <span class="sa">f</span><span class="s2">"U+</span><span class="si">{</span><span class="nb">ord</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">())</span><span class="si">:</span><span class="s2">04X</span><span class="si">}</span><span class="s2"> is rarely typed by hand"</span><span class="p">,</span>
+</span><span id="line-249">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
+</span><span id="line-250">        <span class="p">)</span></div>
 
-</span><span id="line-235">
-</span><span id="line-236">
-</span><span id="line-237"><span class="c1"># ------------------------------------------------------------------------ rhetoric</span>
-</span><span id="line-238">
-</span><span id="line-239">
+</span><span id="line-251">
+</span><span id="line-252">
+</span><span id="line-253"><span class="c1"># ------------------------------------------------------------------------ rhetoric</span>
+</span><span id="line-254">
+</span><span id="line-255">
 <div class="viewcode-block" id="rhetoric">
 <a class="viewcode-back" href="../../_autosummary/ductus.detect.html#ductus.detect.rhetoric">[docs]</a>
-</span><span id="line-240"><span class="k">def</span><span class="w"> </span><span class="nf">rhetoric</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
-</span><span id="line-241"><span class="w">    </span><span class="sd">"""Sentence shapes a phrase catalogue cannot see.</span>
-</span><span id="line-242">
-</span><span id="line-243"><span class="sd">    These are the patterns that survive a model being told to avoid "AI words",</span>
-</span><span id="line-244"><span class="sd">    which is why they matter more than vocabulary as models improve.</span>
-</span><span id="line-245">
-</span><span id="line-246"><span class="sd">    &gt;&gt;&gt; from ductus.base import Span</span>
-</span><span id="line-247"><span class="sd">    &gt;&gt;&gt; t = "This is a pattern: you plan it, you build it, and you ship it."</span>
-</span><span id="line-248"><span class="sd">    &gt;&gt;&gt; [s.name for s in rhetoric(t, Span.of(t, 0, len(t)))]</span>
-</span><span id="line-249"><span class="sd">    ['colon-tricolon']</span>
-</span><span id="line-250"><span class="sd">    """</span>
-</span><span id="line-251">    <span class="n">s</span> <span class="o">=</span> <span class="n">span</span><span class="o">.</span><span class="n">quote</span>
-</span><span id="line-252">    <span class="n">low</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-</span><span id="line-253">
-</span><span id="line-254">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span>
-</span><span id="line-255">        <span class="sa">r</span><span class="s2">"\bnot (?:just |only |merely |simply )?[^,.;:]{2,45},? but\b"</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span>
-</span><span id="line-256">    <span class="p">):</span>
-</span><span id="line-257">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-258">            <span class="s2">"not-x-but-y"</span><span class="p">,</span>
-</span><span id="line-259">            <span class="s2">"machine"</span><span class="p">,</span>
-</span><span id="line-260">            <span class="mf">0.30</span><span class="p">,</span>
-</span><span id="line-261">            <span class="s2">"rhetoric"</span><span class="p">,</span>
-</span><span id="line-262">            <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
-</span><span id="line-263">            <span class="s2">"the 'not X but Y' antithesis -- one of the strongest model habits"</span><span class="p">,</span>
-</span><span id="line-264">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
-</span><span id="line-265">        <span class="p">)</span>
-</span><span id="line-266">
-</span><span id="line-267">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span>
-</span><span id="line-268">        <span class="sa">r</span><span class="s2">":\s*[^,.:;]{4,90},\s*[^,.:;]{4,90},\s*and\s+[^.]{4,90}[.!?]"</span><span class="p">,</span> <span class="n">s</span>
-</span><span id="line-269">    <span class="p">):</span>
-</span><span id="line-270">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-271">            <span class="s2">"colon-tricolon"</span><span class="p">,</span>
-</span><span id="line-272">            <span class="s2">"machine"</span><span class="p">,</span>
-</span><span id="line-273">            <span class="mf">0.45</span><span class="p">,</span>
-</span><span id="line-274">            <span class="s2">"rhetoric"</span><span class="p">,</span>
-</span><span id="line-275">            <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">()[:</span><span class="mi">70</span><span class="p">],</span>
-</span><span id="line-276">            <span class="s2">"a colon introducing a three-part parallel enumeration -- "</span>
-</span><span id="line-277">            <span class="s2">"a textbook assistant construction"</span><span class="p">,</span>
-</span><span id="line-278">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
-</span><span id="line-279">        <span class="p">)</span>
-</span><span id="line-280">
-</span><span id="line-281">    <span class="k">for</span> <span class="n">opener</span> <span class="ow">in</span> <span class="n">_DISCOURSE_OPENERS</span><span class="p">:</span>
-</span><span id="line-282">        <span class="k">if</span> <span class="n">low</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">opener</span><span class="p">):</span>
-</span><span id="line-283">            <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-284">                <span class="s2">"discourse-opener"</span><span class="p">,</span>
-</span><span id="line-285">                <span class="s2">"machine"</span><span class="p">,</span>
-</span><span id="line-286">                <span class="mf">0.20</span><span class="p">,</span>
-</span><span id="line-287">                <span class="s2">"rhetoric"</span><span class="p">,</span>
-</span><span id="line-288">                <span class="n">opener</span><span class="p">,</span>
-</span><span id="line-289">                <span class="sa">f</span><span class="s2">"opens with '</span><span class="si">{</span><span class="n">opener</span><span class="si">}</span><span class="s2">', a connective models reach for"</span><span class="p">,</span>
-</span><span id="line-290">                <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">opener</span><span class="p">)),</span>
-</span><span id="line-291">            <span class="p">)</span>
-</span><span id="line-292">            <span class="k">break</span>
-</span><span id="line-293">
-</span><span id="line-294">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span>
-</span><span id="line-295">        <span class="sa">r</span><span class="s2">"\bi (?:do |really do |genuinely )?(?:value|appreciate|respect|understand)\b[^.]{0,80}\.\s*"</span>
-</span><span id="line-296">        <span class="sa">r</span><span class="s2">"(?:at the same time|that said|however|but)\b"</span><span class="p">,</span>
-</span><span id="line-297">        <span class="n">low</span><span class="p">,</span>
-</span><span id="line-298">    <span class="p">):</span>
-</span><span id="line-299">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-300">            <span class="s2">"concede-pivot"</span><span class="p">,</span>
-</span><span id="line-301">            <span class="s2">"machine"</span><span class="p">,</span>
-</span><span id="line-302">            <span class="mf">0.35</span><span class="p">,</span>
-</span><span id="line-303">            <span class="s2">"rhetoric"</span><span class="p">,</span>
-</span><span id="line-304">            <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">()[:</span><span class="mi">70</span><span class="p">],</span>
-</span><span id="line-305">            <span class="s2">"concession immediately followed by a pivot -- the diplomatic-feedback move"</span><span class="p">,</span>
-</span><span id="line-306">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
-</span><span id="line-307">        <span class="p">)</span></div>
-
-</span><span id="line-308">
+</span><span id="line-256"><span class="k">def</span><span class="w"> </span><span class="nf">rhetoric</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-257"><span class="w">    </span><span class="sd">"""Sentence shapes a phrase catalogue cannot see.</span>
+</span><span id="line-258">
+</span><span id="line-259"><span class="sd">    These are the patterns that survive a model being told to avoid "AI words",</span>
+</span><span id="line-260"><span class="sd">    which is why they matter more than vocabulary as models improve.</span>
+</span><span id="line-261">
+</span><span id="line-262"><span class="sd">    &gt;&gt;&gt; from ductus.base import Span</span>
+</span><span id="line-263"><span class="sd">    &gt;&gt;&gt; t = "This is a pattern: you plan it, you build it, and you ship it."</span>
+</span><span id="line-264"><span class="sd">    &gt;&gt;&gt; [s.name for s in rhetoric(t, Span.of(t, 0, len(t)))]</span>
+</span><span id="line-265"><span class="sd">    ['colon-tricolon']</span>
+</span><span id="line-266"><span class="sd">    """</span>
+</span><span id="line-267">    <span class="n">s</span> <span class="o">=</span> <span class="n">span</span><span class="o">.</span><span class="n">quote</span>
+</span><span id="line-268">    <span class="n">low</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="line-269">
+</span><span id="line-270">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span>
+</span><span id="line-271">        <span class="sa">r</span><span class="s2">"\bnot (?:just |only |merely |simply )?[^,.;:]{2,45},? but\b"</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span>
+</span><span id="line-272">    <span class="p">):</span>
+</span><span id="line-273">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-274">            <span class="s2">"not-x-but-y"</span><span class="p">,</span>
+</span><span id="line-275">            <span class="s2">"machine"</span><span class="p">,</span>
+</span><span id="line-276">            <span class="mf">0.30</span><span class="p">,</span>
+</span><span id="line-277">            <span class="s2">"rhetoric"</span><span class="p">,</span>
+</span><span id="line-278">            <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+</span><span id="line-279">            <span class="s2">"the 'not X but Y' antithesis -- one of the strongest model habits"</span><span class="p">,</span>
+</span><span id="line-280">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
+</span><span id="line-281">        <span class="p">)</span>
+</span><span id="line-282">
+</span><span id="line-283">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span>
+</span><span id="line-284">        <span class="sa">r</span><span class="s2">":\s*[^,.:;]{4,90},\s*[^,.:;]{4,90},\s*and\s+[^.]{4,90}[.!?]"</span><span class="p">,</span> <span class="n">s</span>
+</span><span id="line-285">    <span class="p">):</span>
+</span><span id="line-286">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-287">            <span class="s2">"colon-tricolon"</span><span class="p">,</span>
+</span><span id="line-288">            <span class="s2">"machine"</span><span class="p">,</span>
+</span><span id="line-289">            <span class="mf">0.45</span><span class="p">,</span>
+</span><span id="line-290">            <span class="s2">"rhetoric"</span><span class="p">,</span>
+</span><span id="line-291">            <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">()[:</span><span class="mi">70</span><span class="p">],</span>
+</span><span id="line-292">            <span class="s2">"a colon introducing a three-part parallel enumeration -- "</span>
+</span><span id="line-293">            <span class="s2">"a textbook assistant construction"</span><span class="p">,</span>
+</span><span id="line-294">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
+</span><span id="line-295">        <span class="p">)</span>
+</span><span id="line-296">
+</span><span id="line-297">    <span class="k">for</span> <span class="n">opener</span> <span class="ow">in</span> <span class="n">_DISCOURSE_OPENERS</span><span class="p">:</span>
+</span><span id="line-298">        <span class="k">if</span> <span class="n">low</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">opener</span><span class="p">):</span>
+</span><span id="line-299">            <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-300">                <span class="s2">"discourse-opener"</span><span class="p">,</span>
+</span><span id="line-301">                <span class="s2">"machine"</span><span class="p">,</span>
+</span><span id="line-302">                <span class="mf">0.20</span><span class="p">,</span>
+</span><span id="line-303">                <span class="s2">"rhetoric"</span><span class="p">,</span>
+</span><span id="line-304">                <span class="n">opener</span><span class="p">,</span>
+</span><span id="line-305">                <span class="sa">f</span><span class="s2">"opens with '</span><span class="si">{</span><span class="n">opener</span><span class="si">}</span><span class="s2">', a connective models reach for"</span><span class="p">,</span>
+</span><span id="line-306">                <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">opener</span><span class="p">)),</span>
+</span><span id="line-307">            <span class="p">)</span>
+</span><span id="line-308">            <span class="k">break</span>
 </span><span id="line-309">
-</span><span id="line-310"><span class="c1"># -------------------------------------------------------------------------- rhythm</span>
-</span><span id="line-311">
-</span><span id="line-312">
+</span><span id="line-310">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span>
+</span><span id="line-311">        <span class="sa">r</span><span class="s2">"\bi (?:do |really do |genuinely )?(?:value|appreciate|respect|understand)\b[^.]{0,80}\.\s*"</span>
+</span><span id="line-312">        <span class="sa">r</span><span class="s2">"(?:at the same time|that said|however|but)\b"</span><span class="p">,</span>
+</span><span id="line-313">        <span class="n">low</span><span class="p">,</span>
+</span><span id="line-314">    <span class="p">):</span>
+</span><span id="line-315">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-316">            <span class="s2">"concede-pivot"</span><span class="p">,</span>
+</span><span id="line-317">            <span class="s2">"machine"</span><span class="p">,</span>
+</span><span id="line-318">            <span class="mf">0.35</span><span class="p">,</span>
+</span><span id="line-319">            <span class="s2">"rhetoric"</span><span class="p">,</span>
+</span><span id="line-320">            <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">()[:</span><span class="mi">70</span><span class="p">],</span>
+</span><span id="line-321">            <span class="s2">"concession immediately followed by a pivot -- the diplomatic-feedback move"</span><span class="p">,</span>
+</span><span id="line-322">            <span class="n">_sub</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
+</span><span id="line-323">        <span class="p">)</span></div>
+
+</span><span id="line-324">
+</span><span id="line-325">
+</span><span id="line-326"><span class="c1"># -------------------------------------------------------------------------- rhythm</span>
+</span><span id="line-327">
+</span><span id="line-328">
 <div class="viewcode-block" id="rhythm">
 <a class="viewcode-back" href="../../_autosummary/ductus.detect.html#ductus.detect.rhythm">[docs]</a>
-</span><span id="line-313"><span class="k">def</span><span class="w"> </span><span class="nf">rhythm</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
-</span><span id="line-314"><span class="w">    </span><span class="sd">"""Burstiness: how much sentence length varies.</span>
-</span><span id="line-315">
-</span><span id="line-316"><span class="sd">    Uniform lengths lean machine, uneven lengths lean human. This is the weakest</span>
-</span><span id="line-317"><span class="sd">    detector here and the thresholds come from the shared catalogue metrics, not</span>
-</span><span id="line-318"><span class="sd">    from a fitted model -- treat it as a tiebreaker, never as a finding.</span>
-</span><span id="line-319">
-</span><span id="line-320"><span class="sd">    &gt;&gt;&gt; from ductus.base import Span</span>
-</span><span id="line-321"><span class="sd">    &gt;&gt;&gt; t = ("One two three four five six. " * 7)</span>
-</span><span id="line-322"><span class="sd">    &gt;&gt;&gt; [s.name for s in rhythm(t, Span.of(t, 0, len(t)))]</span>
-</span><span id="line-323"><span class="sd">    ['low-burstiness']</span>
-</span><span id="line-324"><span class="sd">    """</span>
-</span><span id="line-325">    <span class="n">cfg</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">()</span>
-</span><span id="line-326">    <span class="n">lengths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">_WORD_RE</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_SENTENCE_RE</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">span</span><span class="o">.</span><span class="n">quote</span><span class="p">)]</span>
-</span><span id="line-327">    <span class="n">lengths</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">lengths</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">]</span>
-</span><span id="line-328">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">"min_sentences_for_rhythm"</span><span class="p">]:</span>
-</span><span id="line-329">        <span class="k">return</span>
-</span><span id="line-330">    <span class="n">mean</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
-</span><span id="line-331">    <span class="n">sd</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">pstdev</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
-</span><span id="line-332">    <span class="n">cv</span> <span class="o">=</span> <span class="n">sd</span> <span class="o">/</span> <span class="n">mean</span> <span class="k">if</span> <span class="n">mean</span> <span class="k">else</span> <span class="mf">0.0</span>
-</span><span id="line-333">    <span class="n">floor</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">"sentence_len_cv_min"</span><span class="p">]</span>
-</span><span id="line-334">    <span class="k">if</span> <span class="n">cv</span> <span class="o">&lt;</span> <span class="n">floor</span><span class="p">:</span>
-</span><span id="line-335">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-336">            <span class="s2">"low-burstiness"</span><span class="p">,</span>
-</span><span id="line-337">            <span class="s2">"machine"</span><span class="p">,</span>
-</span><span id="line-338">            <span class="mf">0.25</span><span class="p">,</span>
-</span><span id="line-339">            <span class="s2">"rhythm"</span><span class="p">,</span>
-</span><span id="line-340">            <span class="nb">round</span><span class="p">(</span><span class="n">cv</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-</span><span id="line-341">            <span class="sa">f</span><span class="s2">"uniform sentence lengths (mean </span><span class="si">{</span><span class="n">mean</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> words, sd </span><span class="si">{</span><span class="n">sd</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">); "</span>
-</span><span id="line-342">            <span class="s2">"metronomic rhythm"</span><span class="p">,</span>
-</span><span id="line-343">        <span class="p">)</span>
-</span><span id="line-344">    <span class="k">elif</span> <span class="n">cv</span> <span class="o">&gt;</span> <span class="n">floor</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
-</span><span id="line-345">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-346">            <span class="s2">"high-burstiness"</span><span class="p">,</span>
-</span><span id="line-347">            <span class="s2">"human"</span><span class="p">,</span>
-</span><span id="line-348">            <span class="mf">0.25</span><span class="p">,</span>
-</span><span id="line-349">            <span class="s2">"rhythm"</span><span class="p">,</span>
-</span><span id="line-350">            <span class="nb">round</span><span class="p">(</span><span class="n">cv</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-</span><span id="line-351">            <span class="sa">f</span><span class="s2">"uneven sentence lengths (mean </span><span class="si">{</span><span class="n">mean</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> words, sd </span><span class="si">{</span><span class="n">sd</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
-</span><span id="line-352">        <span class="p">)</span></div>
+</span><span id="line-329"><span class="k">def</span><span class="w"> </span><span class="nf">rhythm</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-330"><span class="w">    </span><span class="sd">"""Burstiness: how much sentence length varies.</span>
+</span><span id="line-331">
+</span><span id="line-332"><span class="sd">    Uniform lengths lean machine, uneven lengths lean human. This is the weakest</span>
+</span><span id="line-333"><span class="sd">    detector here and the thresholds come from the shared catalogue metrics, not</span>
+</span><span id="line-334"><span class="sd">    from a fitted model -- treat it as a tiebreaker, never as a finding.</span>
+</span><span id="line-335">
+</span><span id="line-336"><span class="sd">    &gt;&gt;&gt; from ductus.base import Span</span>
+</span><span id="line-337"><span class="sd">    &gt;&gt;&gt; t = ("One two three four five six. " * 7)</span>
+</span><span id="line-338"><span class="sd">    &gt;&gt;&gt; [s.name for s in rhythm(t, Span.of(t, 0, len(t)))]</span>
+</span><span id="line-339"><span class="sd">    ['low-burstiness']</span>
+</span><span id="line-340"><span class="sd">    """</span>
+</span><span id="line-341">    <span class="n">cfg</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">()</span>
+</span><span id="line-342">    <span class="n">lengths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">_WORD_RE</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_SENTENCE_RE</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">span</span><span class="o">.</span><span class="n">quote</span><span class="p">)]</span>
+</span><span id="line-343">    <span class="n">lengths</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">lengths</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">]</span>
+</span><span id="line-344">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">"min_sentences_for_rhythm"</span><span class="p">]:</span>
+</span><span id="line-345">        <span class="k">return</span>
+</span><span id="line-346">    <span class="n">mean</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
+</span><span id="line-347">    <span class="n">sd</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">pstdev</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
+</span><span id="line-348">    <span class="n">cv</span> <span class="o">=</span> <span class="n">sd</span> <span class="o">/</span> <span class="n">mean</span> <span class="k">if</span> <span class="n">mean</span> <span class="k">else</span> <span class="mf">0.0</span>
+</span><span id="line-349">    <span class="n">floor</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">"sentence_len_cv_min"</span><span class="p">]</span>
+</span><span id="line-350">    <span class="k">if</span> <span class="n">cv</span> <span class="o">&lt;</span> <span class="n">floor</span><span class="p">:</span>
+</span><span id="line-351">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-352">            <span class="s2">"low-burstiness"</span><span class="p">,</span>
+</span><span id="line-353">            <span class="s2">"machine"</span><span class="p">,</span>
+</span><span id="line-354">            <span class="mf">0.25</span><span class="p">,</span>
+</span><span id="line-355">            <span class="s2">"rhythm"</span><span class="p">,</span>
+</span><span id="line-356">            <span class="nb">round</span><span class="p">(</span><span class="n">cv</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+</span><span id="line-357">            <span class="sa">f</span><span class="s2">"uniform sentence lengths (mean </span><span class="si">{</span><span class="n">mean</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> words, sd </span><span class="si">{</span><span class="n">sd</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">); "</span>
+</span><span id="line-358">            <span class="s2">"metronomic rhythm"</span><span class="p">,</span>
+</span><span id="line-359">        <span class="p">)</span>
+</span><span id="line-360">    <span class="k">elif</span> <span class="n">cv</span> <span class="o">&gt;</span> <span class="n">floor</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
+</span><span id="line-361">        <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-362">            <span class="s2">"high-burstiness"</span><span class="p">,</span>
+</span><span id="line-363">            <span class="s2">"human"</span><span class="p">,</span>
+</span><span id="line-364">            <span class="mf">0.25</span><span class="p">,</span>
+</span><span id="line-365">            <span class="s2">"rhythm"</span><span class="p">,</span>
+</span><span id="line-366">            <span class="nb">round</span><span class="p">(</span><span class="n">cv</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+</span><span id="line-367">            <span class="sa">f</span><span class="s2">"uneven sentence lengths (mean </span><span class="si">{</span><span class="n">mean</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> words, sd </span><span class="si">{</span><span class="n">sd</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+</span><span id="line-368">        <span class="p">)</span></div>
 
-</span><span id="line-353">
-</span><span id="line-354">
-</span><span id="line-355"><span class="c1">#: The registry the ``detectors=`` seam resolves names against.</span>
-</span><span id="line-356"><span class="n">DETECTORS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Span</span><span class="p">],</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-357">    <span class="s2">"tells"</span><span class="p">:</span> <span class="n">tells</span><span class="p">,</span>
-</span><span id="line-358">    <span class="s2">"forensic"</span><span class="p">:</span> <span class="n">forensic</span><span class="p">,</span>
-</span><span id="line-359">    <span class="s2">"rhetoric"</span><span class="p">:</span> <span class="n">rhetoric</span><span class="p">,</span>
-</span><span id="line-360">    <span class="s2">"rhythm"</span><span class="p">:</span> <span class="n">rhythm</span><span class="p">,</span>
-</span><span id="line-361"><span class="p">}</span>
-</span><span id="line-362">
-</span><span id="line-363">
+</span><span id="line-369">
+</span><span id="line-370">
+</span><span id="line-371"><span class="c1">#: The registry the ``detectors=`` seam resolves names against. It holds more than</span>
+</span><span id="line-372"><span class="c1">#: the default: the model-based detectors are nameable here so ``--detectors</span>
+</span><span id="line-373"><span class="c1">#: fast-detect-gpt`` works, without being on by default. Registering is cheap --</span>
+</span><span id="line-374"><span class="c1">#: :mod:`ductus.curvature` imports nothing heavier than :mod:`ductus.base` until one</span>
+</span><span id="line-375"><span class="c1">#: of its detectors is actually called.</span>
+</span><span id="line-376"><span class="n">DETECTORS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Span</span><span class="p">],</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-377">    <span class="s2">"tells"</span><span class="p">:</span> <span class="n">tells</span><span class="p">,</span>
+</span><span id="line-378">    <span class="s2">"forensic"</span><span class="p">:</span> <span class="n">forensic</span><span class="p">,</span>
+</span><span id="line-379">    <span class="s2">"rhetoric"</span><span class="p">:</span> <span class="n">rhetoric</span><span class="p">,</span>
+</span><span id="line-380">    <span class="s2">"rhythm"</span><span class="p">:</span> <span class="n">rhythm</span><span class="p">,</span>
+</span><span id="line-381">    <span class="s2">"fast-detect-gpt"</span><span class="p">:</span> <span class="n">fast_detect_gpt</span><span class="p">,</span>
+</span><span id="line-382">    <span class="s2">"binoculars"</span><span class="p">:</span> <span class="n">binoculars</span><span class="p">,</span>
+</span><span id="line-383"><span class="p">}</span>
+</span><span id="line-384">
+</span><span id="line-385"><span class="c1">#: What ``detectors=None`` means. Deliberately *not* ``list(DETECTORS)``: a detector</span>
+</span><span id="line-386"><span class="c1">#: joins this tuple only after it has measurably beaten what is already here on</span>
+</span><span id="line-387"><span class="c1">#: ``tests/fixtures/mixed_authorship.json``. See ``misc/docs/phase-1-results.md``.</span>
+</span><span id="line-388"><span class="n">DEFAULT_DETECTORS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"tells"</span><span class="p">,</span> <span class="s2">"forensic"</span><span class="p">,</span> <span class="s2">"rhetoric"</span><span class="p">,</span> <span class="s2">"rhythm"</span><span class="p">)</span>
+</span><span id="line-389">
+</span><span id="line-390">
 <div class="viewcode-block" id="detectors_from">
 <a class="viewcode-back" href="../../_autosummary/ductus.detect.html#ductus.detect.detectors_from">[docs]</a>
-</span><span id="line-364"><span class="k">def</span><span class="w"> </span><span class="nf">detectors_from</span><span class="p">(</span>
-</span><span id="line-365">    <span class="n">names</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Span</span><span class="p">],</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]]]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-366"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Span</span><span class="p">],</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]]],</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-</span><span id="line-367"><span class="w">    </span><span class="sd">"""Resolve a detector spec into callables and their names.</span>
-</span><span id="line-368">
-</span><span id="line-369"><span class="sd">    &gt;&gt;&gt; fns, names = detectors_from(["forensic"])</span>
-</span><span id="line-370"><span class="sd">    &gt;&gt;&gt; names</span>
-</span><span id="line-371"><span class="sd">    ('forensic',)</span>
-</span><span id="line-372"><span class="sd">    &gt;&gt;&gt; _, names = detectors_from(None)</span>
-</span><span id="line-373"><span class="sd">    &gt;&gt;&gt; names</span>
-</span><span id="line-374"><span class="sd">    ('tells', 'forensic', 'rhetoric', 'rhythm')</span>
-</span><span id="line-375"><span class="sd">    """</span>
-</span><span id="line-376">    <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-377">        <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">DETECTORS</span><span class="p">)</span>
-</span><span id="line-378">    <span class="n">fns</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
-</span><span id="line-379">    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
-</span><span id="line-380">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="line-381">            <span class="k">if</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DETECTORS</span><span class="p">:</span>
-</span><span id="line-382">                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown detector </span><span class="si">{</span><span class="n">n</span><span class="si">!r}</span><span class="s2">; known: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">DETECTORS</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="line-383">            <span class="n">fns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DETECTORS</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
-</span><span id="line-384">            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-</span><span id="line-385">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-386">            <span class="n">fns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-</span><span id="line-387">            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="s2">"custom"</span><span class="p">))</span>
-</span><span id="line-388">    <span class="k">return</span> <span class="n">fns</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span></div>
+</span><span id="line-391"><span class="k">def</span><span class="w"> </span><span class="nf">detectors_from</span><span class="p">(</span>
+</span><span id="line-392">    <span class="n">names</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Span</span><span class="p">],</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]]]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-393"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Span</span><span class="p">],</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]]],</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+</span><span id="line-394"><span class="w">    </span><span class="sd">"""Resolve a detector spec into callables and their names.</span>
+</span><span id="line-395">
+</span><span id="line-396"><span class="sd">    &gt;&gt;&gt; fns, names = detectors_from(["forensic"])</span>
+</span><span id="line-397"><span class="sd">    &gt;&gt;&gt; names</span>
+</span><span id="line-398"><span class="sd">    ('forensic',)</span>
+</span><span id="line-399"><span class="sd">    &gt;&gt;&gt; _, names = detectors_from(None)</span>
+</span><span id="line-400"><span class="sd">    &gt;&gt;&gt; names</span>
+</span><span id="line-401"><span class="sd">    ('tells', 'forensic', 'rhetoric', 'rhythm')</span>
+</span><span id="line-402"><span class="sd">    """</span>
+</span><span id="line-403">    <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-404">        <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">DEFAULT_DETECTORS</span><span class="p">)</span>
+</span><span id="line-405">    <span class="n">fns</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+</span><span id="line-406">    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+</span><span id="line-407">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-408">            <span class="k">if</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DETECTORS</span><span class="p">:</span>
+</span><span id="line-409">                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown detector </span><span class="si">{</span><span class="n">n</span><span class="si">!r}</span><span class="s2">; known: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">DETECTORS</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="line-410">            <span class="n">fns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DETECTORS</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+</span><span id="line-411">            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span id="line-412">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-413">            <span class="n">fns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span id="line-414">            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="s2">"custom"</span><span class="p">))</span>
+</span><span id="line-415">    <span class="k">return</span> <span class="n">fns</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -585,7 +613,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=47de8214"></script>
+    <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en" data-content_root="../../"
+  x-data="{ darkMode: $persist(window.matchMedia('(prefers-color-scheme: dark)').matches), activeSection: ''}"
+  :class="{ 'dark' : darkMode === true }">
+
+<head>
+  <script>
+    (function () {
+      // Set initial color scheme
+      if ((localStorage.getItem("_x_darkMode") === "true") || (window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+      }
+
+      // Watch for media preference changes
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
+        localStorage.setItem("_x_darkMode", event.matches);
+        document.documentElement.classList.toggle("dark", event.matches);
+      });
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#030711" />
+  
+<link rel="alternate" type="text/markdown" href="curvature.html.md">
+<link rel="describedby" href="../../llms.txt" type="text/markdown">
+  <title>ductus.curvature | ductus</title>
+  <meta property="og:title" content="ductus.curvature | ductus" />
+  <meta name="twitter:title" content="ductus.curvature | ductus" />
+  <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
+  <link rel="stylesheet" type="text/css" href="../../_static/theme.css?v=d6d7c91b" />
+  <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+  <link rel="stylesheet" type="text/css" href="../../_static/epythet.css?v=f7dd8900" />
+  <link rel="search" title="Search" href="../../search.html" />
+  <link rel="index" title="Index" href="../../genindex.html" />
+</head>
+
+<body x-data="{ showSidebar: false, showScrollTop: false }"
+  class="min-h-screen font-sans antialiased bg-background text-foreground" :class="{ 'overflow-hidden': showSidebar }">
+  <div x-cloak x-show="showSidebar"
+    class="fixed inset-0 z-50 overflow-hidden bg-background/80 backdrop-blur-sm md:hidden"
+    @click.self="showSidebar = false"></div><div id="page" class="relative flex flex-col min-h-screen"><a href="#content"
+      class="absolute top-0 left-0 z-[100] block bg-background p-4 text-xl transition -translate-x-full opacity-0 focus:translate-x-0 focus:opacity-100">
+      Skip to content
+    </a><header class="sticky top-0 z-40 w-full border-b shadow-xs border-border bg-background/90 backdrop-blur"><div class="container flex items-center h-14">
+    <div class="hidden mr-4 md:flex">
+      <a href="../../index.html" class="flex items-center mr-6"><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">ductus</span>
+      </a><nav class="flex items-center gap-6 text-sm font-medium">
+        <a href="https://github.com/thorwhalen/ductus" class="transition-colors hover:text-foreground/80 text-foreground/60" rel="noopener nofollow">GitHub</a>
+      </nav></div><button
+      class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden"
+      type="button" @click="showSidebar = true">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 96 960 960" aria-hidden="true"
+        fill="currentColor">
+        <path
+          d="M152.587 825.087q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440Zm0-203.587q-19.152 0-32.326-13.174T107.087 576q0-19.152 13.174-32.326t32.326-13.174h320q19.152 0 32.326 13.174T518.087 576q0 19.152-13.174 32.326T472.587 621.5h-320Zm0-203.587q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440ZM708.913 576l112.174 112.174q12.674 12.674 12.674 31.826t-12.674 31.826Q808.413 764.5 789.261 764.5t-31.826-12.674l-144-144Q600 594.391 600 576t13.435-31.826l144-144q12.674-12.674 31.826-12.674t31.826 12.674q12.674 12.674 12.674 31.826t-12.674 31.826L708.913 576Z" />
+      </svg>
+      <span class="sr-only">Toggle navigation menu</span>
+    </button>
+    <div class="flex items-center justify-between flex-1 gap-2 sm:gap-4 md:justify-end">
+      <div class="flex-1 w-full md:w-auto md:flex-none"><form id="searchbox"
+      action="../../search.html"
+      method="get"
+      class="relative flex items-center group"
+      @keydown.k.window.meta="$refs.search.focus()">
+  <input x-ref="search"
+          name="q"
+          id="search-input"
+          type="search"
+          aria-label="Search the docs"
+          placeholder="Search ..."
+          class="inline-flex items-center font-medium transition-colors bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background border border-input hover:bg-accent focus:bg-accent hover:text-accent-foreground focus:text-accent-foreground hover:placeholder-accent-foreground py-2 px-4 relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64" />
+  <kbd class="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none text-muted-foreground items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex group-hover:bg-accent group-hover:text-accent-foreground">
+    <span class="text-xs">⌘</span>
+    K
+  </kbd>
+</form>
+      </div>
+      <nav class="flex items-center gap-1">
+        <button @click="darkMode = !darkMode"
+          class="relative inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9"
+          type="button"
+          title="Toggle color scheme">
+          <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 96 960 960" fill="currentColor"
+            class="absolute transition-all scale-100 rotate-0 dark:-rotate-90 dark:scale-0">
+            <path
+              d="M480 685q45.456 0 77.228-31.772Q589 621.456 589 576q0-45.456-31.772-77.228Q525.456 467 480 467q-45.456 0-77.228 31.772Q371 530.544 371 576q0 45.456 31.772 77.228Q434.544 685 480 685Zm0 91q-83 0-141.5-58.5T280 576q0-83 58.5-141.5T480 376q83 0 141.5 58.5T680 576q0 83-58.5 141.5T480 776ZM80 621.5q-19.152 0-32.326-13.174T34.5 576q0-19.152 13.174-32.326T80 530.5h80q19.152 0 32.326 13.174T205.5 576q0 19.152-13.174 32.326T160 621.5H80Zm720 0q-19.152 0-32.326-13.174T754.5 576q0-19.152 13.174-32.326T800 530.5h80q19.152 0 32.326 13.174T925.5 576q0 19.152-13.174 32.326T880 621.5h-80Zm-320-320q-19.152 0-32.326-13.174T434.5 256v-80q0-19.152 13.174-32.326T480 130.5q19.152 0 32.326 13.174T525.5 176v80q0 19.152-13.174 32.326T480 301.5Zm0 720q-19.152 0-32.326-13.17Q434.5 995.152 434.5 976v-80q0-19.152 13.174-32.326T480 850.5q19.152 0 32.326 13.174T525.5 896v80q0 19.152-13.174 32.33-13.174 13.17-32.326 13.17ZM222.174 382.065l-43-42Q165.5 327.391 166 308.239t13.174-33.065q13.435-13.674 32.587-13.674t32.065 13.674l42.239 43q12.674 13.435 12.555 31.706-.12 18.272-12.555 31.946-12.674 13.674-31.445 13.413-18.772-.261-32.446-13.174Zm494 494.761-42.239-43q-12.674-13.435-12.674-32.087t12.674-31.565Q686.609 756.5 705.38 757q18.772.5 32.446 13.174l43 41.761Q794.5 824.609 794 843.761t-13.174 33.065Q767.391 890.5 748.239 890.5t-32.065-13.674Zm-42-494.761Q660.5 369.391 661 350.62q.5-18.772 13.174-32.446l41.761-43Q728.609 261.5 747.761 262t33.065 13.174q13.674 13.435 13.674 32.587t-13.674 32.065l-43 42.239q-13.435 12.674-31.706 12.555-18.272-.12-31.946-12.555Zm-495 494.761Q165.5 863.391 165.5 844.239t13.674-32.065l43-42.239q13.435-12.674 32.087-12.674t31.565 12.674Q299.5 782.609 299 801.38q-.5 18.772-13.174 32.446l-41.761 43Q231.391 890.5 212.239 890t-33.065-13.174ZM480 576Z" />
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 96 960 960" fill="currentColor"
+            class="absolute transition-all scale-0 rotate-90 dark:rotate-0 dark:scale-100">
+            <path
+              d="M480 936q-151 0-255.5-104.5T120 576q0-138 90-239.5T440 218q25-3 39 18t-1 44q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q21-14 43-1.5t19 39.5q-14 138-117.5 229T480 936Zm0-80q88 0 158-48.5T740 681q-20 5-40 8t-40 3q-123 0-209.5-86.5T364 396q0-20 3-40t8-40q-78 32-126.5 102T200 576q0 116 82 198t198 82Zm-10-270Z" />
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+    <div class="flex-1"><div
+        class="container md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10"><aside id="left-sidebar"
+  class="fixed inset-y-0 left-0 md:top-14 z-50 md:z-30 bg-background md:bg-transparent transition-all duration-100 -translate-x-full md:translate-x-0 ml-0 p-6 md:p-0 md:-ml-2 md:h-[calc(100vh-3.5rem)] w-5/6 md:w-full overflow-y-auto border-r border-border md:sticky"
+  :aria-hidden="!showSidebar" :class="{ 'translate-x-0': showSidebar }">
+
+    <a href="../../index.html" class="justify-start text-sm md:!hidden bg-background"><span class="font-bold text-clip whitespace-nowrap">ductus</span>
+    </a>
+
+    <div class="relative overflow-hidden md:overflow-auto my-4 md:my-0">
+      <div class="overflow-y-auto h-full w-full relative pr-6"><nav class="flex md:hidden flex-col font-medium mt-4">
+  <a href="https://github.com/thorwhalen/ductus" rel="nofollow noopener">GitHub</a>
+</nav><nav class="table w-full min-w-full my-6 lg:my-8">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ductus.html">ductus</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.base.html">ductus.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.core.html">ductus.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.curvature.html">ductus.curvature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.data.html">ductus.data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.detect.html">ductus.detect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.render.html">ductus.render</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.score.html">ductus.score</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.segment.html">ductus.segment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.tells.html">ductus.tells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.tools.html">ductus.tools</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../ai-agents.html">For AI agents</a></li>
+</ul>
+
+</nav>
+      </div>
+    </div>
+    <button type="button" @click="showSidebar = false"
+      class="absolute md:hidden right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 96 960 960" fill="currentColor"
+        stroke="none" class="h-4 w-4">
+        <path
+          d="M480 632 284 828q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536 576l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480 632Z" />
+      </svg>
+    </button>
+  </aside>
+          <main class="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
+<div class="w-full min-w-0 mx-auto">
+<nav aria-label="breadcrumbs"
+     class="flex items-center mb-4 space-x-1 text-sm text-muted-foreground">
+  <a class="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground"
+     href="../../index.html">
+    <span class="hidden md:inline">ductus</span>
+    <svg xmlns="http://www.w3.org/2000/svg"
+         height="18"
+         width="18"
+         viewBox="0 96 960 960"
+         aria-label="Home"
+         fill="currentColor"
+         stroke="none"
+         class="md:hidden">
+      <path d="M240 856h120V616h240v240h120V496L480 316 240 496v360Zm-80 80V456l320-240 320 240v480H520V696h-80v240H160Zm320-350Z" />
+    </svg>
+  </a>
+  
+<div class="mr-1">/</div><a class="hover:text-foreground overflow-hidden text-ellipsis whitespace-nowrap"
+       href="../index.html">Module code</a>
+    
+<div class="mr-1">/</div><span aria-current="page"
+        class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">ductus.curvature</span>
+</nav>
+
+    <div id="content" role="main">
+      <h1>Source code for ductus.curvature</h1><div class="highlight"><pre>
+<span></span><code><span id="line-1"><span class="sd">"""Model-based detectors -- the ``[local]`` extra. Two more functions of the same shape.</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="sd">:func:`fast_detect_gpt` and :func:`binoculars` are ``(text, span) -&gt; Iterator[Signal]``</span>
+</span><span id="line-4"><span class="sd">like every other detector here. They differ in one way that matters: their evidence</span>
+</span><span id="line-5"><span class="sd">is a number a reader cannot inspect, produced by a language model rather than quoted</span>
+</span><span id="line-6"><span class="sd">from the text. The whole design of how that number becomes a :class:`~ductus.base.Signal`</span>
+</span><span id="line-7"><span class="sd">is argued in ``misc/docs/curvature-as-evidence.md``; the short version is:</span>
+</span><span id="line-8">
+</span><span id="line-9"><span class="sd">* the statistic is the published one, evaluated over the span's tokens;</span>
+</span><span id="line-10"><span class="sd">* it is compared to **the same statistic over the rest of this document**, never to a</span>
+</span><span id="line-11"><span class="sd">  threshold lifted from a paper's benchmark -- so no calibration is claimed anywhere;</span>
+</span><span id="line-12"><span class="sd">* the standing is banded, not mapped continuously: a mid-range score emits *nothing*,</span>
+</span><span id="line-13"><span class="sd">  because a mid-range score is this detector having nothing to say;</span>
+</span><span id="line-14"><span class="sd">* both directions are emitted, because a detector that can only accuse is not a</span>
+</span><span id="line-15"><span class="sd">  measuring instrument.</span>
+</span><span id="line-16">
+</span><span id="line-17"><span class="sd">The consequence, accepted knowingly: these detectors cannot say whether a whole</span>
+</span><span id="line-18"><span class="sd">document is machine-written. With no rest-of-the-document to compare against, they</span>
+</span><span id="line-19"><span class="sd">return nothing.</span>
+</span><span id="line-20">
+</span><span id="line-21"><span class="sd">``torch`` and ``transformers`` are imported only when a detector actually runs, so</span>
+</span><span id="line-22"><span class="sd">``import ductus`` stays as cheap as it was.</span>
+</span><span id="line-23">
+</span><span id="line-24"><span class="sd">&gt;&gt;&gt; band_of(0.9) is None, band_of(1.8), band_of(-3.0)</span>
+</span><span id="line-25"><span class="sd">(True, 0.3, 0.45)</span>
+</span><span id="line-26"><span class="sd">&gt;&gt;&gt; round(robust_z(10.0, [1.0, 2.0, 3.0, 4.0, 5.0]), 2)</span>
+</span><span id="line-27"><span class="sd">4.72</span>
+</span><span id="line-28"><span class="sd">"""</span>
+</span><span id="line-29">
+</span><span id="line-30"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+</span><span id="line-31">
+</span><span id="line-32"><span class="kn">import</span><span class="w"> </span><span class="nn">statistics</span>
+</span><span id="line-33"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Sequence</span>
+</span><span id="line-34"><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+</span><span id="line-35"><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span>
+</span><span id="line-36">
+</span><span id="line-37"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Signal</span><span class="p">,</span> <span class="n">Span</span>
+</span><span id="line-38">
+</span><span id="line-39"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="line-40">    <span class="s2">"BANDS"</span><span class="p">,</span>
+</span><span id="line-41">    <span class="s2">"BINOCULARS_OBSERVER"</span><span class="p">,</span>
+</span><span id="line-42">    <span class="s2">"BINOCULARS_PERFORMER"</span><span class="p">,</span>
+</span><span id="line-43">    <span class="s2">"FAST_DETECT_MODEL"</span><span class="p">,</span>
+</span><span id="line-44">    <span class="s2">"MIN_TOKENS"</span><span class="p">,</span>
+</span><span id="line-45">    <span class="s2">"MIN_WINDOWS"</span><span class="p">,</span>
+</span><span id="line-46">    <span class="s2">"band_of"</span><span class="p">,</span>
+</span><span id="line-47">    <span class="s2">"binoculars"</span><span class="p">,</span>
+</span><span id="line-48">    <span class="s2">"fast_detect_gpt"</span><span class="p">,</span>
+</span><span id="line-49">    <span class="s2">"robust_z"</span><span class="p">,</span>
+</span><span id="line-50"><span class="p">]</span>
+</span><span id="line-51">
+</span><span id="line-52"><span class="c1">#: Single model, used as both the scoring and the sampling model (the analytic</span>
+</span><span id="line-53"><span class="c1">#: same-model setting of Fast-DetectGPT). Small enough for CPU; the documented</span>
+</span><span id="line-54"><span class="c1">#: upgrade is ``EleutherAI/gpt-neo-2.7B``.</span>
+</span><span id="line-55"><span class="n">FAST_DETECT_MODEL</span> <span class="o">=</span> <span class="s2">"gpt2"</span>
+</span><span id="line-56">
+</span><span id="line-57"><span class="c1">#: Binoculars needs a *closely related* pair sharing one tokenizer, not an</span>
+</span><span id="line-58"><span class="c1">#: arbitrary strong/weak combination. ``distilgpt2`` is a distillation of ``gpt2``.</span>
+</span><span id="line-59"><span class="c1">#: The documented upgrade is the paper's ``tiiuae/falcon-7b`` pair.</span>
+</span><span id="line-60"><span class="n">BINOCULARS_OBSERVER</span> <span class="o">=</span> <span class="s2">"distilgpt2"</span>
+</span><span id="line-61"><span class="n">BINOCULARS_PERFORMER</span> <span class="o">=</span> <span class="s2">"gpt2"</span>
+</span><span id="line-62">
+</span><span id="line-63"><span class="c1">#: ``(|z| threshold, weight)``, lowest first. Below the first threshold the detector</span>
+</span><span id="line-64"><span class="c1">#: emits nothing at all -- the dead zone is the point, not an oversight. Neither</span>
+</span><span id="line-65"><span class="c1">#: weight exceeds the strongest deterministic signal: a statistic the reader cannot</span>
+</span><span id="line-66"><span class="c1">#: inspect does not get to outvote one they can.</span>
+</span><span id="line-67"><span class="n">BANDS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">),</span> <span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">0.45</span><span class="p">))</span>
+</span><span id="line-68">
+</span><span id="line-69"><span class="c1">#: Fewer comparable windows than this and there is no reference distribution worth</span>
+</span><span id="line-70"><span class="c1">#: the name, so nothing is emitted.</span>
+</span><span id="line-71"><span class="n">MIN_WINDOWS</span> <span class="o">=</span> <span class="mi">6</span>
+</span><span id="line-72">
+</span><span id="line-73"><span class="c1">#: A span shorter than this is too few tokens for the statistic to mean anything --</span>
+</span><span id="line-74"><span class="c1">#: roughly a sentence's worth.</span>
+</span><span id="line-75"><span class="n">MIN_TOKENS</span> <span class="o">=</span> <span class="mi">16</span>
+</span><span id="line-76">
+</span><span id="line-77"><span class="c1">#: Tokens per forward pass. Half of it is context on every chunk after the first.</span>
+</span><span id="line-78"><span class="n">WINDOW</span> <span class="o">=</span> <span class="mi">512</span>
+</span><span id="line-79">
+</span><span id="line-80">
+</span><span id="line-81"><span class="k">class</span><span class="w"> </span><span class="nc">ModelDetectorUnavailable</span><span class="p">(</span><span class="ne">ImportError</span><span class="p">):</span>
+</span><span id="line-82"><span class="w">    </span><span class="sd">"""Raised when a model-based detector is used without the ``[local]`` extra."""</span>
+</span><span id="line-83">
+</span><span id="line-84">
+</span><span id="line-85"><span class="k">def</span><span class="w"> </span><span class="nf">_torch</span><span class="p">():</span>
+</span><span id="line-86"><span class="w">    </span><span class="sd">"""Import ``torch``/``transformers`` on demand, with an actionable error."""</span>
+</span><span id="line-87">    <span class="k">try</span><span class="p">:</span>
+</span><span id="line-88">        <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+</span><span id="line-89">        <span class="kn">import</span><span class="w"> </span><span class="nn">transformers</span>  <span class="c1"># noqa: F401</span>
+</span><span id="line-90">    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover - exercised only without the extra</span>
+</span><span id="line-91">        <span class="k">raise</span> <span class="n">ModelDetectorUnavailable</span><span class="p">(</span>
+</span><span id="line-92">            <span class="s2">"ductus's model-based detectors need the [local] extra:</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="line-93">            <span class="s2">"    pip install 'ductus[local]'</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="line-94">            <span class="s2">"which installs torch and transformers. The deterministic detectors "</span>
+</span><span id="line-95">            <span class="s2">"(tells, forensic, rhetoric, rhythm) need neither and are the default."</span>
+</span><span id="line-96">        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="line-97">    <span class="k">return</span> <span class="n">torch</span>
+</span><span id="line-98">
+</span><span id="line-99">
+</span><span id="line-100"><span class="c1"># ------------------------------------------------------------------- pure arithmetic</span>
+</span><span id="line-101">
+</span><span id="line-102">
+<div class="viewcode-block" id="robust_z">
+<a class="viewcode-back" href="../../_autosummary/ductus.curvature.html#ductus.curvature.robust_z">[docs]</a>
+</span><span id="line-103"><span class="k">def</span><span class="w"> </span><span class="nf">robust_z</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">reference</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="line-104"><span class="w">    </span><span class="sd">"""How far ``value`` stands out from ``reference``, in MADs.</span>
+</span><span id="line-105">
+</span><span id="line-106"><span class="sd">    Median and MAD rather than mean and standard deviation: on a mixed document the</span>
+</span><span id="line-107"><span class="sd">    machine-written stretches are exactly the outliers that would drag a mean toward</span>
+</span><span id="line-108"><span class="sd">    themselves and hide the thing being looked for.</span>
+</span><span id="line-109">
+</span><span id="line-110"><span class="sd">    A degenerate reference (every value identical) yields ``0.0``, which falls in the</span>
+</span><span id="line-111"><span class="sd">    dead zone and so emits nothing.</span>
+</span><span id="line-112">
+</span><span id="line-113"><span class="sd">    &gt;&gt;&gt; robust_z(3.0, [1.0, 2.0, 3.0, 4.0, 5.0])</span>
+</span><span id="line-114"><span class="sd">    0.0</span>
+</span><span id="line-115"><span class="sd">    &gt;&gt;&gt; robust_z(1.0, [1.0, 1.0, 1.0])</span>
+</span><span id="line-116"><span class="sd">    0.0</span>
+</span><span id="line-117"><span class="sd">    """</span>
+</span><span id="line-118">    <span class="n">median</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+</span><span id="line-119">    <span class="n">mad</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">median</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">reference</span><span class="p">])</span>
+</span><span id="line-120">    <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.4826</span> <span class="o">*</span> <span class="n">mad</span>
+</span><span id="line-121">    <span class="k">return</span> <span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="n">median</span><span class="p">)</span> <span class="o">/</span> <span class="n">scale</span> <span class="k">if</span> <span class="n">scale</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span></div>
+
+</span><span id="line-122">
+</span><span id="line-123">
+<div class="viewcode-block" id="band_of">
+<a class="viewcode-back" href="../../_autosummary/ductus.curvature.html#ductus.curvature.band_of">[docs]</a>
+</span><span id="line-124"><span class="k">def</span><span class="w"> </span><span class="nf">band_of</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">bands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">BANDS</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-125"><span class="w">    </span><span class="sd">"""The weight for a standing of ``z``, or ``None`` when it says nothing.</span>
+</span><span id="line-126">
+</span><span id="line-127"><span class="sd">    &gt;&gt;&gt; band_of(1.49) is None</span>
+</span><span id="line-128"><span class="sd">    True</span>
+</span><span id="line-129"><span class="sd">    &gt;&gt;&gt; band_of(1.5), band_of(2.49), band_of(2.5), band_of(-9.0)</span>
+</span><span id="line-130"><span class="sd">    (0.3, 0.3, 0.45, 0.45)</span>
+</span><span id="line-131"><span class="sd">    """</span>
+</span><span id="line-132">    <span class="n">weight</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-133">    <span class="k">for</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">bands</span><span class="p">:</span>
+</span><span id="line-134">        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">:</span>
+</span><span id="line-135">            <span class="n">weight</span> <span class="o">=</span> <span class="n">w</span>
+</span><span id="line-136">    <span class="k">return</span> <span class="n">weight</span></div>
+
+</span><span id="line-137">
+</span><span id="line-138">
+</span><span id="line-139"><span class="k">def</span><span class="w"> </span><span class="nf">_iter_chunks</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">WINDOW</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+</span><span id="line-140"><span class="w">    </span><span class="sd">"""``(start, end, first_scored)`` passes covering every position exactly once.</span>
+</span><span id="line-141">
+</span><span id="line-142"><span class="sd">    Position 0 has no prediction. After the first chunk, half the window is context</span>
+</span><span id="line-143"><span class="sd">    whose predictions were already recorded, so every scored position has at least</span>
+</span><span id="line-144"><span class="sd">    ``window // 2`` tokens of history.</span>
+</span><span id="line-145">
+</span><span id="line-146"><span class="sd">    &gt;&gt;&gt; list(_iter_chunks(5, 8))</span>
+</span><span id="line-147"><span class="sd">    [(0, 5, 1)]</span>
+</span><span id="line-148"><span class="sd">    &gt;&gt;&gt; list(_iter_chunks(20, 8))</span>
+</span><span id="line-149"><span class="sd">    [(0, 8, 1), (4, 12, 8), (8, 16, 12), (12, 20, 16)]</span>
+</span><span id="line-150"><span class="sd">    """</span>
+</span><span id="line-151">    <span class="n">stride</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+</span><span id="line-152">    <span class="n">start</span><span class="p">,</span> <span class="n">keep</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+</span><span id="line-153">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span><span id="line-154">        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">window</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</span><span id="line-155">        <span class="k">yield</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span>
+</span><span id="line-156">        <span class="k">if</span> <span class="n">end</span> <span class="o">&gt;=</span> <span class="n">n</span><span class="p">:</span>
+</span><span id="line-157">            <span class="k">return</span>
+</span><span id="line-158">        <span class="n">start</span><span class="p">,</span> <span class="n">keep</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">stride</span><span class="p">,</span> <span class="n">end</span>
+</span><span id="line-159">
+</span><span id="line-160">
+</span><span id="line-161"><span class="k">def</span><span class="w"> </span><span class="nf">_scored_rows</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">keep</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">slice</span><span class="p">:</span>
+</span><span id="line-162"><span class="w">    </span><span class="sd">"""Logit rows predicting document positions ``[keep, end)`` of chunk ``[start, end)``.</span>
+</span><span id="line-163">
+</span><span id="line-164"><span class="sd">    Row ``j`` predicts the token at ``start + j + 1``, so position ``p`` is read from</span>
+</span><span id="line-165"><span class="sd">    row ``p - start - 1``. The chunk's last row predicts a position past its own end</span>
+</span><span id="line-166"><span class="sd">    and is never used.</span>
+</span><span id="line-167">
+</span><span id="line-168"><span class="sd">    &gt;&gt;&gt; _scored_rows(0, 8, 1)</span>
+</span><span id="line-169"><span class="sd">    slice(0, 7, None)</span>
+</span><span id="line-170"><span class="sd">    &gt;&gt;&gt; _scored_rows(4, 12, 8)</span>
+</span><span id="line-171"><span class="sd">    slice(3, 7, None)</span>
+</span><span id="line-172"><span class="sd">    """</span>
+</span><span id="line-173">    <span class="k">return</span> <span class="nb">slice</span><span class="p">(</span><span class="n">keep</span> <span class="o">-</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="line-174">
+</span><span id="line-175">
+</span><span id="line-176"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-177"><span class="k">class</span><span class="w"> </span><span class="nc">_Profile</span><span class="p">:</span>
+</span><span id="line-178"><span class="w">    </span><span class="sd">"""Per-token accumulators for one document, and how a window turns into a score.</span>
+</span><span id="line-179">
+</span><span id="line-180"><span class="sd">    ``a`` and ``b`` are the two sums every statistic here is built from. ``kind``</span>
+</span><span id="line-181"><span class="sd">    says how to combine them; ``machine_sign`` says which end of the resulting scale</span>
+</span><span id="line-182"><span class="sd">    argues machine, so callers never have to remember that Fast-DetectGPT counts up</span>
+</span><span id="line-183"><span class="sd">    and Binoculars counts down.</span>
+</span><span id="line-184"><span class="sd">    """</span>
+</span><span id="line-185">
+</span><span id="line-186">    <span class="n">offsets</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
+</span><span id="line-187">    <span class="n">a</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</span><span id="line-188">    <span class="n">b</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</span><span id="line-189">    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># "curvature" (a / sqrt(b)) or "ratio" (a / b)</span>
+</span><span id="line-190">    <span class="n">machine_sign</span><span class="p">:</span> <span class="nb">float</span>
+</span><span id="line-191">    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-192">
+</span><span id="line-193">    <span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lo</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">hi</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="line-194"><span class="w">        </span><span class="sd">"""The published statistic over tokens ``[lo, hi)``.</span>
+</span><span id="line-195">
+</span><span id="line-196"><span class="sd">        &gt;&gt;&gt; p = _Profile((), (1.0, 3.0), (4.0, 0.0), "curvature", 1.0, "m")</span>
+</span><span id="line-197"><span class="sd">        &gt;&gt;&gt; p.score(0, 2)</span>
+</span><span id="line-198"><span class="sd">        2.0</span>
+</span><span id="line-199"><span class="sd">        &gt;&gt;&gt; _Profile((), (1.0, 3.0), (2.0, 2.0), "ratio", -1.0, "m").score(0, 2)</span>
+</span><span id="line-200"><span class="sd">        1.0</span>
+</span><span id="line-201"><span class="sd">        """</span>
+</span><span id="line-202">        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="n">lo</span><span class="p">:</span><span class="n">hi</span><span class="p">]),</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">[</span><span class="n">lo</span><span class="p">:</span><span class="n">hi</span><span class="p">])</span>
+</span><span id="line-203">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"curvature"</span><span class="p">:</span>
+</span><span id="line-204">            <span class="k">return</span> <span class="n">a</span> <span class="o">/</span> <span class="p">(</span><span class="n">b</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span> <span class="k">if</span> <span class="n">b</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+</span><span id="line-205">        <span class="k">return</span> <span class="n">a</span> <span class="o">/</span> <span class="n">b</span> <span class="k">if</span> <span class="n">b</span> <span class="k">else</span> <span class="mf">0.0</span>
+</span><span id="line-206">
+</span><span id="line-207">
+</span><span id="line-208"><span class="k">def</span><span class="w"> </span><span class="nf">_token_range</span><span class="p">(</span><span class="n">profile</span><span class="p">:</span> <span class="n">_Profile</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+</span><span id="line-209"><span class="w">    </span><span class="sd">"""The half-open token index range whose characters overlap ``span``.</span>
+</span><span id="line-210">
+</span><span id="line-211"><span class="sd">    &gt;&gt;&gt; p = _Profile(((0, 3), (3, 7), (7, 11)), (), (), "ratio", 1.0, "m")</span>
+</span><span id="line-212"><span class="sd">    &gt;&gt;&gt; _token_range(p, Span(3, 11, "x"))</span>
+</span><span id="line-213"><span class="sd">    (1, 3)</span>
+</span><span id="line-214"><span class="sd">    &gt;&gt;&gt; _token_range(p, Span(20, 30, "x"))</span>
+</span><span id="line-215"><span class="sd">    (0, 0)</span>
+</span><span id="line-216"><span class="sd">    """</span>
+</span><span id="line-217">    <span class="n">hits</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="line-218">        <span class="n">i</span>
+</span><span id="line-219">        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">offsets</span><span class="p">)</span>
+</span><span id="line-220">        <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">span</span><span class="o">.</span><span class="n">end</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">&gt;</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">&gt;</span> <span class="n">a</span>
+</span><span id="line-221">    <span class="p">]</span>
+</span><span id="line-222">    <span class="k">return</span> <span class="p">(</span><span class="n">hits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">hits</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">hits</span> <span class="k">else</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span><span id="line-223">
+</span><span id="line-224">
+</span><span id="line-225"><span class="k">def</span><span class="w"> </span><span class="nf">_reference_scores</span><span class="p">(</span><span class="n">profile</span><span class="p">:</span> <span class="n">_Profile</span><span class="p">,</span> <span class="n">lo</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">hi</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+</span><span id="line-226"><span class="w">    </span><span class="sd">"""The same statistic over every same-length window that misses ``[lo, hi)``.</span>
+</span><span id="line-227">
+</span><span id="line-228"><span class="sd">    Stepping by half a window keeps the reference set dense without making it a</span>
+</span><span id="line-229"><span class="sd">    near-copy of itself. Windows that overlap the span are excluded so the span is</span>
+</span><span id="line-230"><span class="sd">    not compared against a distribution it helped define.</span>
+</span><span id="line-231">
+</span><span id="line-232"><span class="sd">    &gt;&gt;&gt; p = _Profile((), tuple([1.0] * 10), tuple([1.0] * 10), "ratio", 1.0, "m")</span>
+</span><span id="line-233"><span class="sd">    &gt;&gt;&gt; len(_reference_scores(p, 0, 2))</span>
+</span><span id="line-234"><span class="sd">    7</span>
+</span><span id="line-235"><span class="sd">    """</span>
+</span><span id="line-236">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+</span><span id="line-237">    <span class="n">width</span> <span class="o">=</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span>
+</span><span id="line-238">    <span class="n">step</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+</span><span id="line-239">    <span class="k">return</span> <span class="p">[</span>
+</span><span id="line-240">        <span class="n">profile</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">width</span><span class="p">)</span>
+</span><span id="line-241">        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">width</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+</span><span id="line-242">        <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="n">width</span> <span class="o">&lt;=</span> <span class="n">lo</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">hi</span>
+</span><span id="line-243">    <span class="p">]</span>
+</span><span id="line-244">
+</span><span id="line-245">
+</span><span id="line-246"><span class="c1"># --------------------------------------------------------------------- model access</span>
+</span><span id="line-247">
+</span><span id="line-248">
+</span><span id="line-249"><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</span><span id="line-250"><span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-251"><span class="w">    </span><span class="sd">"""Tokenizer and model, loaded once per id. Kept warm for the session."""</span>
+</span><span id="line-252">    <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span>
+</span><span id="line-253">
+</span><span id="line-254">    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+</span><span id="line-255">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">"is_fast"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+</span><span id="line-256">        <span class="k">raise</span> <span class="n">ModelDetectorUnavailable</span><span class="p">(</span>
+</span><span id="line-257">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> has no fast tokenizer, so token-to-character offsets are "</span>
+</span><span id="line-258">            <span class="s2">"unavailable and a signal could not be anchored to the text it is about."</span>
+</span><span id="line-259">        <span class="p">)</span>
+</span><span id="line-260">    <span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-261">    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="line-262">    <span class="k">return</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">model</span>
+</span><span id="line-263">
+</span><span id="line-264">
+</span><span id="line-265"><span class="k">def</span><span class="w"> </span><span class="nf">_pick_device</span><span class="p">(</span><span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-266"><span class="w">    </span><span class="sd">"""CUDA when it is there, CPU otherwise. Explicit ``device=`` always wins."""</span>
+</span><span id="line-267">    <span class="k">if</span> <span class="n">device</span><span class="p">:</span>
+</span><span id="line-268">        <span class="k">return</span> <span class="n">device</span>
+</span><span id="line-269">    <span class="n">torch</span> <span class="o">=</span> <span class="n">_torch</span><span class="p">()</span>
+</span><span id="line-270">    <span class="k">return</span> <span class="s2">"cuda"</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"cpu"</span>
+</span><span id="line-271">
+</span><span id="line-272">
+</span><span id="line-273"><span class="k">def</span><span class="w"> </span><span class="nf">_encode</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-274"><span class="w">    </span><span class="sd">"""Token ids and their character offsets, with no truncation.</span>
+</span><span id="line-275">
+</span><span id="line-276"><span class="sd">    ``verbose=False`` silences the tokenizer's warning about exceeding the model's</span>
+</span><span id="line-277"><span class="sd">    context length: the sequence is never fed to the model whole, it is fed in</span>
+</span><span id="line-278"><span class="sd">    :data:`WINDOW`-sized chunks by :func:`_iter_chunks`.</span>
+</span><span id="line-279"><span class="sd">    """</span>
+</span><span id="line-280">    <span class="n">enc</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">return_offsets_mapping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">"pt"</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="line-281">    <span class="n">offsets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">enc</span><span class="p">[</span><span class="s2">"offset_mapping"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+</span><span id="line-282">    <span class="k">return</span> <span class="n">enc</span><span class="p">[</span><span class="s2">"input_ids"</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">offsets</span>
+</span><span id="line-283">
+</span><span id="line-284">
+</span><span id="line-285"><span class="c1"># ------------------------------------------------------------------ fast-detect-gpt</span>
+</span><span id="line-286">
+</span><span id="line-287">
+</span><span id="line-288"><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</span><span id="line-289"><span class="k">def</span><span class="w"> </span><span class="nf">_fast_detect_profile</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Profile</span><span class="p">:</span>
+</span><span id="line-290"><span class="w">    </span><span class="sd">"""Conditional probability curvature, accumulated per token.</span>
+</span><span id="line-291">
+</span><span id="line-292"><span class="sd">    Per position, ``a`` is the observed log-likelihood minus the model's own expected</span>
+</span><span id="line-293"><span class="sd">    log-likelihood there, and ``b`` is the variance of that expectation. The paper's</span>
+</span><span id="line-294"><span class="sd">    statistic over any window is ``sum(a) / sqrt(sum(b))`` -- which is what</span>
+</span><span id="line-295"><span class="sd">    :meth:`_Profile.score` computes, so a span is scored by exactly the published</span>
+</span><span id="line-296"><span class="sd">    method rather than by anything invented here.</span>
+</span><span id="line-297"><span class="sd">    """</span>
+</span><span id="line-298">    <span class="n">torch</span> <span class="o">=</span> <span class="n">_torch</span><span class="p">()</span>
+</span><span id="line-299">    <span class="n">tokenizer</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">_load</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+</span><span id="line-300">    <span class="n">ids</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">_encode</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</span><span id="line-301">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+</span><span id="line-302">    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+</span><span id="line-303">    <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+</span><span id="line-304">
+</span><span id="line-305">    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+</span><span id="line-306">        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span> <span class="ow">in</span> <span class="n">_iter_chunks</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">WINDOW</span><span class="p">):</span>
+</span><span id="line-307">            <span class="n">chunk</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-308">            <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+</span><span id="line-309">            <span class="n">lprobs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-310">            <span class="n">probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-311">            <span class="n">mean_ref</span> <span class="o">=</span> <span class="p">(</span><span class="n">probs</span> <span class="o">*</span> <span class="n">lprobs</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-312">            <span class="n">var_ref</span> <span class="o">=</span> <span class="p">(</span><span class="n">probs</span> <span class="o">*</span> <span class="n">lprobs</span><span class="o">.</span><span class="n">square</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">mean_ref</span><span class="o">.</span><span class="n">square</span><span class="p">()</span>
+</span><span id="line-313">            <span class="n">rows</span> <span class="o">=</span> <span class="n">_scored_rows</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
+</span><span id="line-314">            <span class="n">labels</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-315">            <span class="n">ll</span> <span class="o">=</span> <span class="n">lprobs</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-316">            <span class="n">a</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ll</span> <span class="o">-</span> <span class="n">mean_ref</span><span class="p">[</span><span class="n">rows</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-317">            <span class="n">b</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_ref</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">clamp_min</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-318">
+</span><span id="line-319">    <span class="k">return</span> <span class="n">_Profile</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="s2">"curvature"</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">model_id</span><span class="p">)</span>
+</span><span id="line-320">
+</span><span id="line-321">
+<div class="viewcode-block" id="fast_detect_gpt">
+<a class="viewcode-back" href="../../_autosummary/ductus.detect.html#ductus.curvature.fast_detect_gpt">[docs]</a>
+</span><span id="line-322"><span class="k">def</span><span class="w"> </span><span class="nf">fast_detect_gpt</span><span class="p">(</span>
+</span><span id="line-323">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-324">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span>
+</span><span id="line-325">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-326">    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">FAST_DETECT_MODEL</span><span class="p">,</span>
+</span><span id="line-327">    <span class="n">bands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">BANDS</span><span class="p">,</span>
+</span><span id="line-328">    <span class="n">min_windows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_WINDOWS</span><span class="p">,</span>
+</span><span id="line-329">    <span class="n">min_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_TOKENS</span><span class="p">,</span>
+</span><span id="line-330">    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-331"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-332"><span class="w">    </span><span class="sd">"""Conditional probability curvature, read as a standing within this document.</span>
+</span><span id="line-333">
+</span><span id="line-334"><span class="sd">    A passage a model finds unusually *predictable* compared to the rest of the</span>
+</span><span id="line-335"><span class="sd">    document leans machine; an unusually surprising one leans human. Neither claim</span>
+</span><span id="line-336"><span class="sd">    is absolute, and none of the paper's benchmark thresholds are used.</span>
+</span><span id="line-337">
+</span><span id="line-338"><span class="sd">    Needs the ``[local]`` extra. The first call downloads and caches the proxy model;</span>
+</span><span id="line-339"><span class="sd">    later calls on the same text cost no model time at all.</span>
+</span><span id="line-340"><span class="sd">    """</span>
+</span><span id="line-341">    <span class="k">yield from</span> <span class="n">_curvature_signals</span><span class="p">(</span>
+</span><span id="line-342">        <span class="n">_fast_detect_profile</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">_pick_device</span><span class="p">(</span><span class="n">device</span><span class="p">)),</span>
+</span><span id="line-343">        <span class="n">text</span><span class="p">,</span>
+</span><span id="line-344">        <span class="n">span</span><span class="p">,</span>
+</span><span id="line-345">        <span class="n">name</span><span class="o">=</span><span class="s2">"curvature-outlier"</span><span class="p">,</span>
+</span><span id="line-346">        <span class="n">detector</span><span class="o">=</span><span class="s2">"fast-detect-gpt"</span><span class="p">,</span>
+</span><span id="line-347">        <span class="n">statistic</span><span class="o">=</span><span class="s2">"conditional probability curvature"</span><span class="p">,</span>
+</span><span id="line-348">        <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span>
+</span><span id="line-349">        <span class="n">min_windows</span><span class="o">=</span><span class="n">min_windows</span><span class="p">,</span>
+</span><span id="line-350">        <span class="n">min_tokens</span><span class="o">=</span><span class="n">min_tokens</span><span class="p">,</span>
+</span><span id="line-351">    <span class="p">)</span></div>
+
+</span><span id="line-352">
+</span><span id="line-353">
+</span><span id="line-354"><span class="c1"># ----------------------------------------------------------------------- binoculars</span>
+</span><span id="line-355">
+</span><span id="line-356">
+</span><span id="line-357"><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</span><span id="line-358"><span class="k">def</span><span class="w"> </span><span class="nf">_binoculars_profile</span><span class="p">(</span>
+</span><span id="line-359">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">observer_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">performer_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-360"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Profile</span><span class="p">:</span>
+</span><span id="line-361"><span class="w">    </span><span class="sd">"""Perplexity over cross-perplexity, accumulated per token.</span>
+</span><span id="line-362">
+</span><span id="line-363"><span class="sd">    ``a`` is the performer's surprise at the token actually written; ``b`` is the</span>
+</span><span id="line-364"><span class="sd">    performer's surprise at what the observer expected. Their ratio over a window is</span>
+</span><span id="line-365"><span class="sd">    the paper's *B*. Machine text makes the two agree, so **low** B argues machine --</span>
+</span><span id="line-366"><span class="sd">    which is why this profile carries ``machine_sign = -1``.</span>
+</span><span id="line-367"><span class="sd">    """</span>
+</span><span id="line-368">    <span class="n">torch</span> <span class="o">=</span> <span class="n">_torch</span><span class="p">()</span>
+</span><span id="line-369">    <span class="n">obs_tokenizer</span><span class="p">,</span> <span class="n">observer</span> <span class="o">=</span> <span class="n">_load</span><span class="p">(</span><span class="n">observer_id</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+</span><span id="line-370">    <span class="n">tokenizer</span><span class="p">,</span> <span class="n">performer</span> <span class="o">=</span> <span class="n">_load</span><span class="p">(</span><span class="n">performer_id</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+</span><span id="line-371">    <span class="k">if</span> <span class="n">obs_tokenizer</span><span class="o">.</span><span class="n">get_vocab</span><span class="p">()</span> <span class="o">!=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">get_vocab</span><span class="p">():</span>
+</span><span id="line-372">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-373">            <span class="sa">f</span><span class="s2">"binoculars needs observer and performer to share a tokenizer; "</span>
+</span><span id="line-374">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">observer_id</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">performer_id</span><span class="si">!r}</span><span class="s2"> do not. Cross-perplexity between "</span>
+</span><span id="line-375">            <span class="s2">"models that disagree about what a token is has no meaning."</span>
+</span><span id="line-376">        <span class="p">)</span>
+</span><span id="line-377">
+</span><span id="line-378">    <span class="n">ids</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">_encode</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</span><span id="line-379">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+</span><span id="line-380">    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+</span><span id="line-381">    <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+</span><span id="line-382">
+</span><span id="line-383">    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+</span><span id="line-384">        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span> <span class="ow">in</span> <span class="n">_iter_chunks</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">WINDOW</span><span class="p">):</span>
+</span><span id="line-385">            <span class="n">chunk</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-386">            <span class="n">lprobs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">performer</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-387">            <span class="n">obs_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">observer</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-388">            <span class="n">cross</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">obs_probs</span> <span class="o">*</span> <span class="n">lprobs</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-389">            <span class="n">rows</span> <span class="o">=</span> <span class="n">_scored_rows</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
+</span><span id="line-390">            <span class="n">labels</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-391">            <span class="n">a</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">lprobs</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-392">            <span class="n">b</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">cross</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-393">
+</span><span id="line-394">    <span class="k">return</span> <span class="n">_Profile</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="s2">"ratio"</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">performer_id</span><span class="p">)</span>
+</span><span id="line-395">
+</span><span id="line-396">
+<div class="viewcode-block" id="binoculars">
+<a class="viewcode-back" href="../../_autosummary/ductus.detect.html#ductus.curvature.binoculars">[docs]</a>
+</span><span id="line-397"><span class="k">def</span><span class="w"> </span><span class="nf">binoculars</span><span class="p">(</span>
+</span><span id="line-398">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-399">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span>
+</span><span id="line-400">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-401">    <span class="n">observer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">BINOCULARS_OBSERVER</span><span class="p">,</span>
+</span><span id="line-402">    <span class="n">performer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">BINOCULARS_PERFORMER</span><span class="p">,</span>
+</span><span id="line-403">    <span class="n">bands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">BANDS</span><span class="p">,</span>
+</span><span id="line-404">    <span class="n">min_windows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_WINDOWS</span><span class="p">,</span>
+</span><span id="line-405">    <span class="n">min_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_TOKENS</span><span class="p">,</span>
+</span><span id="line-406">    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-407"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-408"><span class="w">    </span><span class="sd">"""Cross-perplexity of a paired observer and performer, as a standing in this text.</span>
+</span><span id="line-409">
+</span><span id="line-410"><span class="sd">    Where :func:`fast_detect_gpt` asks how predictable a passage is, this asks whether</span>
+</span><span id="line-411"><span class="sd">    two closely related models are *unusually unsurprised in the same places* -- which</span>
+</span><span id="line-412"><span class="sd">    generalises better to generators neither model has seen.</span>
+</span><span id="line-413">
+</span><span id="line-414"><span class="sd">    Needs the ``[local]`` extra, and observer and performer must share a tokenizer.</span>
+</span><span id="line-415"><span class="sd">    """</span>
+</span><span id="line-416">    <span class="k">yield from</span> <span class="n">_curvature_signals</span><span class="p">(</span>
+</span><span id="line-417">        <span class="n">_binoculars_profile</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">observer</span><span class="p">,</span> <span class="n">performer</span><span class="p">,</span> <span class="n">_pick_device</span><span class="p">(</span><span class="n">device</span><span class="p">)),</span>
+</span><span id="line-418">        <span class="n">text</span><span class="p">,</span>
+</span><span id="line-419">        <span class="n">span</span><span class="p">,</span>
+</span><span id="line-420">        <span class="n">name</span><span class="o">=</span><span class="s2">"cross-perplexity-outlier"</span><span class="p">,</span>
+</span><span id="line-421">        <span class="n">detector</span><span class="o">=</span><span class="s2">"binoculars"</span><span class="p">,</span>
+</span><span id="line-422">        <span class="n">statistic</span><span class="o">=</span><span class="s2">"perplexity / cross-perplexity"</span><span class="p">,</span>
+</span><span id="line-423">        <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span>
+</span><span id="line-424">        <span class="n">min_windows</span><span class="o">=</span><span class="n">min_windows</span><span class="p">,</span>
+</span><span id="line-425">        <span class="n">min_tokens</span><span class="o">=</span><span class="n">min_tokens</span><span class="p">,</span>
+</span><span id="line-426">    <span class="p">)</span></div>
+
+</span><span id="line-427">
+</span><span id="line-428">
+</span><span id="line-429"><span class="c1"># ------------------------------------------------------------------- shared banding</span>
+</span><span id="line-430">
+</span><span id="line-431">
+</span><span id="line-432"><span class="k">def</span><span class="w"> </span><span class="nf">_curvature_signals</span><span class="p">(</span>
+</span><span id="line-433">    <span class="n">profile</span><span class="p">:</span> <span class="n">_Profile</span><span class="p">,</span>
+</span><span id="line-434">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-435">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span>
+</span><span id="line-436">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-437">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-438">    <span class="n">detector</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-439">    <span class="n">statistic</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-440">    <span class="n">bands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+</span><span id="line-441">    <span class="n">min_windows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span><span id="line-442">    <span class="n">min_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span><span id="line-443"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-444"><span class="w">    </span><span class="sd">"""Band a span's standing against the rest of the document, or say nothing."""</span>
+</span><span id="line-445">    <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">_token_range</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">span</span><span class="p">)</span>
+</span><span id="line-446">    <span class="k">if</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">min_tokens</span><span class="p">:</span>
+</span><span id="line-447">        <span class="k">return</span>
+</span><span id="line-448">    <span class="n">reference</span> <span class="o">=</span> <span class="n">_reference_scores</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+</span><span id="line-449">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">min_windows</span><span class="p">:</span>
+</span><span id="line-450">        <span class="k">return</span>
+</span><span id="line-451">
+</span><span id="line-452">    <span class="n">score</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+</span><span id="line-453">    <span class="n">z</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">machine_sign</span> <span class="o">*</span> <span class="n">robust_z</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">reference</span><span class="p">)</span>
+</span><span id="line-454">    <span class="n">weight</span> <span class="o">=</span> <span class="n">band_of</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">bands</span><span class="p">)</span>
+</span><span id="line-455">    <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-456">        <span class="k">return</span>
+</span><span id="line-457">
+</span><span id="line-458">    <span class="n">machine</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</span><span id="line-459">    <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-460">        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+</span><span id="line-461">        <span class="n">direction</span><span class="o">=</span><span class="s2">"machine"</span> <span class="k">if</span> <span class="n">machine</span> <span class="k">else</span> <span class="s2">"human"</span><span class="p">,</span>
+</span><span id="line-462">        <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span>
+</span><span id="line-463">        <span class="n">detector</span><span class="o">=</span><span class="n">detector</span><span class="p">,</span>
+</span><span id="line-464">        <span class="n">value</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+</span><span id="line-465">        <span class="n">note</span><span class="o">=</span><span class="p">(</span>
+</span><span id="line-466">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">statistic</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> under </span><span class="si">{</span><span class="n">profile</span><span class="o">.</span><span class="n">model</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MADs "</span>
+</span><span id="line-467">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'flatter'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">machine</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'more surprising'</span><span class="si">}</span><span class="s2"> than the rest of this "</span>
+</span><span id="line-468">            <span class="sa">f</span><span class="s2">"document (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span><span class="si">}</span><span class="s2"> comparable windows); "</span>
+</span><span id="line-469">            <span class="s2">"unlike the other detectors this is a model's opinion about the text, "</span>
+</span><span id="line-470">            <span class="s2">"not a quotation from it"</span>
+</span><span id="line-471">        <span class="p">),</span>
+</span><span id="line-472">        <span class="n">span</span><span class="o">=</span><span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">span</span><span class="o">.</span><span class="n">level</span><span class="p">),</span>
+</span><span id="line-473">    <span class="p">)</span>
+</span></code></pre></div>
+    </div></div>
+          </main>
+        </div>
+      </div><footer class="py-6 border-t border-border md:py-0">
+    <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+      <div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
+        <p class="text-sm leading-loose text-center text-muted-foreground md:text-left"></p>
+</div>
+</div>
+</footer>
+    </div>
+    
+    <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=fd10adb8"></script>
+    <script defer="defer" src="../../_static/theme.js?v=5db23cf8"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    
+</body>
+
+</html>

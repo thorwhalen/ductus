@@ -81,6 +81,7 @@
 <li class="toctree-l2" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="_autosummary/ductus.html">ductus<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-cloak="" x-show="expanded">
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.base.html">ductus.base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.core.html">ductus.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.data.html">ductus.data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.detect.html">ductus.detect</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.render.html">ductus.render</a></li>
@@ -118,13 +119,10 @@
 
 <section id="about-this-build">
 <h1>About this build<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#about-this-build">¶</a></h1>
-<p>This documentation was built on <strong>2026-09-17 11:43 UTC</strong> from commit <a href="https://github.com/thorwhalen/ductus/commit/b232077979a230ddfa03492c976658999e70c432"><code>b232077</code></a> on branch <code>main</code>, for <strong>ductus 0.0.3</strong> (from <code>pyproject.toml</code>).</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The documentation and the package may be misaligned:</p>
-<ul class="simple">
-<li><p>The documented version (0.0.3) is behind the latest release on PyPI (0.0.4): <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ductus</span></code> gives newer code than these docs describe.</p></li>
-</ul>
+<p>This documentation was built on <strong>2026-09-17 12:10 UTC</strong> from commit <a href="https://github.com/thorwhalen/ductus/commit/b2fab6e82e2fb4363327871e19fa84a9e57dae5e"><code>b2fab6e</code></a> on branch <code>main</code>, for <strong>ductus 0.0.4</strong> (from <code>pyproject.toml</code>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.</p>
 </div>
 <section id="source">
 <h2>Source<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#source" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#source'">¶</a></h2>
@@ -136,7 +134,7 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Commit</p></td>
-<td><p><a href="https://github.com/thorwhalen/ductus/commit/b232077979a230ddfa03492c976658999e70c432"><code>b232077979a230ddfa03492c976658999e70c432</code></a></p></td>
+<td><p><a href="https://github.com/thorwhalen/ductus/commit/b2fab6e82e2fb4363327871e19fa84a9e57dae5e"><code>b2fab6e82e2fb4363327871e19fa84a9e57dae5e</code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p>Branch</p></td>
 <td><p><code>main</code></p></td>
@@ -166,13 +164,13 @@
 <td><p><code>thorwhalen/ductus</code></p></td>
 </tr>
 <tr class="row-odd"><td><p>Run</p></td>
-<td><p><a href="https://github.com/thorwhalen/ductus/actions/runs/35217106809">35217106809</a></p></td>
+<td><p><a href="https://github.com/thorwhalen/ductus/actions/runs/35219467476">35219467476</a></p></td>
 </tr>
 <tr class="row-even"><td><p>Ref</p></td>
 <td><p><code>refs/heads/main</code></p></td>
 </tr>
 <tr class="row-odd"><td><p>Event commit</p></td>
-<td><p><code>b232077979a230ddfa03492c976658999e70c432</code> (in the history of the built commit)</p></td>
+<td><p><code>b2fab6e82e2fb4363327871e19fa84a9e57dae5e</code> (in the history of the built commit)</p></td>
 </tr>
 </tbody>
 </table>
@@ -236,13 +234,13 @@
 </section>
 <section id="package-on-pypi">
 <h2>Package on PyPI<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#package-on-pypi" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#package-on-pypi'">¶</a></h2>
-<p>Latest release: <a href="https://pypi.org/project/ductus/0.0.4/">0.0.4</a>, newer than the documented version (0.0.3).</p>
+<p>Latest release: <a href="https://pypi.org/project/ductus/0.0.4/">0.0.4</a>, the same as the documented version.</p>
 </section>
-<section id="site"><h2>Site</h2><table class="docutils align-default"><tbody><tr><td><p>Modules documented</p></td><td><p>10</p></td></tr><tr><td><p>Objects documented</p></td><td><p>58</p></td></tr></tbody></table></section>
+<section id="site"><h2>Site</h2><table class="docutils align-default"><tbody><tr><td><p>Modules documented</p></td><td><p>11</p></td></tr><tr><td><p>Objects documented</p></td><td><p>70</p></td></tr></tbody></table></section>
 <section id="reproduce">
 <h2>Reproduce<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#reproduce" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#reproduce'">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">git<span class="w"> </span>clone<span class="w"> </span>https://github.com/thorwhalen/ductus<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>ductus
-</span><span id="line-2">git<span class="w"> </span>checkout<span class="w"> </span>b232077979a230ddfa03492c976658999e70c432
+</span><span id="line-2">git<span class="w"> </span>checkout<span class="w"> </span>b2fab6e82e2fb4363327871e19fa84a9e57dae5e
 </span><span id="line-3">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"epythet==0.2.12"</span>
 </span><span id="line-4">epythet<span class="w"> </span>quickstart<span class="w"> </span>.<span class="w"> </span>--ignore<span class="w"> </span>tests/<span class="w"> </span>scrap/<span class="w"> </span>examples/
 </span></code></pre></div>
@@ -272,7 +270,7 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=47de8214"></script>
+<script src="_static/documentation_options.js?v=8c5712d9"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

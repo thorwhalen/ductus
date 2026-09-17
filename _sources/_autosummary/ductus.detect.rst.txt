@@ -9,12 +9,15 @@ ductus.detect
    .. autosummary::
    
       DETECTORS
+      DEFAULT_DETECTORS
    
    .. rubric:: Functions
 
    .. autosummary::
    
+      binoculars
       detectors_from
+      fast_detect_gpt
       forensic
       rhetoric
       rhythm

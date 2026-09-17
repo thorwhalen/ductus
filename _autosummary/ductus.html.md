@@ -271,13 +271,14 @@ True
 
 ### Modules
 
-| [`base`](ductus.base.html.md#module-ductus.base)       | The data model: where a finding lives, what it claims, and how much it weighs.   |
-|--------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| [`core`](ductus.core.html.md#module-ductus.core)       | The core: stream segments, or take the whole report.                             |
-| [`data`](ductus.data.html.md#module-ductus.data)       |                                                                                  |
-| [`detect`](ductus.detect.html.md#module-ductus.detect)   | The detectors -- the `detectors=` seam.                                          |
-| [`render`](ductus.render.html.md#module-ductus.render)   | Turning a report into something a person reads: JSON, Markdown, or HTML.         |
-| [`score`](ductus.score.html.md#module-ductus.score)     | Turning evidence into a lean -- the `aggregate=` seam.                           |
-| [`segment`](ductus.segment.html.md#module-ductus.segment) | Cutting a text into the units that get scored -- the `segmenter=` seam.          |
-| [`tells`](ductus.tells.html.md#module-ductus.tells)     | The tells catalogue: named regular-expression patterns, tiered by confidence.    |
-| [`tools`](ductus.tools.html.md#module-ductus.tools)     | The verb SSOT: plain functions, JSON-ready in, JSON-ready out.                   |
+| [`base`](ductus.base.html.md#module-ductus.base)           | The data model: where a finding lives, what it claims, and how much it weighs.   |
+|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| [`core`](ductus.core.html.md#module-ductus.core)           | The core: stream segments, or take the whole report.                             |
+| [`curvature`](ductus.curvature.html.md#module-ductus.curvature) | Model-based detectors -- the `[local]` extra.                                    |
+| [`data`](ductus.data.html.md#module-ductus.data)           |                                                                                  |
+| [`detect`](ductus.detect.html.md#module-ductus.detect)       | The detectors -- the `detectors=` seam.                                          |
+| [`render`](ductus.render.html.md#module-ductus.render)       | Turning a report into something a person reads: JSON, Markdown, or HTML.         |
+| [`score`](ductus.score.html.md#module-ductus.score)         | Turning evidence into a lean -- the `aggregate=` seam.                           |
+| [`segment`](ductus.segment.html.md#module-ductus.segment)     | Cutting a text into the units that get scored -- the `segmenter=` seam.          |
+| [`tells`](ductus.tells.html.md#module-ductus.tells)         | The tells catalogue: named regular-expression patterns, tiered by confidence.    |
+| [`tools`](ductus.tools.html.md#module-ductus.tools)         | The verb SSOT: plain functions, JSON-ready in, JSON-ready out.                   |

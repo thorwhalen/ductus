@@ -82,6 +82,7 @@
 <li class="toctree-l2" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="_autosummary/ductus.html">ductus<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-cloak="" x-show="expanded">
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.base.html">ductus.base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.core.html">ductus.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.data.html">ductus.data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.detect.html">ductus.detect</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.render.html">ductus.render</a></li>
@@ -170,13 +171,38 @@
 </table>
 <p>Note that several of these argue <em>for</em> a human. A detector that can only ever accuse is not a measuring instrument. In practice the mechanical signals are often the most decisive thing in a file, in either direction.</p>
 <p>The deterministic pass finds phrases, artifacts and a few shapes. <strong>It cannot find prose that is machine-written and bland</strong> — for that a model has to read it, which is what the shipped agent skills are for.</p>
+<p>Two model-based detectors also ship, behind the <code class="docutils literal notranslate"><span class="pre">[local]</span></code> extra and <strong>off by default</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Detector</p></th>
+<th class="head"><p>Finds</p></th>
+<th class="head"><p>Cost</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fast-detect-gpt</span></code></p></td>
+<td><p>Passages a language model finds markedly more predictable — or more surprising — than the rest of the same document</p></td>
+<td><p>one CPU pass with <code class="docutils literal notranslate"><span class="pre">gpt2</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">binoculars</span></code></p></td>
+<td><p>The same comparison, via the cross-perplexity of a paired observer and performer, which generalises better to unseen generators</p></td>
+<td><p>two CPU passes with <code class="docutils literal notranslate"><span class="pre">distilgpt2</span></code>/<code class="docutils literal notranslate"><span class="pre">gpt2</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[local]"</span>
+</span><span id="line-2">ductus<span class="w"> </span>gauge<span class="w"> </span>draft.md<span class="w"> </span>--detectors<span class="w"> </span>fast-detect-gpt,binoculars
+</span></code></pre></div>
+</div>
+<p>They are opt-in because they were measured and did not beat the deterministic set on machine-written text — better recall, worse precision. They <em>did</em> find human-leaning evidence the deterministic detectors miss entirely. The numbers, including the unflattering ones, are in <a class="reference internal" href="#misc/docs/phase-1-results.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">phase-1-results.md</span></code></span></a>; why a continuous score becomes a banded signal rather than a weight is <a class="reference internal" href="#misc/docs/curvature-as-evidence.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">curvature-as-evidence.md</span></code></span></a>.</p>
+<p>Note what they do <em>not</em> do: they compare passages <strong>within</strong> a document and so cannot say whether a whole text is machine-written. Answering that honestly needs a calibration this package does not have yet.</p>
 </section>
 <section id="how-it-fits-together">
 <h2>How it fits together<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#how-it-fits-together" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#how-it-fits-together'">¶</a></h2>
 <pre class="mermaid">
         flowchart TD
   TXT["&lt;b&gt;text&lt;/b&gt;"] --&gt; SEG["&lt;b&gt;segmenter=&lt;/b&gt;&lt;br/&gt;paragraph · sentence · document"]
-  SEG --&gt;|"Spans — offsets + quote/prefix/suffix"| DET["&lt;b&gt;detectors=&lt;/b&gt;&lt;br/&gt;tells · forensic · rhetoric · rhythm"]
+  SEG --&gt;|"Spans — offsets + quote/prefix/suffix"| DET["&lt;b&gt;detectors=&lt;/b&gt;&lt;br/&gt;tells · forensic · rhetoric · rhythm&lt;br/&gt;&lt;i&gt;opt-in: fast-detect-gpt · binoculars&lt;/i&gt;"]
   DET --&gt;|"Signals — direction · weight · reason · span"| AGG["&lt;b&gt;aggregate=&lt;/b&gt;&lt;br/&gt;lean · strength · label"]
   JUD["an agent's reading&lt;br/&gt;&lt;code&gt;--judgments&lt;/code&gt;"] -.-&gt;|"more Signals"| AGG
   AGG --&gt; REP["&lt;b&gt;Report&lt;/b&gt;"]
@@ -261,7 +287,8 @@
 </span><span id="line-5"><span class="n">gauge</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">aggregate</span><span class="o">=</span><span class="n">my_calibrated_scorer</span><span class="p">)</span>  <span class="c1"># replace the scoring model wholesale</span>
 </span></code></pre></div>
 </div>
-<p>A detector is a plain function <code class="docutils literal notranslate"><span class="pre">(text,</span> <span class="pre">span)</span> <span class="pre">-&gt;</span> <span class="pre">Iterator[Signal]</span></code>. There is no base class and nothing to register. Adding Fast-DetectGPT, Binoculars or a vendor API means writing one more function of that shape — see <a class="reference internal" href="#misc/docs/roadmap.md"><span class="xref myst">the roadmap</span></a>.</p>
+<p>A detector is a plain function <code class="docutils literal notranslate"><span class="pre">(text,</span> <span class="pre">span)</span> <span class="pre">-&gt;</span> <span class="pre">Iterator[Signal]</span></code>. Fast-DetectGPT and Binoculars are exactly that and nothing more — <code class="docutils literal notranslate"><span class="pre">ductus/curvature.py</span></code> adds no base class, no core change and no import cost. A vendor API would be one more function of the same shape; see <a class="reference internal" href="#misc/docs/roadmap.md"><span class="xref myst">the roadmap</span></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">DETECTORS</span></code> is the registry of everything nameable; <code class="docutils literal notranslate"><span class="pre">DEFAULT_DETECTORS</span></code> is what <code class="docutils literal notranslate"><span class="pre">detectors=None</span></code> means. They are deliberately different lists — a detector joins the default by beating what is already there on <code class="docutils literal notranslate"><span class="pre">tests/fixtures/mixed_authorship.json</span></code>, which <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">misc/measure_detectors.py</span></code> measures.</p>
 <p>For long documents, <code class="docutils literal notranslate"><span class="pre">iter_segments</span></code> is the streaming core and <code class="docutils literal notranslate"><span class="pre">gauge</span></code> is the batch facade over it.</p>
 </section>
 <section id="spans-survive-editing">
@@ -276,7 +303,7 @@
 <section id="install">
 <h2>Install<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#install" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#install'">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pip<span class="w"> </span>install<span class="w"> </span>ductus<span class="w">              </span><span class="c1"># the core: pyyaml and cw, nothing else</span>
-</span><span id="line-2">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[local]"</span><span class="w">     </span><span class="c1"># + model-based detectors, offline, no API key</span>
+</span><span id="line-2">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[local]"</span><span class="w">     </span><span class="c1"># + Fast-DetectGPT and Binoculars: offline, no API key, opt-in</span>
 </span><span id="line-3">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[api]"</span><span class="w">       </span><span class="c1"># + vendor detector adapters</span>
 </span></code></pre></div>
 </div>
@@ -291,7 +318,7 @@
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-17 11:43 UTC from <a href="https://github.com/thorwhalen/ductus/commit/b232077979a230ddfa03492c976658999e70c432">b232077</a> (main) · ductus 0.0.3 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-17 12:10 UTC from <a href="https://github.com/thorwhalen/ductus/commit/b2fab6e82e2fb4363327871e19fa84a9e57dae5e">b2fab6e</a> (main) · ductus 0.0.4 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -321,7 +348,7 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=47de8214"></script>
+<script src="_static/documentation_options.js?v=8c5712d9"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

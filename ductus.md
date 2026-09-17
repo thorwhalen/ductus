@@ -1,4 +1,4 @@
-> built 2026-09-17 11:43 UTC from b232077 (main) · ductus 0.0.3. Details: build_info.json
+> built 2026-09-17 12:10 UTC from b2fab6e (main) · ductus 0.0.4. Details: build_info.json
 
 # index.html.md
 
@@ -54,6 +54,21 @@ Four detectors ship, all deterministic, all free, none needing a model or a key.
 Note that several of these argue *for* a human. A detector that can only ever accuse is not a measuring instrument. In practice the mechanical signals are often the most decisive thing in a file, in either direction.
 
 The deterministic pass finds phrases, artifacts and a few shapes. **It cannot find prose that is machine-written and bland** — for that a model has to read it, which is what the shipped agent skills are for.
+
+Two model-based detectors also ship, behind the `[local]` extra and **off by default**:
+
+| Detector          | Finds                                                                                                                           | Cost                                    |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| `fast-detect-gpt` | Passages a language model finds markedly more predictable — or more surprising — than the rest of the same document             | one CPU pass with `gpt2`                |
+| `binoculars`      | The same comparison, via the cross-perplexity of a paired observer and performer, which generalises better to unseen generators | two CPU passes with `distilgpt2`/`gpt2` |
+```bash
+pip install "ductus[local]"
+ductus gauge draft.md --detectors fast-detect-gpt,binoculars
+```
+
+They are opt-in because they were measured and did not beat the deterministic set on machine-written text — better recall, worse precision. They *did* find human-leaning evidence the deterministic detectors miss entirely. The numbers, including the unflattering ones, are in [`phase-1-results.md`](); why a continuous score becomes a banded signal rather than a weight is [`curvature-as-evidence.md`]().
+
+Note what they do *not* do: they compare passages **within** a document and so cannot say whether a whole text is machine-written. Answering that honestly needs a calibration this package does not have yet.
 
 ## How it fits together
 
@@ -114,7 +129,9 @@ gauge(
 gauge(text, aggregate=my_calibrated_scorer)  # replace the scoring model wholesale
 ```
 
-A detector is a plain function `(text, span) -> Iterator[Signal]`. There is no base class and nothing to register. Adding Fast-DetectGPT, Binoculars or a vendor API means writing one more function of that shape — see [the roadmap]().
+A detector is a plain function `(text, span) -> Iterator[Signal]`. Fast-DetectGPT and Binoculars are exactly that and nothing more — `ductus/curvature.py` adds no base class, no core change and no import cost. A vendor API would be one more function of the same shape; see [the roadmap]().
+
+`DETECTORS` is the registry of everything nameable; `DEFAULT_DETECTORS` is what `detectors=None` means. They are deliberately different lists — a detector joins the default by beating what is already there on `tests/fixtures/mixed_authorship.json`, which `python misc/measure_detectors.py` measures.
 
 For long documents, `iter_segments` is the streaming core and `gauge` is the batch facade over it.
 
@@ -132,7 +149,7 @@ They are separate packages because they have different inputs. `deslop` needs a 
 
 ```bash
 pip install ductus              # the core: pyyaml and cw, nothing else
-pip install "ductus[local]"     # + model-based detectors, offline, no API key
+pip install "ductus[local]"     # + Fast-DetectGPT and Binoculars: offline, no API key, opt-in
 pip install "ductus[api]"       # + vendor detector adapters
 ```
 
@@ -360,6 +377,149 @@ Yield one scored segment at a time.
 ```
 
 
+# _autosummary/ductus.curvature.html.md
+
+# ductus.curvature
+
+Model-based detectors – the `[local]` extra. Two more functions of the same shape.
+
+[`fast_detect_gpt()`](_autosummary/ductus.curvature.html.md#ductus.curvature.fast_detect_gpt) and [`binoculars()`](_autosummary/ductus.curvature.html.md#ductus.curvature.binoculars) are `(text, span) -> Iterator[Signal]`
+like every other detector here. They differ in one way that matters: their evidence
+is a number a reader cannot inspect, produced by a language model rather than quoted
+from the text. The whole design of how that number becomes a [`Signal`](_autosummary/ductus.base.html.md#ductus.base.Signal)
+is argued in `misc/docs/curvature-as-evidence.md`; the short version is:
+
+* the statistic is the published one, evaluated over the span’s tokens;
+* it is compared to **the same statistic over the rest of this document**, never to a
+  threshold lifted from a paper’s benchmark – so no calibration is claimed anywhere;
+* the standing is banded, not mapped continuously: a mid-range score emits *nothing*,
+  because a mid-range score is this detector having nothing to say;
+* both directions are emitted, because a detector that can only accuse is not a
+  measuring instrument.
+
+The consequence, accepted knowingly: these detectors cannot say whether a whole
+document is machine-written. With no rest-of-the-document to compare against, they
+return nothing.
+
+`torch` and `transformers` are imported only when a detector actually runs, so
+`import ductus` stays as cheap as it was.
+
+```pycon
+>>> band_of(0.9) is None, band_of(1.8), band_of(-3.0)
+(True, 0.3, 0.45)
+>>> round(robust_z(10.0, [1.0, 2.0, 3.0, 4.0, 5.0]), 2)
+4.72
+```
+
+### Module Attributes
+
+| [`FAST_DETECT_MODEL`](_autosummary/ductus.curvature.html.md#ductus.curvature.FAST_DETECT_MODEL)   | Single model, used as both the scoring and the sampling model (the analytic same-model setting of Fast-DetectGPT).   |
+|----------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| [`BINOCULARS_OBSERVER`](_autosummary/ductus.curvature.html.md#ductus.curvature.BINOCULARS_OBSERVER) | Binoculars needs a *closely related* pair sharing one tokenizer, not an arbitrary strong/weak combination.           |
+| [`BANDS`](_autosummary/ductus.curvature.html.md#ductus.curvature.BANDS)               | `(|z| threshold, weight)`, lowest first.                                                                             |
+| [`MIN_WINDOWS`](_autosummary/ductus.curvature.html.md#ductus.curvature.MIN_WINDOWS)         | Fewer comparable windows than this and there is no reference distribution worth the name, so nothing is emitted.     |
+| [`MIN_TOKENS`](_autosummary/ductus.curvature.html.md#ductus.curvature.MIN_TOKENS)          | A span shorter than this is too few tokens for the statistic to mean anything -- roughly a sentence's worth.         |
+
+### Functions
+
+| [`band_of`](_autosummary/ductus.curvature.html.md#ductus.curvature.band_of)(z[, bands])                           | The weight for a standing of `z`, or `None` when it says nothing.                |
+|------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| [`binoculars`](_autosummary/ductus.curvature.html.md#ductus.curvature.binoculars)(text, span, \*[, observer, ...])   | Cross-perplexity of a paired observer and performer, as a standing in this text. |
+| [`fast_detect_gpt`](_autosummary/ductus.curvature.html.md#ductus.curvature.fast_detect_gpt)(text, span, \*[, model, ...]) | Conditional probability curvature, read as a standing within this document.      |
+| [`robust_z`](_autosummary/ductus.curvature.html.md#ductus.curvature.robust_z)(value, reference)                    | How far `value` stands out from `reference`, in MADs.                            |
+
+### ductus.curvature.BANDS *: [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[float](https://docs.python.org/3/builtins/functions.html#float), [float](https://docs.python.org/3/builtins/functions.html#float)], ...]* *= ((1.5, 0.3), (2.5, 0.45))*
+
+`(|z| threshold, weight)`, lowest first. Below the first threshold the detector
+emits nothing at all – the dead zone is the point, not an oversight. Neither
+weight exceeds the strongest deterministic signal: a statistic the reader cannot
+inspect does not get to outvote one they can.
+
+### ductus.curvature.BINOCULARS_OBSERVER *= 'distilgpt2'*
+
+Binoculars needs a *closely related* pair sharing one tokenizer, not an
+arbitrary strong/weak combination. `distilgpt2` is a distillation of `gpt2`.
+The documented upgrade is the paper’s `tiiuae/falcon-7b` pair.
+
+### ductus.curvature.FAST_DETECT_MODEL *= 'gpt2'*
+
+Single model, used as both the scoring and the sampling model (the analytic
+same-model setting of Fast-DetectGPT). Small enough for CPU; the documented
+upgrade is `EleutherAI/gpt-neo-2.7B`.
+
+### ductus.curvature.MIN_TOKENS *= 16*
+
+A span shorter than this is too few tokens for the statistic to mean anything –
+roughly a sentence’s worth.
+
+### ductus.curvature.MIN_WINDOWS *= 6*
+
+Fewer comparable windows than this and there is no reference distribution worth
+the name, so nothing is emitted.
+
+### ductus.curvature.band_of(z, bands=((1.5, 0.3), (2.5, 0.45)))
+
+The weight for a standing of `z`, or `None` when it says nothing.
+
+* **Return type:**
+  [`float`](https://docs.python.org/3/builtins/functions.html#float) | [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
+```pycon
+>>> band_of(1.49) is None
+True
+>>> band_of(1.5), band_of(2.49), band_of(2.5), band_of(-9.0)
+(0.3, 0.3, 0.45, 0.45)
+```
+
+### ductus.curvature.binoculars(text, span, , observer='distilgpt2', performer='gpt2', bands=((1.5, 0.3), (2.5, 0.45)), min_windows=6, min_tokens=16, device=None)
+
+Cross-perplexity of a paired observer and performer, as a standing in this text.
+
+Where [`fast_detect_gpt()`](_autosummary/ductus.curvature.html.md#ductus.curvature.fast_detect_gpt) asks how predictable a passage is, this asks whether
+two closely related models are *unusually unsurprised in the same places* – which
+generalises better to generators neither model has seen.
+
+Needs the `[local]` extra, and observer and performer must share a tokenizer.
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](_autosummary/ductus.base.html.md#ductus.base.Signal)]
+
+### ductus.curvature.fast_detect_gpt(text, span, , model='gpt2', bands=((1.5, 0.3), (2.5, 0.45)), min_windows=6, min_tokens=16, device=None)
+
+Conditional probability curvature, read as a standing within this document.
+
+A passage a model finds unusually *predictable* compared to the rest of the
+document leans machine; an unusually surprising one leans human. Neither claim
+is absolute, and none of the paper’s benchmark thresholds are used.
+
+Needs the `[local]` extra. The first call downloads and caches the proxy model;
+later calls on the same text cost no model time at all.
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](_autosummary/ductus.base.html.md#ductus.base.Signal)]
+
+### ductus.curvature.robust_z(value, reference)
+
+How far `value` stands out from `reference`, in MADs.
+
+Median and MAD rather than mean and standard deviation: on a mixed document the
+machine-written stretches are exactly the outliers that would drag a mean toward
+themselves and hide the thing being looked for.
+
+A degenerate reference (every value identical) yields `0.0`, which falls in the
+dead zone and so emits nothing.
+
+* **Return type:**
+  [`float`](https://docs.python.org/3/builtins/functions.html#float)
+
+```pycon
+>>> robust_z(3.0, [1.0, 2.0, 3.0, 4.0, 5.0])
+0.0
+>>> robust_z(1.0, [1.0, 1.0, 1.0])
+0.0
+```
+
+
 # _autosummary/ductus.data.html.md
 
 # ductus.data
@@ -392,8 +552,13 @@ deterministic and dependency-free:
 : Burstiness – the variance of sentence length. Weak evidence, and reported
   as weak.
 
-Adding a model-based detector (Fast-DetectGPT, Binoculars, a vendor API) means
-writing one more function of this shape. Nothing else in the package changes.
+Two more ship behind the `[local]` extra – `fast-detect-gpt` and
+`binoculars`, in [`ductus.curvature`](_autosummary/ductus.curvature.html.md#module-ductus.curvature). They are registered here so they can be
+named, but whether they belong in [`DEFAULT_DETECTORS`](_autosummary/ductus.detect.html.md#ductus.detect.DEFAULT_DETECTORS) is settled by
+measurement, not by being new – see `misc/docs/phase-1-results.md`.
+
+Adding another one – a vendor API, a supervised classifier – means writing one more
+function of this shape. Nothing else in the package changes.
 
 ```pycon
 >>> from ductus.base import Span
@@ -407,21 +572,50 @@ writing one more function of this shape. Nothing else in the package changes.
 
 ### Module Attributes
 
-| [`DETECTORS`](_autosummary/ductus.detect.html.md#ductus.detect.DETECTORS)   | The registry the `detectors=` seam resolves names against.   |
-|--------------------------------------------------------------|--------------------------------------------------------------|
+| [`DETECTORS`](_autosummary/ductus.detect.html.md#ductus.detect.DETECTORS)         | The registry the `detectors=` seam resolves names against.                                                                      |
+|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| [`DEFAULT_DETECTORS`](_autosummary/ductus.detect.html.md#ductus.detect.DEFAULT_DETECTORS) | a detector joins this tuple only after it has measurably beaten what is already here on `tests/fixtures/mixed_authorship.json`. |
 
 ### Functions
 
-| [`detectors_from`](_autosummary/ductus.detect.html.md#ductus.detect.detectors_from)(names)   | Resolve a detector spec into callables and their names.            |
-|--------------------------------------------------------------------------|--------------------------------------------------------------------|
-| [`forensic`](_autosummary/ductus.detect.html.md#ductus.detect.forensic)(text, span)    | Typographic and mechanical artifacts of how the text was produced. |
-| [`rhetoric`](_autosummary/ductus.detect.html.md#ductus.detect.rhetoric)(text, span)    | Sentence shapes a phrase catalogue cannot see.                     |
-| [`rhythm`](_autosummary/ductus.detect.html.md#ductus.detect.rhythm)(text, span)      | Burstiness: how much sentence length varies.                       |
-| [`tells`](_autosummary/ductus.detect.html.md#ductus.detect.tells)(text, span)       | Catalogue phrase matches, as signals.                              |
+| [`binoculars`](_autosummary/ductus.detect.html.md#ductus.detect.binoculars)(text, span, \*[, observer, ...])   | Cross-perplexity of a paired observer and performer, as a standing in this text.   |
+|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| [`detectors_from`](_autosummary/ductus.detect.html.md#ductus.detect.detectors_from)(names)                         | Resolve a detector spec into callables and their names.                            |
+| [`fast_detect_gpt`](_autosummary/ductus.detect.html.md#ductus.detect.fast_detect_gpt)(text, span, \*[, model, ...]) | Conditional probability curvature, read as a standing within this document.        |
+| [`forensic`](_autosummary/ductus.detect.html.md#ductus.detect.forensic)(text, span)                          | Typographic and mechanical artifacts of how the text was produced.                 |
+| [`rhetoric`](_autosummary/ductus.detect.html.md#ductus.detect.rhetoric)(text, span)                          | Sentence shapes a phrase catalogue cannot see.                                     |
+| [`rhythm`](_autosummary/ductus.detect.html.md#ductus.detect.rhythm)(text, span)                            | Burstiness: how much sentence length varies.                                       |
+| [`tells`](_autosummary/ductus.detect.html.md#ductus.detect.tells)(text, span)                             | Catalogue phrase matches, as signals.                                              |
 
-### ductus.detect.DETECTORS *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [Callable](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [Span](_autosummary/ductus.base.html.md#ductus.base.Span)], [Iterator](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[Signal](_autosummary/ductus.base.html.md#ductus.base.Signal)]]]* *= {'forensic': <function forensic>, 'rhetoric': <function rhetoric>, 'rhythm': <function rhythm>, 'tells': <function tells>}*
+### ductus.detect.DEFAULT_DETECTORS *: [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), ...]* *= ('tells', 'forensic', 'rhetoric', 'rhythm')*
 
-The registry the `detectors=` seam resolves names against.
+a detector
+joins this tuple only after it has measurably beaten what is already here on
+`tests/fixtures/mixed_authorship.json`. See `misc/docs/phase-1-results.md`.
+
+* **Type:**
+  What `detectors=None` means. Deliberately *not* `list(DETECTORS)`
+
+### ductus.detect.DETECTORS *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [Callable](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [Span](_autosummary/ductus.base.html.md#ductus.base.Span)], [Iterator](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[Signal](_autosummary/ductus.base.html.md#ductus.base.Signal)]]]* *= {'binoculars': <function binoculars>, 'fast-detect-gpt': <function fast_detect_gpt>, 'forensic': <function forensic>, 'rhetoric': <function rhetoric>, 'rhythm': <function rhythm>, 'tells': <function tells>}*
+
+The registry the `detectors=` seam resolves names against. It holds more than
+the default: the model-based detectors are nameable here so `--detectors
+fast-detect-gpt` works, without being on by default. Registering is cheap –
+[`ductus.curvature`](_autosummary/ductus.curvature.html.md#module-ductus.curvature) imports nothing heavier than [`ductus.base`](_autosummary/ductus.base.html.md#module-ductus.base) until one
+of its detectors is actually called.
+
+### ductus.detect.binoculars(text, span, , observer='distilgpt2', performer='gpt2', bands=((1.5, 0.3), (2.5, 0.45)), min_windows=6, min_tokens=16, device=None)
+
+Cross-perplexity of a paired observer and performer, as a standing in this text.
+
+Where [`fast_detect_gpt()`](_autosummary/ductus.detect.html.md#ductus.detect.fast_detect_gpt) asks how predictable a passage is, this asks whether
+two closely related models are *unusually unsurprised in the same places* – which
+generalises better to generators neither model has seen.
+
+Needs the `[local]` extra, and observer and performer must share a tokenizer.
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](_autosummary/ductus.base.html.md#ductus.base.Signal)]
 
 ### ductus.detect.detectors_from(names)
 
@@ -438,6 +632,20 @@ Resolve a detector spec into callables and their names.
 >>> names
 ('tells', 'forensic', 'rhetoric', 'rhythm')
 ```
+
+### ductus.detect.fast_detect_gpt(text, span, , model='gpt2', bands=((1.5, 0.3), (2.5, 0.45)), min_windows=6, min_tokens=16, device=None)
+
+Conditional probability curvature, read as a standing within this document.
+
+A passage a model finds unusually *predictable* compared to the rest of the
+document leans machine; an unusually surprising one leans human. Neither claim
+is absolute, and none of the paper’s benchmark thresholds are used.
+
+Needs the `[local]` extra. The first call downloads and caches the proxy model;
+later calls on the same text cost no model time at all.
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](_autosummary/ductus.base.html.md#ductus.base.Signal)]
 
 ### ductus.detect.forensic(text, span)
 
@@ -784,16 +992,17 @@ True
 
 ### Modules
 
-| [`base`](_autosummary/ductus.base.html.md#module-ductus.base)       | The data model: where a finding lives, what it claims, and how much it weighs.   |
-|--------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| [`core`](_autosummary/ductus.core.html.md#module-ductus.core)       | The core: stream segments, or take the whole report.                             |
-| [`data`](_autosummary/ductus.data.html.md#module-ductus.data)       |                                                                                  |
-| [`detect`](_autosummary/ductus.detect.html.md#module-ductus.detect)   | The detectors -- the `detectors=` seam.                                          |
-| [`render`](_autosummary/ductus.render.html.md#module-ductus.render)   | Turning a report into something a person reads: JSON, Markdown, or HTML.         |
-| [`score`](_autosummary/ductus.score.html.md#module-ductus.score)     | Turning evidence into a lean -- the `aggregate=` seam.                           |
-| [`segment`](_autosummary/ductus.segment.html.md#module-ductus.segment) | Cutting a text into the units that get scored -- the `segmenter=` seam.          |
-| [`tells`](_autosummary/ductus.tells.html.md#module-ductus.tells)     | The tells catalogue: named regular-expression patterns, tiered by confidence.    |
-| [`tools`](_autosummary/ductus.tools.html.md#module-ductus.tools)     | The verb SSOT: plain functions, JSON-ready in, JSON-ready out.                   |
+| [`base`](_autosummary/ductus.base.html.md#module-ductus.base)           | The data model: where a finding lives, what it claims, and how much it weighs.   |
+|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| [`core`](_autosummary/ductus.core.html.md#module-ductus.core)           | The core: stream segments, or take the whole report.                             |
+| [`curvature`](_autosummary/ductus.curvature.html.md#module-ductus.curvature) | Model-based detectors -- the `[local]` extra.                                    |
+| [`data`](_autosummary/ductus.data.html.md#module-ductus.data)           |                                                                                  |
+| [`detect`](_autosummary/ductus.detect.html.md#module-ductus.detect)       | The detectors -- the `detectors=` seam.                                          |
+| [`render`](_autosummary/ductus.render.html.md#module-ductus.render)       | Turning a report into something a person reads: JSON, Markdown, or HTML.         |
+| [`score`](_autosummary/ductus.score.html.md#module-ductus.score)         | Turning evidence into a lean -- the `aggregate=` seam.                           |
+| [`segment`](_autosummary/ductus.segment.html.md#module-ductus.segment)     | Cutting a text into the units that get scored -- the `segmenter=` seam.          |
+| [`tells`](_autosummary/ductus.tells.html.md#module-ductus.tells)         | The tells catalogue: named regular-expression patterns, tiered by confidence.    |
+| [`tools`](_autosummary/ductus.tools.html.md#module-ductus.tools)         | The verb SSOT: plain functions, JSON-ready in, JSON-ready out.                   |
 
 
 # _autosummary/ductus.render.html.md
@@ -1270,18 +1479,16 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-17 11:43 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/b232077979a230ddfa03492c976658999e70c432"><code>b232077</code></a> on branch <code>main</code>, for **ductus 0.0.3** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-17 12:10 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/b2fab6e82e2fb4363327871e19fa84a9e57dae5e"><code>b2fab6e</code></a> on branch <code>main</code>, for **ductus 0.0.4** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.3) is behind the latest release on PyPI (0.0.4): `pip install ductus` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/b232077979a230ddfa03492c976658999e70c432"><code>b232077979a230ddfa03492c976658999e70c432</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/b2fab6e82e2fb4363327871e19fa84a9e57dae5e"><code>b2fab6e82e2fb4363327871e19fa84a9e57dae5e</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -1292,9 +1499,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35217106809">35217106809</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35219467476">35219467476</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>b232077979a230ddfa03492c976658999e70c432</code> (in the history of the built commit) |
+| Event commit | <code>b2fab6e82e2fb4363327871e19fa84a9e57dae5e</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1319,13 +1526,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.4/">0.0.4</a>, newer than the documented version (0.0.3).
+Latest release: <a href="https://pypi.org/project/ductus/0.0.4/">0.0.4</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout b232077979a230ddfa03492c976658999e70c432
+git checkout b2fab6e82e2fb4363327871e19fa84a9e57dae5e
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
