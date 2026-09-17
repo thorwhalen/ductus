@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ductus"
+version = "0.0.1"
+description = "Gauge which parts of a text read as machine-written, and why, with the evidence anchored to exact characters"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+keywords = [
+    "ai-detection", "machine-generated-text", "mgt", "authorship", "stylometry",
+    "llm", "provenance", "writing", "annotation", "agent-skills",
+]
+authors = [{ name = "Thor Whalen" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing :: Linguistic",
+]
+# The core is deliberately near-empty: `pyyaml` reads the tells catalogue and `cw`
+# builds the CLI from the same functions the library exposes. Everything that costs
+# a model, a GPU or an API key is an optional extra, so `import ductus` stays cheap.
+dependencies = ["pyyaml>=6.0", "cw>=0.1.1,<0.2"]
+
+[project.scripts]
+ductus = "ductus.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/thorwhalen/ductus"
+Repository = "https://github.com/thorwhalen/ductus"
+Issues = "https://github.com/thorwhalen/ductus/issues"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "ruff>=0.1.0"]
+# Model-based detectors that run offline against a small open proxy model
+# (Fast-DetectGPT, Binoculars). No API key; a GPU is optional but slow without.
+local = ["torch", "transformers"]
+# Vendor detector adapters. Each needs its own key; none is required.
+api = ["httpx"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["ductus"]
+
+# The shipped skills and the agent live inside the package dir (ductus/data/skills,
+# ductus/data/agents), so hatchling carries them into the wheel with no extra config
+# and `ductus install-skills` links them into an agent host.
+
+[tool.hatch.build.targets.sdist]
+only-include = ["ductus", "tests", ".github", "README.md", "LICENSE", "pyproject.toml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "ductus"]
+addopts = "--doctest-modules"
+
+[tool.ruff]
+line-length = 90
+target-version = "py310"
+
+[tool.wads.ci]
+project_name = "ductus"
+
+[tool.wads.ci.testing]
+python_versions = ["3.10", "3.12"]

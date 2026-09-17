@@ -1,0 +1,228 @@
+{
+ "_comment": "Ground truth: mixed human/AI documents with character-level AI spans. Used by tests/test_fixture_ground_truth.py.",
+ "_source": "LLMTrace, https://huggingface.co/datasets/iitolstykh/LLMTrace_detection",
+ "_license": "Apache-2.0 (a small verbatim slice, redistributed with attribution, unmodified)",
+ "_citation": "LLMTrace: A Corpus for Classification and Fine-Grained Localization of AI-Written Text. arXiv:2509.21269",
+ "documents": [
+  {
+   "id": "llmtrace-08008",
+   "data_type": "review",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "I honestly don't understand why many point out what a \"failure\" Occupy was as a protest. It's often criticized for not achieving specific legislative changes or having a clear set of demands. Yet, focusing solely on policy outcomes misses the broader impact and long-term ripple effects of such movements. Instead, it cultivated a powerful awareness of economic inequality and corporate influence, which continues to resonate today. I believe that Occupy WAS significant because it 2) created a global outpouring of support, galvanizing hundreds of thousands (perhaps millions?) of people all over the world onto the streets. It also provided a platform for diverse voices and concerns, fostering a sense of community among participants. 3) brought together people from all walks of life for a number of different, yet still related causes. Furthermore, it demonstrated the power of collective action and inspired subsequent movements for social and economic justice. 4) highlighted innovative solutions to problems, like the communications system of having entire groups relay messages in unison to overcome loudspeaker rules. 5) brought to light ideas and concepts not often discussed: the barter system, direct democracy, alternative currencies, buying local, the failed two party system... though these haven't yet sprouted, Occupy helped plant these seeds into our collective psyche as to their possibilities. I think the \"solutions\" aspect of the protest goes largely ignored, but was one of the most powerful parts of the movement.",
+   "ai_char_intervals": [
+    [
+     89,
+     432
+    ],
+    [
+     626,
+     737
+    ],
+    [
+     841,
+     967
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08023",
+   "data_type": "article",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "Eagles @ Lions Watch Live Here> http://advertisement.sportfb.com/hsfootball.php < How To Watch Live Stream: DeSoto vs Spring | Texas High School Football LIVE 12/26/2020 Watch Live Here>http://advertisement.sportfb.com/hsfootball.php< Eagles 9–1 Lions 9–0 The Spring (TX) varsity football team has a home playoff game vs. DeSoto (TX) on Saturday, December 26 @ 7p. This game is a part of the \"2020 Football State Championships - 6A D1\" tournament.",
+   "ai_char_intervals": [
+    [
+     365,
+     447
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08026",
+   "data_type": "paper_abstract",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "Hidden Markov random fields (HMRFs) are powerful statistical tools for modeling spatially correlated data, particularly when the underlying states are unobservable. The expectation-maximization (EM) algorithm provides an iterative approach to estimate the parameters of such models. In this project, we study the hidden Markov random field (HMRF) model and its expectation-maximization (EM) algorithm.",
+   "ai_char_intervals": [
+    [
+     0,
+     282
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08035",
+   "data_type": "question",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "Hi Pamela,The Zune Car thingy should be able to play what you have on your Zune, that's its job. You don't want it to play the radio from the zune because your cars radio already does that. The Zune car adapter is designed to output your Zune's audio to your car's stereo system. The Car packs are a tricky business from ipods to zunes. The ones that are like cassette readers if your car has a cassette player (good luck with that one) that does the job very well and won't interrupt your music with incoming radio. If you have any other questions let me know. Hi Pamela,The Zune Car thingy should be able to play what you have on your Zune, that's its job. You don't want it to play the radio from the zune because your cars radio already does that. This is usually done through an auxiliary input or an FM transmitter. The Car packs are a tricky business from ipods to zunes. The ones that are like cassette readers if your car has a cassette player (good luck with that... » Read More Hi Pamela,The Zune Car thingy should be able to play what you have on your Zune, that's its job. You don't want it to play the radio from the zune because your cars radio already does that. Some models might even offer direct integration with your car's entertainment system. The Car packs are a tricky business from ipods to zunes. However, compatibility can vary greatly depending on your car's make and model, as well as the specific Zune car kit you're using. If you have any other questions let me know. « Show Less",
+   "ai_char_intervals": [
+    [
+     97,
+     279
+    ],
+    [
+     752,
+     821
+    ],
+    [
+     1179,
+     1264
+    ],
+    [
+     1322,
+     1452
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08037",
+   "data_type": "factual",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "Monroe was too sick to work for most of the next six weeks, but despite confirmations by multiple doctors, the studio pressured her by alleging publicly that she was faking it. She made an appearance at President John F. Kennedy's 45th birthday celebration at Madison Square Garden on May 19, 1962, to sing \"Happy Birthday, Mr. President.\" She drew attention with her costume: a beige, skintight dress covered in rhinestones, which made her appear nude. The scene was widely publicized, and Monroe posed for nude photographs with photographer Lawrence Schiller that were published in *LIFE* magazine. Monroe next filmed a scene for \"Something's Got to Give\" in which she swam naked in a swimming pool. It was the first time a major star had appeared nude in a mainstream Hollywood production. She was fired from the film on June 7, 1962, and the production was shut down. When she was again on sick leave for several days, Fox decided that it could not afford to have another film running behind schedule when it was already struggling with the rising costs of \"Cleopatra\" (1963). Her dismissal became a major news story across the country. She responded to the allegations in interviews, including one with *LIFE* magazine, in which she stated that she was \"not crazy, just tired.\" The studio blamed Monroe for the film's demise and began spreading negative publicity about her, even alleging that she was mentally disturbed.",
+   "ai_char_intervals": [
+    [
+     177,
+     339
+    ],
+    [
+     454,
+     600
+    ],
+    [
+     702,
+     871
+    ],
+    [
+     1081,
+     1282
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08054",
+   "data_type": "news",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "Manchester United midfielder Marouane Fellaini is fit and ready to play, Belgium coach Marc Wilmots has confirmed. He had been sidelined with a knee injury, raising concerns about his readiness for the upcoming matches. Manchester United midfielder Marouane Fellaini returned to full training at Carrington this week. The news will come as a relief to United fans and management alike, who have been monitoring his recovery closely. Wilmots said: ‘Fellaini is definitely fit. I know he hasn’t played much but he is eager to play. He has been training well and is ready to contribute to the team. We've seen him in training, and he's looking strong and motivated. ‘He can be very helpful in different game situations. In Belgium you don’t find another player who has the same profile as Fellaini.’",
+   "ai_char_intervals": [
+    [
+     115,
+     219
+    ],
+    [
+     318,
+     432
+    ],
+    [
+     530,
+     662
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08059",
+   "data_type": "story",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "A man kills several of his business partners and his estranged ex-wife, then runs away with his children: a young Victoria and baby Lilly. After speeding on a remote, snowy road, he crashes into the woods and takes the children to an abandoned cabin he wanders upon nearby. Realizing the mistakes he has made, he prepares to commit murder suicide but at the last moment is killed by a strange figure in the cabin. Weeks later, the girls are still missing, and search parties are dispatched. The searchers stumble upon the crashed car and find the two children in the cabin. The girls are traumatized and feral, having spent years alone. They are put under the care of a psychiatrist, Dr. Dreyfuss. Their aunt and uncle, Lucas and Annabel, fight for custody of the children. Dr. Dreyfuss agrees to recommend Lucas and Annabel as the childrens' legal guardians as long as they agree to move into a special home used to perform case studies, knowing that he would not be able to monitor their progress if their aunt, who lives on the other side of the country, were to obtain custody.It quickly becomes apparent that the strange figure, who the children repeatedly refer to as \"Mama\", is in the new home with the children.",
+   "ai_char_intervals": [
+    [
+     414,
+     490
+    ],
+    [
+     574,
+     636
+    ],
+    [
+     698,
+     773
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08063",
+   "data_type": "story",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "Amid the political protests of the Saffron Revolution in Burma (Myanmar), ruthless SPDC officer Major Pa Tee Tint leads an army to pillage small villages in a campaign of fear. One such village is home to Sarah Miller, a compassionate missionary. Meanwhile, twenty years after the events in Afghanistan, John Rambo now lives in Thailand, making a meager living as a snake catcher and by providing boat rides. A group of Christian aid workers approaches him, seeking passage up the Salween River into Burma to deliver medical supplies and humanitarian aid to the Karen people. During the trip, the boat is stopped by pirates demanding Sarah Miller, the only female in the group, in exchange for passage. Rambo, witnessing the scene, initially refuses to intervene, but a deeper sense of morality eventually compels him to act. He fights off the pirates, saving Sarah and the others, and successfully delivers the group to their destination. However, soon after their arrival, the missionaries are ambushed and captured by Major Pa Tee Tint's forces. News of their disappearance reaches the outside world, causing grave concern among their colleagues and the church community. The pastor of the missionaries' church comes to Thailand and asks Rambo to guide a team of five mercenaries on a rescue mission.",
+   "ai_char_intervals": [
+    [
+     177,
+     246
+    ],
+    [
+     409,
+     575
+    ],
+    [
+     703,
+     1174
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08073",
+   "data_type": "short_form",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "I have trust issues due to being abused for years in a friendship/relationship with a woman who is a sociopath, as well as other past relationship trauma. This has made it incredibly difficult for me to form new connections and open up to people. Every new interaction feels like a potential minefield, and I'm constantly on guard, looking for red flags. I want a long term relationship with someone who cares about me, and can accept me for who I am, but I’m afraid of being abused again. I also never want to have kids due to childhood trauma, so my dating pool is rather challenging, since that seems to be a deal-breaker for most people.",
+   "ai_char_intervals": [
+    [
+     155,
+     354
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08084",
+   "data_type": "story",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "[From film's own website]Rex Dobson (Ryan Macquet) and Alice Edmonds (Claire Opperman) find themselves stranded alongside the R106, a freeway just outside Johannesburg. A horrific car accident leaves them injured and disoriented, surrounded by the eerie silence of the highway. Both survive, but wish they hadnt. As their stories unfold, it is clear that the truth of what happened that fateful day is far worse than anyone could imagine.Investigating the crime is Detective James Hirsch (Michael Thompson), a police officer who is used to doing things his own way. However, this case will test his resolve and force him to confront his own biases. Told in an unconventional narrative structure, The Unforgiving tosses and turns between points of view and characters as the film builds to its horrifying climax.Rex retells the story of how he found himself in an abandoned, rural farm house, chained by his ankle to a large slab of concrete.",
+   "ai_char_intervals": [
+    [
+     169,
+     277
+    ],
+    [
+     566,
+     648
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08085",
+   "data_type": "review",
+   "model": "gemini-2.5-flash",
+   "prompt_type": "fill_gaps",
+   "text": "My sister bought this antenna to go with the new 19 inch TV that has been installed in our grandmothers assisted living home. My sister was hoping for more channels, as the building is quite close to the city. Unfortunately, the reception has been quite poor so far. One PBS channel and two other channels is all I got even tho the TV says it picked up 6, I played with the ears put the antenna right in the window. It's really frustrating, especially since we live in a major metropolitan area. I am less than impressed with this antenna any antenna should pick up a station less than 40 miles away.",
+   "ai_char_intervals": [
+    [
+     126,
+     266
+    ],
+    [
+     416,
+     495
+    ]
+   ]
+  },
+  {
+   "id": "llmtrace-08088",
+   "data_type": "news",
+   "model": "zai-org/GLM-4-32B-0414",
+   "prompt_type": "create",
+   "text": "Roy Keane was spotted in the stands at Goodison Park on Monday night after his departure from Aston Villa. Keane left his position as Paul Lambert's assistant after just six months in the job. Returning to his post as Republic of Ireland No 2, the 43-year-old was present to watch Everton face Queens Park Rangers to monitor right-back Seamus Coleman. Roy Keane was in the crowd at Goodison Park to watch Republic of Ireland defender Seamus Coleman. The 43-year-old left his position as Aston Villa assistant manager following talks with boss Paul Lambert. Keane (bottom right) watches as Everton beat QPR 3-1 at Goodison Park.. Roy Keane attended Everton's match at Goodison Park, focusing on Seamus Coleman's performance.",
+   "ai_char_intervals": [
+    [
+     629,
+     723
+    ]
+   ]
+  }
+ ]
+}
