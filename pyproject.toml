@@ -32,6 +32,7 @@ dependencies = ["pyyaml>=6.0", "cw>=0.1.1,<0.2"]
 
 [project.scripts]
 ductus = "ductus.__main__:main"
+ductus-mcp = "ductus.mcp:main"
 
 [project.urls]
 Homepage = "https://github.com/thorwhalen/ductus"
@@ -47,6 +48,9 @@ dev = ["pytest>=7.0", "ruff>=0.1.0"]
 local = ["torch>=2.0", "transformers>=4.30"]
 # Vendor detector adapters. Each needs its own key; none is required.
 api = ["httpx"]
+# The MCP surface. `py2mcp` resolves 'module:function' strings at call time, so the
+# core never imports MCP and `import ductus` is unaffected by installing this.
+mcp = ["py2mcp>=0.1.10"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["ductus"]

@@ -58,11 +58,12 @@ Results: [`phase-2-results.md`](phase-2-results.md). The decision that had to co
 - **Not done, and deliberately** — per-detector weights were not fitted. Seven deterministic signals across twelve documents is not an evidence base, and fitting on it would have produced the shape of a result with none of the content.
 - **The roadmap's own reassurance about calibration was wrong**, and is corrected in `what-calibration-means-here.md`: "a fitted scorer changes what `lean` is computed from, not what is reported" does *not* hold for the obvious implementation, because `lean = 2p − 1` is invertible. The rule that survives is *calibrate the instrument, not the verdict*, with a sufficiency test to tell them apart. **Still no percentage.**
 
-### Phase 3 — MCP
+### Phase 3 — MCP — **done**
 
-- `ductus/mcp.py`: `mk_mcp_from_refs(['ductus.tools:gauge', 'ductus.tools:tells', 'ductus.tools:detectors'])`.
-- Never author a second verb list. One registry, many emitters — a parity test between two surfaces means there are two implementations.
-- The MCP surface is where the deployed-connector story starts: a hosted server whose LLM work runs on the caller's own subscription, with `middleware=` as the auth and metering seam.
+- **Done** — `ductus/mcp.py`, `mk_mcp()` over `py2mcp.mk_mcp_from_refs`. The core did not change, as predicted.
+- **Done, and better than "never author a second verb list"** — `TOOL_REFS` is *derived* from `tools._dispatch_funcs`, so there is no second list and therefore nothing for a parity test to catch. A verb that mutates the host says so at its own definition (`@host_mutating`) and surfaces filter on that property; `install_skills` is consequently not reachable over MCP, while a CLI user who types it chose to.
+- **Done** — `middleware=` and `auth=` pass straight through, which is where a deployed connector attaches metering and authentication without the core learning either exists.
+- **One thing the surface found.** Under `from __future__ import annotations` — used by every module here — the schema layer beneath `fastmcp` reads annotations as strings and drops **every keyword-only default**, so `gauge(source=...)` failed with five "missing required argument" errors. Since this package's convention is keyword-only from the second or third argument, that would have made every verb uncallable. `ductus.mcp._resolve_annotations` resolves them eagerly before the server is built. The defect is upstream, not in the core, so the core stayed as it was — but it is the first time a surface has told us anything, and it is the reason the surface is tested by *calling* it through a real client rather than by inspecting its schema.
 
 ### Phase 4 — HTTP
 

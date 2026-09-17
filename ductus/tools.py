@@ -30,12 +30,29 @@ __all__ = [
     "_dispatch_funcs",
     "detectors",
     "gauge",
+    "host_mutating",
     "install_skills",
     "segmenters",
     "tells",
 ]
 
 FORMATS = ("markdown", "json", "html")
+
+
+def host_mutating(fn):
+    """Mark a verb that changes the machine it runs on, rather than only reading.
+
+    Declared at the definition site so surfaces can filter on it without anyone
+    writing a second list of verbs. A CLI user invoking one of these chose to; a
+    remote MCP caller did not necessarily, so :mod:`ductus.mcp` leaves them out.
+
+    >>> host_mutating(lambda: None).mutates_host
+    True
+    >>> getattr(segmenters, "mutates_host", False)
+    False
+    """
+    fn.mutates_host = True
+    return fn
 
 
 def _read_source(source: str) -> str:
@@ -187,6 +204,7 @@ def tells(*, tier: str | None = None) -> list[dict[str, Any]]:
     ]
 
 
+@host_mutating
 def install_skills(*, target: str | None = None, write: bool = False) -> dict[str, Any]:
     """Link this package's shipped skills into an agent host's skills directory.
 
