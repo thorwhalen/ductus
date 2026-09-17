@@ -91,6 +91,8 @@ The default pair is the smallest thing that works on a CPU, because a detector t
 
 Binoculars' own ablations show the method depends on observer and performer being a *closely related* pair rather than an arbitrary strong/weak combination \[2]. `distilgpt2` is a distillation of `gpt2` and shares its tokenizer exactly, which is both the closeness the method wants and a hard requirement — the two models have to agree on what a token is for the cross-perplexity term to mean anything.
 
+**Phase 2 measured this ladder and left both defaults where they were.** A `gpt2`/`gpt2-large` Binoculars pair finds substantially more machine text on both fixtures *and* nearly doubles the rate at which it accuses human writers (6.3% → 11.4%), so it was argued for and then refused. Recall and false-positive rate move together as the proxy gets stronger; "upgrade" is the wrong word for that trade. Anyone changing `model=`, `observer=` or `performer=` should re-run `python misc/measure_false_positives.py --pair-check` for their pair. The full ladder is in [`phase-2-results.md`](phase-2-results.md).
+
 Both models are pulled from Hugging Face on first use and cached. The detectors are not in the default `detectors=` list and the core does not import `torch`; see the gate result in [`phase-1-results.md`](phase-1-results.md).
 
 ## REFERENCES

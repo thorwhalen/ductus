@@ -12,6 +12,7 @@ Run it::
     python misc/measure_false_positives.py --blind         # the pre-Phase-2 scorer
     python misc/measure_false_positives.py --local         # the [local] detectors
     python misc/measure_false_positives.py --sweep         # how REFERENCE_CHARS was chosen
+    python misc/measure_false_positives.py --pair-check    # binoculars, two proxy pairs
 
 **The corpus is not vendored, and cannot be.** Cambridge English Write & Improve and
 LOCNESS are released for non-commercial research use with no redistribution, so this
@@ -248,7 +249,24 @@ def main() -> None:
     # ones, so that a bias can be attributed to the mechanism that produced it. They
     # need a reference distribution within the document, so sentence granularity is
     # the only one that gives them anything to work with on texts this short.
-    if use_local:
+    if "--pair-check" in sys.argv:
+        # A stronger proxy pair may find more machine text AND accuse more humans.
+        # Promoting one on recall alone would contradict this whole document, so the
+        # candidate default is measured here before it is promoted.
+        from functools import partial
+
+        from ductus.curvature import binoculars
+
+        sets = {
+            "binoculars distilgpt2/gpt2 (current default)": [
+                partial(binoculars, observer="distilgpt2", performer="gpt2")
+            ],
+            "binoculars gpt2/gpt2-large (candidate)": [
+                partial(binoculars, observer="gpt2", performer="gpt2-large")
+            ],
+        }
+        segmenters = ("sentence",)
+    elif use_local:
         sets: dict[str, list[str] | None] = {
             "fast-detect-gpt alone": ["fast-detect-gpt"],
             "binoculars alone": ["binoculars"],
