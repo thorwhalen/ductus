@@ -42,7 +42,12 @@ from ductus.score import aggregate
 from ductus.segment import SEGMENTERS
 from ductus.tells import TellMatch, TellRule, iter_tell_matches, load_rules
 
-__version__ = "0.0.1"
+try:  # the installed distribution is the source of truth; CI bumps pyproject.toml
+    from importlib.metadata import version as _version
+
+    __version__ = _version("ductus")
+except Exception:  # running from a source tree that was never installed
+    __version__ = "0.0.0+unknown"
 
 __all__ = [
     "DETECTORS",
