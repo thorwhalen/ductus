@@ -36,18 +36,21 @@ If any of these turns out to need a core change, **the core was coupled to its f
 
 ## Tentative plan
 
-### Phase 1 — model-based detectors (`[local]`)
+### Phase 1 — model-based detectors (`[local]`) — **done, gate not cleared**
 
-The single biggest accuracy upgrade available, and it needs no API key.
+Built and shipped, **off by default**. The full measurement is in [`phase-1-results.md`](phase-1-results.md); the design decision it rests on is in [`curvature-as-evidence.md`](curvature-as-evidence.md).
 
-- Add `ductus/detectors/curvature.py` with `fast_detect_gpt(text, span, *, model=...)` and `binoculars(text, span, *, observer=..., performer=...)`. Both are one function of the existing `(text, span) -> Iterator[Signal]` shape.
-- Deferred imports; `torch`/`transformers` stay in the `[local]` extra and `import ductus` stays cheap.
-- Default proxy model small enough to run on CPU (GPT-Neo-125M class), with the Falcon-7B pair as the documented upgrade.
-- **Gate**: the `[local]` detectors must measurably beat the deterministic ones on `tests/fixtures/mixed_authorship.json` before they become part of any default. Recall is the weakness they exist to fix — the deterministic layer currently fires 8 times across 12 known-mixed documents.
+- `ductus/curvature.py` holds `fast_detect_gpt(text, span, *, model=...)` and `binoculars(text, span, *, observer=..., performer=...)` — one function each of the existing `(text, span) -> Iterator[Signal]` shape, registered in `DETECTORS` so they can be named. (A flat module rather than the `ductus/detectors/` package sketched here, to match the shape the rest of the package already has.)
+- Deferred imports: `import ductus` still loads no `torch`, and `tests/test_curvature.py` asserts it in a subprocess.
+- Defaults are `gpt2` and the `distilgpt2`/`gpt2` pair, CPU-sized; `EleutherAI/gpt-neo-2.7B` and the Falcon-7B pair are the documented upgrade.
+- **Gate: not cleared.** Machine-side recall moved from 1/40 to 3/40 decisive segments, but precision fell from 1/1 to 3/8, so the criterion — more recall *without* worse precision — failed. `DEFAULT_DETECTORS` is unchanged and is deliberately a different list from `DETECTORS`.
+- The result worth carrying forward: the model detectors found **10 human-leaning segments where the deterministic set found 0, all 10 correct**. Human-leaning evidence is first-class here, so this is why they ship rather than being deleted.
+- Re-running the gate after any change is `python misc/measure_detectors.py`.
 
 ### Phase 2 — calibration, and the fixture corpus
 
 - Vendor a second fixture set from RoFT (MIT, human prefix + machine continuation, an explicit `true_boundary_index`) alongside the LLMTrace slice already in `tests/fixtures/`. Different ground-truth shape — a single boundary rather than multiple spans — which is exactly why it is worth having both.
+- Retest the Phase 1 detectors at the documented upgrade models before anything else — the cheapest untried thing, and the fixture's `fill_gaps` shape is close to their worst case.
 - Fit `aggregate=` on them and report the honest operating characteristics: false-positive rate on the human-only subset first, and separately on non-native-English text if a suitable corpus can be licensed.
 - **Even after calibration, no percentage.** A fitted scorer changes what `lean` is computed from; it does not change what is reported. See `why-no-percentage.md`.
 

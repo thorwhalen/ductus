@@ -7,7 +7,7 @@
 | Seam | Current default | Built surfaces |
 |---|---|---|
 | `segmenter=` | `"paragraph"` (also `"sentence"`, `"document"`, or any callable) | **CLI** (`cw` over `tools._dispatch_funcs`), **agent skills** (`ductus/data/skills/`) |
-| `detectors=` | `tells`, `forensic`, `rhetoric`, `rhythm` — all deterministic, zero extra deps | MCP / HTTP / frontend: **questions answered, not built** — see `misc/docs/roadmap.md` |
+| `detectors=` | `tells`, `forensic`, `rhetoric`, `rhythm` — all deterministic, zero extra deps. `fast-detect-gpt` and `binoculars` ship in the `[local]` extra: registered, **opt-in**, off by default — see `misc/docs/phase-1-results.md` | MCP / HTTP / frontend: **questions answered, not built** — see `misc/docs/roadmap.md` |
 | `aggregate=` | `score.aggregate`, a transparent weighted sum | |
 
 **NOT seams**, on purpose: report templates, arg parsing, the four dataclasses, the colour ramp, the tier→weight map.
@@ -18,7 +18,8 @@
 base.py      Span / Signal / Segment / Report -- the contract every module speaks
 segment.py   segmenters (the `segmenter=` seam); pure generators over exact offsets
 tells.py     the catalogue: load_rules, iter_tell_matches, metrics  <- acquaint imports these
-detect.py    the four detectors (the `detectors=` seam); each is (text, span) -> Iterator[Signal]
+detect.py    the four deterministic detectors (the `detectors=` seam) + the registry
+curvature.py Fast-DetectGPT and Binoculars ([local] extra, deferred torch import)
 score.py     aggregate(): evidence -> (lean, strength, label). No percentage. Ever.
 core.py      iter_segments() streams, gauge() batches over it
 render.py    to_json / to_markdown / to_html (self-contained, no CDN, two-channel highlighting)
@@ -36,7 +37,8 @@ data/        tells.yaml, skills/, agents/
 - **Nothing in `tools.py` prints or exits.** The CLI is `cw`; MCP would be `py2mcp` string refs to the same functions.
 - **The core stays cheap to import.** `torch`/`transformers` live in the `[local]` extra behind deferred imports. `pyyaml` and `cw` are the only hard dependencies.
 - **"No findings" is a weak result, not a clean bill**, and the renderers say so.
-- **The deterministic layer has high precision and low recall** — 8 signals across 12 known-mixed fixture documents. `tests/test_ground_truth.py` asserts that floor rather than a flattering number. Do not raise the assertion to make a change look good.
+- **The deterministic layer has high precision and low recall** — 7 signals across the 12 known-mixed fixture documents at sentence granularity (11 at paragraph). `tests/test_ground_truth.py` asserts that floor rather than a flattering number. Do not raise the assertion to make a change look good.
+- **A detector joins `DEFAULT_DETECTORS` by measurement, never by being new.** `DETECTORS` is the registry; `DEFAULT_DETECTORS` is what `detectors=None` means, and they are deliberately not the same list. The gate and its criterion are `misc/measure_detectors.py`; the standing result is `misc/docs/phase-1-results.md`. The model-based pair did not clear it and is off by default.
 
 ## Conventions
 

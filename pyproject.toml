@@ -41,8 +41,10 @@ Issues = "https://github.com/thorwhalen/ductus/issues"
 [project.optional-dependencies]
 dev = ["pytest>=7.0", "ruff>=0.1.0"]
 # Model-based detectors that run offline against a small open proxy model
-# (Fast-DetectGPT, Binoculars). No API key; a GPU is optional but slow without.
-local = ["torch", "transformers"]
+# (Fast-DetectGPT, Binoculars). No API key, and CPU is enough at the default models.
+# `transformers` must be new enough for fast tokenizers' offset mapping, which is how
+# a model-based signal stays anchored to the exact characters it is about.
+local = ["torch>=2.0", "transformers>=4.30"]
 # Vendor detector adapters. Each needs its own key; none is required.
 api = ["httpx"]
 

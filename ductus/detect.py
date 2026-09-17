@@ -18,8 +18,13 @@ deterministic and dependency-free:
     Burstiness -- the variance of sentence length. Weak evidence, and reported
     as weak.
 
-Adding a model-based detector (Fast-DetectGPT, Binoculars, a vendor API) means
-writing one more function of this shape. Nothing else in the package changes.
+Two more ship behind the ``[local]`` extra -- ``fast-detect-gpt`` and
+``binoculars``, in :mod:`ductus.curvature`. They are registered here so they can be
+named, but whether they belong in :data:`DEFAULT_DETECTORS` is settled by
+measurement, not by being new -- see ``misc/docs/phase-1-results.md``.
+
+Adding another one -- a vendor API, a supervised classifier -- means writing one more
+function of this shape. Nothing else in the package changes.
 
 >>> from ductus.base import Span
 >>> t = "The results were not merely good, but transformative."
@@ -37,9 +42,20 @@ import statistics
 from collections.abc import Callable, Iterator, Sequence
 
 from ductus.base import Signal, Span
+from ductus.curvature import binoculars, fast_detect_gpt
 from ductus.tells import iter_tell_matches, metrics
 
-__all__ = ["DETECTORS", "detectors_from", "forensic", "rhetoric", "rhythm", "tells"]
+__all__ = [
+    "DEFAULT_DETECTORS",
+    "DETECTORS",
+    "binoculars",
+    "detectors_from",
+    "fast_detect_gpt",
+    "forensic",
+    "rhetoric",
+    "rhythm",
+    "tells",
+]
 
 _WORD_RE = re.compile(r"[A-Za-z0-9’']+")
 _SENTENCE_RE = re.compile(r"[^.!?\n]+[.!?]?")
@@ -352,13 +368,24 @@ def rhythm(text: str, span: Span) -> Iterator[Signal]:
         )
 
 
-#: The registry the ``detectors=`` seam resolves names against.
+#: The registry the ``detectors=`` seam resolves names against. It holds more than
+#: the default: the model-based detectors are nameable here so ``--detectors
+#: fast-detect-gpt`` works, without being on by default. Registering is cheap --
+#: :mod:`ductus.curvature` imports nothing heavier than :mod:`ductus.base` until one
+#: of its detectors is actually called.
 DETECTORS: dict[str, Callable[[str, Span], Iterator[Signal]]] = {
     "tells": tells,
     "forensic": forensic,
     "rhetoric": rhetoric,
     "rhythm": rhythm,
+    "fast-detect-gpt": fast_detect_gpt,
+    "binoculars": binoculars,
 }
+
+#: What ``detectors=None`` means. Deliberately *not* ``list(DETECTORS)``: a detector
+#: joins this tuple only after it has measurably beaten what is already here on
+#: ``tests/fixtures/mixed_authorship.json``. See ``misc/docs/phase-1-results.md``.
+DEFAULT_DETECTORS: tuple[str, ...] = ("tells", "forensic", "rhetoric", "rhythm")
 
 
 def detectors_from(
@@ -374,7 +401,7 @@ def detectors_from(
     ('tells', 'forensic', 'rhetoric', 'rhythm')
     """
     if names is None:
-        names = list(DETECTORS)
+        names = list(DEFAULT_DETECTORS)
     fns, labels = [], []
     for n in names:
         if isinstance(n, str):
