@@ -61,7 +61,7 @@ def test_plain_specific_prose_fires_nothing():
 def test_matches_carry_usable_offsets():
     text = "Well, let's delve into it."
     m = next(m for m in iter_tell_matches(text) if m.rule_id == "ai-vocabulary")
-    assert text[m.start:m.end] == m.matched == "delve"
+    assert text[m.start : m.end] == m.matched == "delve"
 
 
 def test_offset_shifts_a_whole_scan():
@@ -70,7 +70,9 @@ def test_offset_shifts_a_whole_scan():
 
 
 def test_tier_filter():
-    assert {m.tier for m in iter_tell_matches("Great question! Let's delve.", tiers=["E"])} == {"E"}
+    assert {
+        m.tier for m in iter_tell_matches("Great question! Let's delve.", tiers=["E"])
+    } == {"E"}
 
 
 def test_a_caller_can_supply_its_own_catalogue():
@@ -78,7 +80,15 @@ def test_a_caller_can_supply_its_own_catalogue():
     from ductus.tells import TellRule
     import re
 
-    custom = (TellRule(id="mine", tier="W", message="a habit of mine",
-                       patterns=(re.compile(r"\bfrankly\b", re.I),)),)
-    assert {m.rule_id for m in iter_tell_matches("Frankly, it broke.", rules=custom)} == {"mine"}
+    custom = (
+        TellRule(
+            id="mine",
+            tier="W",
+            message="a habit of mine",
+            patterns=(re.compile(r"\bfrankly\b", re.I),),
+        ),
+    )
+    assert {m.rule_id for m in iter_tell_matches("Frankly, it broke.", rules=custom)} == {
+        "mine"
+    }
     assert list(iter_tell_matches("Let's delve in.", rules=custom)) == []

@@ -6,8 +6,8 @@ Gauge which parts of a text read as machine-written, and say why — with every 
 from ductus import gauge
 
 report = gauge(open("draft.md").read())
-report.document.label          # 'mixed-signals'
-report.segments[3].lean        # +0.62  (-1 human … +1 machine)
+report.document.label  # 'mixed-signals'
+report.segments[3].lean  # +0.62  (-1 human … +1 machine)
 report.segments[3].signals[0].note
 # "a colon introducing a three-part parallel enumeration -- a textbook assistant construction"
 ```
@@ -74,9 +74,11 @@ A quote that no longer occurs is dropped rather than mis-anchored, so re-running
 Three, each one keyword argument, each defaulting to something that genuinely works:
 
 ```python
-gauge(text, segmenter="sentence")               # or "paragraph", "document", or a callable
-gauge(text, detectors=["forensic", "rhetoric"]) # or your own (text, span) -> Iterator[Signal]
-gauge(text, aggregate=my_calibrated_scorer)     # replace the scoring model wholesale
+gauge(text, segmenter="sentence")  # or "paragraph", "document", or a callable
+gauge(
+    text, detectors=["forensic", "rhetoric"]
+)  # or your own (text, span) -> Iterator[Signal]
+gauge(text, aggregate=my_calibrated_scorer)  # replace the scoring model wholesale
 ```
 
 A detector is a plain function `(text, span) -> Iterator[Signal]`. There is no base class and nothing to register. Adding Fast-DetectGPT, Binoculars or a vendor API means writing one more function of that shape — see [the roadmap](misc/docs/roadmap.md).

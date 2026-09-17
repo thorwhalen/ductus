@@ -16,7 +16,7 @@ or normalises the text, so every offset it yields indexes the original.
 from __future__ import annotations
 
 import re
-from typing import Callable, Iterator
+from collections.abc import Callable, Iterator
 
 from ductus.base import Span
 
@@ -27,7 +27,7 @@ _PARAGRAPH_RE = re.compile(r"[^\n]+(?:\n(?!\s*\n)[^\n]+)*")
 # Deliberately simple: abbreviations will occasionally split wrong. A sentence
 # splitter that is right 99% of the time costs a model; this one costs nothing,
 # and a mis-split moves a boundary rather than losing text.
-_SENTENCE_RE = re.compile(r"\s*(\S.*?(?:[.!?](?=\s|$)|$))", re.S)
+_SENTENCE_RE = re.compile(r"\s*(\S.*?(?:[.!?](?=\s|$)|$))", re.DOTALL)
 
 
 def paragraph_spans(text: str) -> Iterator[Span]:
@@ -70,7 +70,9 @@ SEGMENTERS: dict[str, Callable[[str], Iterator[Span]]] = {
 }
 
 
-def spans_of(text: str, segmenter: str | Callable[[str], Iterator[Span]]) -> Iterator[Span]:
+def spans_of(
+    text: str, segmenter: str | Callable[[str], Iterator[Span]]
+) -> Iterator[Span]:
     """Resolve ``segmenter`` (a name or a callable) and run it over ``text``.
 
     >>> len(list(spans_of("a\\n\\nb", "paragraph")))

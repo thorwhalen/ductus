@@ -27,13 +27,13 @@ from dataclasses import dataclass, field
 from typing import Any
 
 __all__ = [
-    "SCHEMA_VERSION",
     "DIRECTIONS",
     "LABELS",
-    "Span",
-    "Signal",
-    "Segment",
+    "SCHEMA_VERSION",
     "Report",
+    "Segment",
+    "Signal",
+    "Span",
 ]
 
 #: Bumped when the serialized shape of a Report changes incompatibly.
@@ -74,7 +74,7 @@ class Span:
     level: str = "segment"
 
     @classmethod
-    def of(cls, text: str, start: int, end: int, *, level: str = "segment") -> "Span":
+    def of(cls, text: str, start: int, end: int, *, level: str = "segment") -> Span:
         """Build a span over ``text``, capturing its re-anchoring context.
 
         >>> Span.of("abcdef", 2, 4).suffix
@@ -93,7 +93,7 @@ class Span:
     def length(self) -> int:
         return self.end - self.start
 
-    def contains(self, other: "Span") -> bool:
+    def contains(self, other: Span) -> bool:
         """Whether ``other`` falls entirely inside this span.
 
         >>> a, b = Span.of("abcdef", 0, 6), Span.of("abcdef", 2, 4)
@@ -125,7 +125,9 @@ class Signal:
 
     def __post_init__(self) -> None:
         if self.direction not in DIRECTIONS:
-            raise ValueError(f"direction must be one of {DIRECTIONS}, got {self.direction!r}")
+            raise ValueError(
+                f"direction must be one of {DIRECTIONS}, got {self.direction!r}"
+            )
         if not 0.0 <= self.weight <= 1.0:
             raise ValueError(f"weight must be in [0, 1], got {self.weight!r}")
 

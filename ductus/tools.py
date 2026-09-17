@@ -17,7 +17,8 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from ductus.base import Signal, Span
 from ductus.core import gauge as _gauge
@@ -25,7 +26,14 @@ from ductus.detect import DETECTORS
 from ductus.render import to_html, to_json, to_markdown
 from ductus.segment import SEGMENTERS
 
-__all__ = ["gauge", "detectors", "tells", "segmenters", "install_skills", "_dispatch_funcs"]
+__all__ = [
+    "_dispatch_funcs",
+    "detectors",
+    "gauge",
+    "install_skills",
+    "segmenters",
+    "tells",
+]
 
 FORMATS = ("markdown", "json", "html")
 
@@ -38,6 +46,7 @@ def _read_source(source: str) -> str:
     """
     if source == "-":
         import sys
+
         return sys.stdin.read()
     if len(source) < 4096 and os.path.isfile(source):
         with open(source, encoding="utf-8") as f:
@@ -73,15 +82,17 @@ def _signals_from_judgments(text: str, judgments: Any) -> list[Signal]:
             end = start + len(j["quote"])
         else:
             start, end = int(j["start"]), int(j["end"])
-        out.append(Signal(
-            name=j.get("name", "judgment"),
-            direction=j["direction"],
-            weight=float(j.get("weight", 0.35)),
-            detector=j.get("detector", "judge"),
-            value=j.get("value"),
-            note=j.get("note", ""),
-            span=Span.of(text, start, end, level="token"),
-        ))
+        out.append(
+            Signal(
+                name=j.get("name", "judgment"),
+                direction=j["direction"],
+                weight=float(j.get("weight", 0.35)),
+                detector=j.get("detector", "judge"),
+                value=j.get("value"),
+                note=j.get("note", ""),
+                span=Span.of(text, start, end, level="token"),
+            )
+        )
     return out
 
 
@@ -125,8 +136,10 @@ def gauge(
     if out:
         with open(out, "w", encoding="utf-8") as f:
             f.write(rendered)
-        return (f"wrote {out} ({len(rendered)} bytes) -- {report.document.label}, "
-                f"lean {report.document.lean:+.2f}, {len(report.signals)} signal(s)")
+        return (
+            f"wrote {out} ({len(rendered)} bytes) -- {report.document.label}, "
+            f"lean {report.document.lean:+.2f}, {len(report.signals)} signal(s)"
+        )
     return rendered
 
 
@@ -162,8 +175,13 @@ def tells(*, tier: str | None = None) -> list[dict[str, Any]]:
     from ductus.tells import load_rules
 
     return [
-        {"id": r.id, "tier": r.tier, "message": r.message, "weight": r.weight,
-         "patterns": [p.pattern for p in r.patterns]}
+        {
+            "id": r.id,
+            "tier": r.tier,
+            "message": r.message,
+            "weight": r.weight,
+            "patterns": [p.pattern for p in r.patterns],
+        }
         for r in load_rules()
         if tier is None or r.tier == tier
     ]
@@ -193,8 +211,12 @@ def install_skills(*, target: str | None = None, write: bool = False) -> dict[st
         if write and not link.exists():
             dst.mkdir(parents=True, exist_ok=True)
             link.symlink_to(src / name)
-    return {"source": str(src), "target": str(dst), "dry_run": not write,
-            "skills": actions}
+    return {
+        "source": str(src),
+        "target": str(dst),
+        "dry_run": not write,
+        "skills": actions,
+    }
 
 
 #: The SSOT the CLI, an MCP server and an HTTP app would all dispatch from.

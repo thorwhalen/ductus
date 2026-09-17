@@ -1,10 +1,10 @@
 """``python -m ductus`` -- the CLI, built from the same functions the library exposes.
 
-    ductus gauge draft.md                      # a markdown diagnosis on stdout
-    ductus gauge draft.md --format html --out report.html
-    ductus gauge - --format json < draft.md    # from stdin, machine-readable
-    ductus tells --tier E                      # what the catalogue enforces
-    ductus install-skills --write              # link the skills into ~/.claude
+ductus gauge draft.md                      # a markdown diagnosis on stdout
+ductus gauge draft.md --format html --out report.html
+ductus gauge - --format json < draft.md    # from stdin, machine-readable
+ductus tells --tier E                      # what the catalogue enforces
+ductus install-skills --write              # link the skills into ~/.claude
 """
 
 import cw

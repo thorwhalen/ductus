@@ -24,18 +24,19 @@ half of its ``deslop`` check, and layers recipient calibration on top.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any, Iterator, Sequence
+from typing import Any
 
 __all__ = [
     "TIER_WEIGHT",
-    "TellRule",
     "TellMatch",
+    "TellRule",
+    "iter_tell_matches",
     "load_catalogue",
     "load_rules",
     "metrics",
-    "iter_tell_matches",
 ]
 
 #: How much each tier is worth as evidence, on the 0..1 Signal scale.

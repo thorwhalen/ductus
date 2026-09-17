@@ -31,11 +31,11 @@ argument; see ``misc/docs/roadmap.md``.
 
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from ductus.base import Signal
 
-__all__ = ["aggregate", "LEAN_THRESHOLD", "STRENGTH_FLOOR", "EVIDENCE_FULL"]
+__all__ = ["EVIDENCE_FULL", "LEAN_THRESHOLD", "STRENGTH_FLOOR", "aggregate"]
 
 #: Beyond this, a segment is called as leaning one way.
 LEAN_THRESHOLD = 0.45

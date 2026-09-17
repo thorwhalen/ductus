@@ -33,9 +33,9 @@ import json
 from dataclasses import asdict
 from typing import Any
 
-from ductus.base import Report, Segment, Signal
+from ductus.base import Report, Segment, Signal, Span
 
-__all__ = ["to_json", "to_markdown", "to_html"]
+__all__ = ["to_html", "to_json", "to_markdown"]
 
 _DISCLAIMER = (
     "Evidence, not a verdict. These are signals with weights, not a probability that "
@@ -59,11 +59,15 @@ def to_json(report: Report, *, indent: int | None = 2) -> str:
 def _stats(seg: Segment) -> str:
     m = sum(s.weight for s in seg.signals if s.direction == "machine")
     h = sum(s.weight for s in seg.signals if s.direction == "human")
-    return (f"lean **{seg.lean:+.2f}** &middot; strength {seg.strength:.2f} &middot; "
-            f"{len(seg.signals)} signal(s), machine {m:.2f} / human {h:.2f}")
+    return (
+        f"lean **{seg.lean:+.2f}** &middot; strength {seg.strength:.2f} &middot; "
+        f"{len(seg.signals)} signal(s), machine {m:.2f} / human {h:.2f}"
+    )
 
 
-def to_markdown(report: Report, *, text: str | None = None, title: str = "Reading") -> str:
+def to_markdown(
+    report: Report, *, text: str | None = None, title: str = "Reading"
+) -> str:
     """A readable diagnosis: synopsis first, then the flagged segments.
 
     >>> from ductus.core import gauge
@@ -91,10 +95,16 @@ def to_markdown(report: Report, *, text: str | None = None, title: str = "Readin
     out.append("")
 
     if not flagged:
-        out += ["No signal fired anywhere in this text. That is a real result and a weak "
-                "one: the deterministic detectors find phrases, artifacts and shapes, and "
-                "a text can be wholly machine-written without any of them.", "",
-                f"> {_DISCLAIMER}", ""]
+        out += [
+            (
+                "No signal fired anywhere in this text. That is a real result and a "
+                "weak one: the deterministic detectors find phrases, artifacts and "
+                "shapes, and a text can be wholly machine-written without any of them."
+            ),
+            "",
+            f"> {_DISCLAIMER}",
+            "",
+        ]
         return "\n".join(out)
 
     out += ["## Segments with evidence", ""]
@@ -102,18 +112,30 @@ def to_markdown(report: Report, *, text: str | None = None, title: str = "Readin
     for seg in flagged:
         opening = seg.span.quote[:44].replace("\n", " ").replace("|", "\\|")
         names = ", ".join(sorted({s.name for s in seg.signals}))
-        out.append(f"| {seg.span.start}&ndash;{seg.span.end} | {opening}… | "
-                   f"{seg.label} | {seg.lean:+.2f} | {names} |")
+        out.append(
+            f"| {seg.span.start}&ndash;{seg.span.end} | {opening}… | "
+            f"{seg.label} | {seg.lean:+.2f} | {names} |"
+        )
     out.append("")
 
     out += ["## Why", ""]
     for seg in flagged:
         opening = seg.span.quote[:60].replace("\n", " ")
-        out += [f"### `{seg.span.start}`&ndash;`{seg.span.end}` — {seg.label}", "",
-                f"> {opening}…", "", _stats(seg), ""]
+        out += [
+            f"### `{seg.span.start}`&ndash;`{seg.span.end}` — {seg.label}",
+            "",
+            f"> {opening}…",
+            "",
+            _stats(seg),
+            "",
+        ]
         for s in sorted(seg.signals, key=lambda s: -s.weight):
-            where = f" — `{s.span.quote[:40]}`" if s.span and s.span.level == "token" else ""
-            out.append(f"- **{s.name}** ({s.direction}, {s.weight:.2f}, via {s.detector}){where}  \n  {s.note}")
+            where = (
+                f" — `{s.span.quote[:40]}`" if s.span and s.span.level == "token" else ""
+            )
+            out.append(
+                f"- **{s.name}** ({s.direction}, {s.weight:.2f}, via {s.detector}){where}  \n  {s.note}"
+            )
         out.append("")
 
     out += ["---", "", f"> {_DISCLAIMER}", ""]
@@ -194,23 +216,32 @@ def _shade(direction: str, weight: float) -> tuple[str, str]:
     return f"color-mix(in oklab, var(--{b}) {t * 100:.0f}%, var(--{a}))", f"var(--{b})"
 
 
-def _placed(seg: Segment) -> list[Signal]:
-    """Token-level signals, greedily de-overlapped -- the rest go to the lane."""
+def _placed(seg: Segment) -> list[tuple[Signal, Span]]:
+    """Token-level signals, greedily de-overlapped -- the rest go to the lane.
+
+    Pairs each signal with its span so the caller never has to re-check that the
+    span is there.
+    """
     candidates = sorted(
-        (s for s in seg.signals if s.span and s.span.level == "token"),
-        key=lambda s: (s.span.start, -s.weight),
+        ((s, s.span) for s in seg.signals if s.span and s.span.level == "token"),
+        key=lambda pair: (pair[1].start, -pair[0].weight),
     )
-    out, last = [], seg.span.start
-    for s in candidates:
-        if s.span.start >= last:
-            out.append(s)
-            last = s.span.end
+    out: list[tuple[Signal, Span]] = []
+    last = seg.span.start
+    for signal, span in candidates:
+        if span.start >= last:
+            out.append((signal, span))
+            last = span.end
     return out
 
 
-def to_html(report: Report, *, text: str | None = None,
-            title: str = "Where this reads as machine-written",
-            subtitle: str = "") -> str:
+def to_html(
+    report: Report,
+    *,
+    text: str | None = None,
+    title: str = "Where this reads as machine-written",
+    subtitle: str = "",
+) -> str:
     """A single self-contained HTML file. ``text`` defaults to the spans' own quotes.
 
     >>> from ductus.core import gauge
@@ -223,34 +254,47 @@ def to_html(report: Report, *, text: str | None = None,
 
     for i, seg in enumerate(report.segments):
         base = seg.span.start
-        raw = text[seg.span.start:seg.span.end] if text is not None else seg.span.quote
+        raw = text[seg.span.start : seg.span.end] if text is not None else seg.span.quote
         out, cursor = [], 0
-        for j, s in enumerate(_placed(seg)):
+        for j, (s, s_span) in enumerate(_placed(seg)):
             key = f"{i}_{j}"
-            tips[key] = {"n": s.name, "d": s.direction, "w": s.weight,
-                         "t": s.detector, "r": _html.escape(s.note)}
+            tips[key] = {
+                "n": s.name,
+                "d": s.direction,
+                "w": s.weight,
+                "t": s.detector,
+                "r": _html.escape(s.note),
+            }
             hl, ul = _shade(s.direction, s.weight)
-            a, b = s.span.start - base, s.span.end - base
+            a, b = s_span.start - base, s_span.end - base
             out.append(_html.escape(raw[cursor:a]))
-            out.append(f'<mark data-k="{key}" style="--hl:{hl};--ul:{ul}">'
-                       f'{_html.escape(raw[a:b])}</mark>')
+            out.append(
+                f'<mark data-k="{key}" style="--hl:{hl};--ul:{ul}">'
+                f"{_html.escape(raw[a:b])}</mark>"
+            )
             cursor = b
         out.append(_html.escape(raw[cursor:]))
 
         lean = "m" if seg.lean > 0.15 else ("h" if seg.lean < -0.15 else "n")
         badge = f"{seg.label} &middot; {seg.lean:+.2f}" if seg.signals else ""
-        body.append(f'<p class="para" data-lean="{lean}">'
-                    f'<span class="badge">{badge}</span>{"".join(out)}</p>')
+        body.append(
+            f'<p class="para" data-lean="{lean}">'
+            f'<span class="badge">{badge}</span>{"".join(out)}</p>'
+        )
         if seg.signals:
             bars = "".join(
                 f'<i style="width:{max(12, s.weight * 80):.0f}px;'
                 f'background:{_shade(s.direction, s.weight)[1]}" '
-                f'title="{_html.escape(s.name)}"></i>' for s in seg.signals)
+                f'title="{_html.escape(s.name)}"></i>'
+                for s in seg.signals
+            )
             body.append(f'<div class="lane">{bars}</div>')
 
     doc = report.document
-    sub = subtitle or (f"{report.n_chars} characters &middot; {len(report.segments)} "
-                       f"{report.segmenter}(s) &middot; schema {report.schema_version}")
+    sub = subtitle or (
+        f"{report.n_chars} characters &middot; {len(report.segments)} "
+        f"{report.segmenter}(s) &middot; schema {report.schema_version}"
+    )
     return (
         '<!doctype html>\n<html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -262,9 +306,9 @@ def to_html(report: Report, *, text: str | None = None,
         f'<span class="chip">document: <b>&nbsp;{doc.label}</b> '
         f"({doc.lean:+.2f}, strength {doc.strength:.2f})</span></div></header>"
         f'<main>{"".join(body)}</main><aside id="tip"></aside>'
-        f'<footer><p><b>{_DISCLAIMER}</b></p>'
+        f"<footer><p><b>{_DISCLAIMER}</b></p>"
         f"<p>sha256 {report.text_sha256[:16]} &middot; detectors: "
-        f'{", ".join(report.detectors)} &middot; calibration: {report.calibration}</p></footer>'
+        f"{', '.join(report.detectors)} &middot; calibration: {report.calibration}</p></footer>"
         f'<script type="application/json" id="ductus-data">{json.dumps(tips)}</script>'
         f"<script>{_JS}</script></body></html>"
     )

@@ -63,12 +63,13 @@ ds = load_dataset("liamdugan/roft", split="train")
 # pick a small, license-clean slice: dedupe by (dataset, model) and keep the first N
 sample = ds.filter(lambda r: r["true_boundary_index"] is not None).select(range(20))
 
+
 def recover_char_offset(row):
-    full_text = row["prompt_body"] + row["gen_body"]     # reconstruct full doc
-    sentences = nltk.sent_tokenize(full_text)              # 10 sentences per RoFT design
+    full_text = row["prompt_body"] + row["gen_body"]  # reconstruct full doc
+    sentences = nltk.sent_tokenize(full_text)  # 10 sentences per RoFT design
     boundary_sentence_idx = row["true_boundary_index"]
     human_part = " ".join(sentences[:boundary_sentence_idx])
-    char_offset = len(human_part)                          # everything after this = AI
+    char_offset = len(human_part)  # everything after this = AI
     return char_offset
 ```
 
@@ -78,6 +79,7 @@ Because each RoFT document is exactly 10 sentences with a single, human-annotate
 
 ```python
 from datasets import load_dataset
+
 ds = load_dataset("iitolstykh/LLMTrace_detection", split="test")
 mixed = ds.filter(lambda r: r["label"] == "mixed").select(range(20))
 # mixed[i]["ai_char_intervals"] is already [[start, end], ...] into mixed[i]["text"]

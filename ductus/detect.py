@@ -34,20 +34,29 @@ from __future__ import annotations
 
 import re
 import statistics
-from typing import Callable, Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 
 from ductus.base import Signal, Span
 from ductus.tells import iter_tell_matches, metrics
 
-__all__ = ["DETECTORS", "tells", "forensic", "rhetoric", "rhythm", "detectors_from"]
+__all__ = ["DETECTORS", "detectors_from", "forensic", "rhetoric", "rhythm", "tells"]
 
 _WORD_RE = re.compile(r"[A-Za-z0-9’']+")
 _SENTENCE_RE = re.compile(r"[^.!?\n]+[.!?]?")
 
 _DISCOURSE_OPENERS = (
-    "however", "moreover", "furthermore", "additionally", "that said",
-    "at the same time", "in addition", "importantly", "ultimately",
-    "crucially", "notably", "overall",
+    "however",
+    "moreover",
+    "furthermore",
+    "additionally",
+    "that said",
+    "at the same time",
+    "in addition",
+    "importantly",
+    "ultimately",
+    "crucially",
+    "notably",
+    "overall",
 )
 
 
@@ -136,6 +145,7 @@ def tells(text: str, span: Span) -> Iterator[Signal]:
 
 # ------------------------------------------------------------------------ forensic
 
+
 def forensic(text: str, span: Span) -> Iterator[Signal]:
     """Typographic and mechanical artifacts of how the text was produced.
 
@@ -150,43 +160,82 @@ def forensic(text: str, span: Span) -> Iterator[Signal]:
     s = span.quote
 
     for m in re.finditer(r"—", s):
-        yield Signal("em-dash", "machine", 0.12, "forensic", "—",
-                     "em dash; heavy use is a default-model habit, and absence "
-                     "across a long text is a meaningful human signal",
-                     _sub(text, span, m.start(), m.end()))
+        yield Signal(
+            "em-dash",
+            "machine",
+            0.12,
+            "forensic",
+            "—",
+            "em dash; heavy use is a default-model habit, and absence "
+            "across a long text is a meaningful human signal",
+            _sub(text, span, m.start(), m.end()),
+        )
 
     straight, curly = s.count("'"), s.count("’")
     if straight and curly:
-        yield Signal("mixed-apostrophes", "human", 0.35, "forensic", (straight, curly),
-                     f"{straight} straight and {curly} curly apostrophes mixed -- "
-                     "the trace of hand-editing pasted text")
+        yield Signal(
+            "mixed-apostrophes",
+            "human",
+            0.35,
+            "forensic",
+            (straight, curly),
+            f"{straight} straight and {curly} curly apostrophes mixed -- "
+            "the trace of hand-editing pasted text",
+        )
 
-    for m in re.finditer(r"[ \t]+$", s, re.M):
-        yield Signal("trailing-whitespace", "human", 0.25, "forensic", True,
-                     "trailing whitespace: a typing artifact, not something a model emits",
-                     _sub(text, span, m.start(), m.end()))
+    for m in re.finditer(r"[ \t]+$", s, re.MULTILINE):
+        yield Signal(
+            "trailing-whitespace",
+            "human",
+            0.25,
+            "forensic",
+            True,
+            "trailing whitespace: a typing artifact, not something a model emits",
+            _sub(text, span, m.start(), m.end()),
+        )
 
     prose = not _is_markup(s)
 
     if prose:
         for m in re.finditer(r"[a-z,;]\n[a-z]", s):
-            yield Signal("mid-sentence-newline", "human", 0.45, "forensic", True,
-                         "a hard line break inside a sentence -- a paste or typing artifact",
-                         _sub(text, span, m.start(), m.end()))
+            yield Signal(
+                "mid-sentence-newline",
+                "human",
+                0.45,
+                "forensic",
+                True,
+                "a hard line break inside a sentence -- a paste or typing artifact",
+                _sub(text, span, m.start(), m.end()),
+            )
 
-    if (prose and len(_WORD_RE.findall(s)) >= 4
-            and not re.search(r"[.!?:;)\]\"'’”]\s*$", s.strip())):
-        yield Signal("no-terminal-punctuation", "human", 0.30, "forensic", True,
-                     "ends without terminal punctuation; models close their sentences")
+    if (
+        prose
+        and len(_WORD_RE.findall(s)) >= 4
+        and not re.search(r"[.!?:;)\]\"'’”]\s*$", s.strip())
+    ):
+        yield Signal(
+            "no-terminal-punctuation",
+            "human",
+            0.30,
+            "forensic",
+            True,
+            "ends without terminal punctuation; models close their sentences",
+        )
 
     for m in re.finditer(r"[  →✓✅❌]", s):
-        yield Signal("unicode-artifact", "machine", 0.15, "forensic",
-                     f"U+{ord(m.group()):04X}",
-                     f"U+{ord(m.group()):04X} is rarely typed by hand",
-                     _sub(text, span, m.start(), m.end()))
+        yield Signal(
+            "unicode-artifact",
+            "machine",
+            0.15,
+            "forensic",
+            f"U+{ord(m.group()):04X}",
+            f"U+{ord(m.group()):04X} is rarely typed by hand",
+            _sub(text, span, m.start(), m.end()),
+        )
 
 
 # ------------------------------------------------------------------------ rhetoric
+
 
 def rhetoric(text: str, span: Span) -> Iterator[Signal]:
     """Sentence shapes a phrase catalogue cannot see.
@@ -202,33 +251,64 @@ def rhetoric(text: str, span: Span) -> Iterator[Signal]:
     s = span.quote
     low = s.lower()
 
-    for m in re.finditer(r"\bnot (?:just |only |merely |simply )?[^,.;:]{2,45},? but\b", s, re.I):
-        yield Signal("not-x-but-y", "machine", 0.30, "rhetoric", m.group().strip(),
-                     "the 'not X but Y' antithesis -- one of the strongest model habits",
-                     _sub(text, span, m.start(), m.end()))
+    for m in re.finditer(
+        r"\bnot (?:just |only |merely |simply )?[^,.;:]{2,45},? but\b", s, re.IGNORECASE
+    ):
+        yield Signal(
+            "not-x-but-y",
+            "machine",
+            0.30,
+            "rhetoric",
+            m.group().strip(),
+            "the 'not X but Y' antithesis -- one of the strongest model habits",
+            _sub(text, span, m.start(), m.end()),
+        )
 
-    for m in re.finditer(r":\s*[^,.:;]{4,90},\s*[^,.:;]{4,90},\s*and\s+[^.]{4,90}[.!?]", s):
-        yield Signal("colon-tricolon", "machine", 0.45, "rhetoric", m.group()[:70],
-                     "a colon introducing a three-part parallel enumeration -- "
-                     "a textbook assistant construction",
-                     _sub(text, span, m.start(), m.end()))
+    for m in re.finditer(
+        r":\s*[^,.:;]{4,90},\s*[^,.:;]{4,90},\s*and\s+[^.]{4,90}[.!?]", s
+    ):
+        yield Signal(
+            "colon-tricolon",
+            "machine",
+            0.45,
+            "rhetoric",
+            m.group()[:70],
+            "a colon introducing a three-part parallel enumeration -- "
+            "a textbook assistant construction",
+            _sub(text, span, m.start(), m.end()),
+        )
 
     for opener in _DISCOURSE_OPENERS:
         if low.startswith(opener):
-            yield Signal("discourse-opener", "machine", 0.20, "rhetoric", opener,
-                         f"opens with '{opener}', a connective models reach for",
-                         _sub(text, span, 0, len(opener)))
+            yield Signal(
+                "discourse-opener",
+                "machine",
+                0.20,
+                "rhetoric",
+                opener,
+                f"opens with '{opener}', a connective models reach for",
+                _sub(text, span, 0, len(opener)),
+            )
             break
 
     for m in re.finditer(
         r"\bi (?:do |really do |genuinely )?(?:value|appreciate|respect|understand)\b[^.]{0,80}\.\s*"
-        r"(?:at the same time|that said|however|but)\b", low):
-        yield Signal("concede-pivot", "machine", 0.35, "rhetoric", m.group()[:70],
-                     "concession immediately followed by a pivot -- the diplomatic-feedback move",
-                     _sub(text, span, m.start(), m.end()))
+        r"(?:at the same time|that said|however|but)\b",
+        low,
+    ):
+        yield Signal(
+            "concede-pivot",
+            "machine",
+            0.35,
+            "rhetoric",
+            m.group()[:70],
+            "concession immediately followed by a pivot -- the diplomatic-feedback move",
+            _sub(text, span, m.start(), m.end()),
+        )
 
 
 # -------------------------------------------------------------------------- rhythm
+
 
 def rhythm(text: str, span: Span) -> Iterator[Signal]:
     """Burstiness: how much sentence length varies.
@@ -252,12 +332,24 @@ def rhythm(text: str, span: Span) -> Iterator[Signal]:
     cv = sd / mean if mean else 0.0
     floor = cfg["sentence_len_cv_min"]
     if cv < floor:
-        yield Signal("low-burstiness", "machine", 0.25, "rhythm", round(cv, 3),
-                     f"uniform sentence lengths (mean {mean:.0f} words, sd {sd:.1f}); "
-                     "metronomic rhythm")
+        yield Signal(
+            "low-burstiness",
+            "machine",
+            0.25,
+            "rhythm",
+            round(cv, 3),
+            f"uniform sentence lengths (mean {mean:.0f} words, sd {sd:.1f}); "
+            "metronomic rhythm",
+        )
     elif cv > floor * 2:
-        yield Signal("high-burstiness", "human", 0.25, "rhythm", round(cv, 3),
-                     f"uneven sentence lengths (mean {mean:.0f} words, sd {sd:.1f})")
+        yield Signal(
+            "high-burstiness",
+            "human",
+            0.25,
+            "rhythm",
+            round(cv, 3),
+            f"uneven sentence lengths (mean {mean:.0f} words, sd {sd:.1f})",
+        )
 
 
 #: The registry the ``detectors=`` seam resolves names against.

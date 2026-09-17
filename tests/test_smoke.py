@@ -16,7 +16,9 @@ SAMPLE = (
 def _run(*args, stdin=None):
     return subprocess.run(
         [sys.executable, "-m", "ductus", *args],
-        capture_output=True, text=True, input=stdin,
+        capture_output=True,
+        text=True,
+        input=stdin,
         cwd=Path(__file__).parent.parent,
     )
 
@@ -29,7 +31,7 @@ def test_cli_markdown_end_to_end(tmp_path):
     assert r.returncode == 0, r.stderr
     assert "# Reading" in r.stdout
     assert "leans-machine" in r.stdout
-    assert "delve" in r.stdout          # it says which words, not just a score
+    assert "delve" in r.stdout  # it says which words, not just a score
     assert "%" not in r.stdout.split("References")[0] or True  # no percentage claims
 
 

@@ -34,14 +34,14 @@ contains it. It is how the shipped skills feed a model's reading back in.
 from __future__ import annotations
 
 import hashlib
-from typing import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 
 from ductus.base import Report, Segment, Signal, Span
 from ductus.detect import detectors_from
 from ductus.score import aggregate as default_aggregate
 from ductus.segment import spans_of
 
-__all__ = ["iter_segments", "gauge"]
+__all__ = ["gauge", "iter_segments"]
 
 Aggregator = Callable[[Sequence[Signal]], "tuple[float, float, str]"]
 
@@ -71,8 +71,9 @@ def iter_segments(
                 signals.append(s)
         signals.sort(key=lambda s: (s.span.start if s.span else span.start, s.name))
         lean, strength, label = aggregate(signals)
-        yield Segment(span=span, signals=tuple(signals), lean=lean,
-                      strength=strength, label=label)
+        yield Segment(
+            span=span, signals=tuple(signals), lean=lean, strength=strength, label=label
+        )
 
 
 def gauge(
@@ -96,13 +97,23 @@ def gauge(
     ('paragraph', 4)
     """
     _, names = detectors_from(detectors)
-    segments = tuple(iter_segments(text, segmenter=segmenter, detectors=detectors,
-                                   aggregate=aggregate, extra_signals=extra_signals))
+    segments = tuple(
+        iter_segments(
+            text,
+            segmenter=segmenter,
+            detectors=detectors,
+            aggregate=aggregate,
+            extra_signals=extra_signals,
+        )
+    )
     all_signals = tuple(s for seg in segments for s in seg.signals)
     lean, strength, label = aggregate(all_signals)
     document = Segment(
         span=Span.of(text, 0, len(text), level="document"),
-        signals=(), lean=lean, strength=strength, label=label,
+        signals=(),
+        lean=lean,
+        strength=strength,
+        label=label,
     )
     return Report(
         text_sha256=hashlib.sha256(text.encode("utf-8")).hexdigest(),

@@ -49,13 +49,13 @@ def test_every_signal_span_indexes_the_original_text(documents):
         text = d["text"]
         report = gauge(text, segmenter="sentence")
         for segment in report.segments:
-            assert text[segment.span.start:segment.span.end] == segment.span.quote
+            assert text[segment.span.start : segment.span.end] == segment.span.quote
             for signal in segment.signals:
                 if signal.span is None:
                     continue
                 s = signal.span
-                assert text[s.start:s.end] == s.quote, (d["id"], signal.name)
-                assert text[max(0, s.start - 40):s.start] == s.prefix
+                assert text[s.start : s.end] == s.quote, (d["id"], signal.name)
+                assert text[max(0, s.start - 40) : s.start] == s.prefix
 
 
 def test_flagged_segments_land_on_the_right_side(documents):
@@ -73,7 +73,9 @@ def test_flagged_segments_land_on_the_right_side(documents):
 
     assert len(agreements) >= 5, "too few decisive segments to measure anything"
     rate = statistics.mean(agreements)
-    assert rate >= 0.6, f"flagged segments agreed with ground truth only {rate:.0%} of the time"
+    assert rate >= 0.6, (
+        f"flagged segments agreed with ground truth only {rate:.0%} of the time"
+    )
 
 
 def test_recall_is_low_and_that_is_documented(documents):
