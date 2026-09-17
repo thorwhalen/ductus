@@ -426,235 +426,242 @@
 </span><span id="line-248">
 </span><span id="line-249"><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </span><span id="line-250"><span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="line-251"><span class="w">    </span><span class="sd">"""Tokenizer and model, loaded once per id. Kept warm for the session."""</span>
-</span><span id="line-252">    <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span>
-</span><span id="line-253">
-</span><span id="line-254">    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
-</span><span id="line-255">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">"is_fast"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-</span><span id="line-256">        <span class="k">raise</span> <span class="n">ModelDetectorUnavailable</span><span class="p">(</span>
-</span><span id="line-257">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> has no fast tokenizer, so token-to-character offsets are "</span>
-</span><span id="line-258">            <span class="s2">"unavailable and a signal could not be anchored to the text it is about."</span>
-</span><span id="line-259">        <span class="p">)</span>
-</span><span id="line-260">    <span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-</span><span id="line-261">    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-</span><span id="line-262">    <span class="k">return</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">model</span>
-</span><span id="line-263">
-</span><span id="line-264">
-</span><span id="line-265"><span class="k">def</span><span class="w"> </span><span class="nf">_pick_device</span><span class="p">(</span><span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-266"><span class="w">    </span><span class="sd">"""CUDA when it is there, CPU otherwise. Explicit ``device=`` always wins."""</span>
-</span><span id="line-267">    <span class="k">if</span> <span class="n">device</span><span class="p">:</span>
-</span><span id="line-268">        <span class="k">return</span> <span class="n">device</span>
-</span><span id="line-269">    <span class="n">torch</span> <span class="o">=</span> <span class="n">_torch</span><span class="p">()</span>
-</span><span id="line-270">    <span class="k">return</span> <span class="s2">"cuda"</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"cpu"</span>
+</span><span id="line-251"><span class="w">    </span><span class="sd">"""Tokenizer and model, loaded once per id. Kept warm for the session.</span>
+</span><span id="line-252">
+</span><span id="line-253"><span class="sd">    Warm is the right default: a session that scores several texts with one detector</span>
+</span><span id="line-254"><span class="sd">    pays the load once. The cost is that every model touched stays resident -- four</span>
+</span><span id="line-255"><span class="sd">    GPT-2-family models is about 10GB in float32 -- so code that sweeps across many</span>
+</span><span id="line-256"><span class="sd">    models should call ``_load.cache_clear()`` between them. ``misc/measure_model_ladder.py``</span>
+</span><span id="line-257"><span class="sd">    does exactly that, and was swapping rather than computing until it did.</span>
+</span><span id="line-258"><span class="sd">    """</span>
+</span><span id="line-259">    <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span>
+</span><span id="line-260">
+</span><span id="line-261">    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+</span><span id="line-262">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">"is_fast"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+</span><span id="line-263">        <span class="k">raise</span> <span class="n">ModelDetectorUnavailable</span><span class="p">(</span>
+</span><span id="line-264">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> has no fast tokenizer, so token-to-character offsets are "</span>
+</span><span id="line-265">            <span class="s2">"unavailable and a signal could not be anchored to the text it is about."</span>
+</span><span id="line-266">        <span class="p">)</span>
+</span><span id="line-267">    <span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-268">    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="line-269">    <span class="k">return</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">model</span>
+</span><span id="line-270">
 </span><span id="line-271">
-</span><span id="line-272">
-</span><span id="line-273"><span class="k">def</span><span class="w"> </span><span class="nf">_encode</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="line-274"><span class="w">    </span><span class="sd">"""Token ids and their character offsets, with no truncation.</span>
-</span><span id="line-275">
-</span><span id="line-276"><span class="sd">    ``verbose=False`` silences the tokenizer's warning about exceeding the model's</span>
-</span><span id="line-277"><span class="sd">    context length: the sequence is never fed to the model whole, it is fed in</span>
-</span><span id="line-278"><span class="sd">    :data:`WINDOW`-sized chunks by :func:`_iter_chunks`.</span>
-</span><span id="line-279"><span class="sd">    """</span>
-</span><span id="line-280">    <span class="n">enc</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">return_offsets_mapping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">"pt"</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</span><span id="line-281">    <span class="n">offsets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">enc</span><span class="p">[</span><span class="s2">"offset_mapping"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
-</span><span id="line-282">    <span class="k">return</span> <span class="n">enc</span><span class="p">[</span><span class="s2">"input_ids"</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">offsets</span>
-</span><span id="line-283">
-</span><span id="line-284">
-</span><span id="line-285"><span class="c1"># ------------------------------------------------------------------ fast-detect-gpt</span>
-</span><span id="line-286">
-</span><span id="line-287">
-</span><span id="line-288"><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-</span><span id="line-289"><span class="k">def</span><span class="w"> </span><span class="nf">_fast_detect_profile</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Profile</span><span class="p">:</span>
-</span><span id="line-290"><span class="w">    </span><span class="sd">"""Conditional probability curvature, accumulated per token.</span>
+</span><span id="line-272"><span class="k">def</span><span class="w"> </span><span class="nf">_pick_device</span><span class="p">(</span><span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-273"><span class="w">    </span><span class="sd">"""CUDA when it is there, CPU otherwise. Explicit ``device=`` always wins."""</span>
+</span><span id="line-274">    <span class="k">if</span> <span class="n">device</span><span class="p">:</span>
+</span><span id="line-275">        <span class="k">return</span> <span class="n">device</span>
+</span><span id="line-276">    <span class="n">torch</span> <span class="o">=</span> <span class="n">_torch</span><span class="p">()</span>
+</span><span id="line-277">    <span class="k">return</span> <span class="s2">"cuda"</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"cpu"</span>
+</span><span id="line-278">
+</span><span id="line-279">
+</span><span id="line-280"><span class="k">def</span><span class="w"> </span><span class="nf">_encode</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-281"><span class="w">    </span><span class="sd">"""Token ids and their character offsets, with no truncation.</span>
+</span><span id="line-282">
+</span><span id="line-283"><span class="sd">    ``verbose=False`` silences the tokenizer's warning about exceeding the model's</span>
+</span><span id="line-284"><span class="sd">    context length: the sequence is never fed to the model whole, it is fed in</span>
+</span><span id="line-285"><span class="sd">    :data:`WINDOW`-sized chunks by :func:`_iter_chunks`.</span>
+</span><span id="line-286"><span class="sd">    """</span>
+</span><span id="line-287">    <span class="n">enc</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">return_offsets_mapping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">"pt"</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="line-288">    <span class="n">offsets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">enc</span><span class="p">[</span><span class="s2">"offset_mapping"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+</span><span id="line-289">    <span class="k">return</span> <span class="n">enc</span><span class="p">[</span><span class="s2">"input_ids"</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">offsets</span>
+</span><span id="line-290">
 </span><span id="line-291">
-</span><span id="line-292"><span class="sd">    Per position, ``a`` is the observed log-likelihood minus the model's own expected</span>
-</span><span id="line-293"><span class="sd">    log-likelihood there, and ``b`` is the variance of that expectation. The paper's</span>
-</span><span id="line-294"><span class="sd">    statistic over any window is ``sum(a) / sqrt(sum(b))`` -- which is what</span>
-</span><span id="line-295"><span class="sd">    :meth:`_Profile.score` computes, so a span is scored by exactly the published</span>
-</span><span id="line-296"><span class="sd">    method rather than by anything invented here.</span>
-</span><span id="line-297"><span class="sd">    """</span>
-</span><span id="line-298">    <span class="n">torch</span> <span class="o">=</span> <span class="n">_torch</span><span class="p">()</span>
-</span><span id="line-299">    <span class="n">tokenizer</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">_load</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
-</span><span id="line-300">    <span class="n">ids</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">_encode</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-</span><span id="line-301">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
-</span><span id="line-302">    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
-</span><span id="line-303">    <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
-</span><span id="line-304">
-</span><span id="line-305">    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-</span><span id="line-306">        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span> <span class="ow">in</span> <span class="n">_iter_chunks</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">WINDOW</span><span class="p">):</span>
-</span><span id="line-307">            <span class="n">chunk</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-</span><span id="line-308">            <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-</span><span id="line-309">            <span class="n">lprobs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-310">            <span class="n">probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-311">            <span class="n">mean_ref</span> <span class="o">=</span> <span class="p">(</span><span class="n">probs</span> <span class="o">*</span> <span class="n">lprobs</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-312">            <span class="n">var_ref</span> <span class="o">=</span> <span class="p">(</span><span class="n">probs</span> <span class="o">*</span> <span class="n">lprobs</span><span class="o">.</span><span class="n">square</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">mean_ref</span><span class="o">.</span><span class="n">square</span><span class="p">()</span>
-</span><span id="line-313">            <span class="n">rows</span> <span class="o">=</span> <span class="n">_scored_rows</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
-</span><span id="line-314">            <span class="n">labels</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-</span><span id="line-315">            <span class="n">ll</span> <span class="o">=</span> <span class="n">lprobs</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-316">            <span class="n">a</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ll</span> <span class="o">-</span> <span class="n">mean_ref</span><span class="p">[</span><span class="n">rows</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-</span><span id="line-317">            <span class="n">b</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_ref</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">clamp_min</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-</span><span id="line-318">
-</span><span id="line-319">    <span class="k">return</span> <span class="n">_Profile</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="s2">"curvature"</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">model_id</span><span class="p">)</span>
-</span><span id="line-320">
-</span><span id="line-321">
+</span><span id="line-292"><span class="c1"># ------------------------------------------------------------------ fast-detect-gpt</span>
+</span><span id="line-293">
+</span><span id="line-294">
+</span><span id="line-295"><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</span><span id="line-296"><span class="k">def</span><span class="w"> </span><span class="nf">_fast_detect_profile</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Profile</span><span class="p">:</span>
+</span><span id="line-297"><span class="w">    </span><span class="sd">"""Conditional probability curvature, accumulated per token.</span>
+</span><span id="line-298">
+</span><span id="line-299"><span class="sd">    Per position, ``a`` is the observed log-likelihood minus the model's own expected</span>
+</span><span id="line-300"><span class="sd">    log-likelihood there, and ``b`` is the variance of that expectation. The paper's</span>
+</span><span id="line-301"><span class="sd">    statistic over any window is ``sum(a) / sqrt(sum(b))`` -- which is what</span>
+</span><span id="line-302"><span class="sd">    :meth:`_Profile.score` computes, so a span is scored by exactly the published</span>
+</span><span id="line-303"><span class="sd">    method rather than by anything invented here.</span>
+</span><span id="line-304"><span class="sd">    """</span>
+</span><span id="line-305">    <span class="n">torch</span> <span class="o">=</span> <span class="n">_torch</span><span class="p">()</span>
+</span><span id="line-306">    <span class="n">tokenizer</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">_load</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+</span><span id="line-307">    <span class="n">ids</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">_encode</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</span><span id="line-308">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+</span><span id="line-309">    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+</span><span id="line-310">    <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+</span><span id="line-311">
+</span><span id="line-312">    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+</span><span id="line-313">        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span> <span class="ow">in</span> <span class="n">_iter_chunks</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">WINDOW</span><span class="p">):</span>
+</span><span id="line-314">            <span class="n">chunk</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-315">            <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+</span><span id="line-316">            <span class="n">lprobs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-317">            <span class="n">probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-318">            <span class="n">mean_ref</span> <span class="o">=</span> <span class="p">(</span><span class="n">probs</span> <span class="o">*</span> <span class="n">lprobs</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-319">            <span class="n">var_ref</span> <span class="o">=</span> <span class="p">(</span><span class="n">probs</span> <span class="o">*</span> <span class="n">lprobs</span><span class="o">.</span><span class="n">square</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">mean_ref</span><span class="o">.</span><span class="n">square</span><span class="p">()</span>
+</span><span id="line-320">            <span class="n">rows</span> <span class="o">=</span> <span class="n">_scored_rows</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
+</span><span id="line-321">            <span class="n">labels</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-322">            <span class="n">ll</span> <span class="o">=</span> <span class="n">lprobs</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-323">            <span class="n">a</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ll</span> <span class="o">-</span> <span class="n">mean_ref</span><span class="p">[</span><span class="n">rows</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-324">            <span class="n">b</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_ref</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">clamp_min</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-325">
+</span><span id="line-326">    <span class="k">return</span> <span class="n">_Profile</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="s2">"curvature"</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">model_id</span><span class="p">)</span>
+</span><span id="line-327">
+</span><span id="line-328">
 <div class="viewcode-block" id="fast_detect_gpt">
 <a class="viewcode-back" href="../../_autosummary/ductus.detect.html#ductus.curvature.fast_detect_gpt">[docs]</a>
-</span><span id="line-322"><span class="k">def</span><span class="w"> </span><span class="nf">fast_detect_gpt</span><span class="p">(</span>
-</span><span id="line-323">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-324">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span>
-</span><span id="line-325">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-326">    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">FAST_DETECT_MODEL</span><span class="p">,</span>
-</span><span id="line-327">    <span class="n">bands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">BANDS</span><span class="p">,</span>
-</span><span id="line-328">    <span class="n">min_windows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_WINDOWS</span><span class="p">,</span>
-</span><span id="line-329">    <span class="n">min_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_TOKENS</span><span class="p">,</span>
-</span><span id="line-330">    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-331"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
-</span><span id="line-332"><span class="w">    </span><span class="sd">"""Conditional probability curvature, read as a standing within this document.</span>
-</span><span id="line-333">
-</span><span id="line-334"><span class="sd">    A passage a model finds unusually *predictable* compared to the rest of the</span>
-</span><span id="line-335"><span class="sd">    document leans machine; an unusually surprising one leans human. Neither claim</span>
-</span><span id="line-336"><span class="sd">    is absolute, and none of the paper's benchmark thresholds are used.</span>
-</span><span id="line-337">
-</span><span id="line-338"><span class="sd">    Needs the ``[local]`` extra. The first call downloads and caches the proxy model;</span>
-</span><span id="line-339"><span class="sd">    later calls on the same text cost no model time at all.</span>
-</span><span id="line-340"><span class="sd">    """</span>
-</span><span id="line-341">    <span class="k">yield from</span> <span class="n">_curvature_signals</span><span class="p">(</span>
-</span><span id="line-342">        <span class="n">_fast_detect_profile</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">_pick_device</span><span class="p">(</span><span class="n">device</span><span class="p">)),</span>
-</span><span id="line-343">        <span class="n">text</span><span class="p">,</span>
-</span><span id="line-344">        <span class="n">span</span><span class="p">,</span>
-</span><span id="line-345">        <span class="n">name</span><span class="o">=</span><span class="s2">"curvature-outlier"</span><span class="p">,</span>
-</span><span id="line-346">        <span class="n">detector</span><span class="o">=</span><span class="s2">"fast-detect-gpt"</span><span class="p">,</span>
-</span><span id="line-347">        <span class="n">statistic</span><span class="o">=</span><span class="s2">"conditional probability curvature"</span><span class="p">,</span>
-</span><span id="line-348">        <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span>
-</span><span id="line-349">        <span class="n">min_windows</span><span class="o">=</span><span class="n">min_windows</span><span class="p">,</span>
-</span><span id="line-350">        <span class="n">min_tokens</span><span class="o">=</span><span class="n">min_tokens</span><span class="p">,</span>
-</span><span id="line-351">    <span class="p">)</span></div>
+</span><span id="line-329"><span class="k">def</span><span class="w"> </span><span class="nf">fast_detect_gpt</span><span class="p">(</span>
+</span><span id="line-330">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-331">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span>
+</span><span id="line-332">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-333">    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">FAST_DETECT_MODEL</span><span class="p">,</span>
+</span><span id="line-334">    <span class="n">bands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">BANDS</span><span class="p">,</span>
+</span><span id="line-335">    <span class="n">min_windows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_WINDOWS</span><span class="p">,</span>
+</span><span id="line-336">    <span class="n">min_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_TOKENS</span><span class="p">,</span>
+</span><span id="line-337">    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-338"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-339"><span class="w">    </span><span class="sd">"""Conditional probability curvature, read as a standing within this document.</span>
+</span><span id="line-340">
+</span><span id="line-341"><span class="sd">    A passage a model finds unusually *predictable* compared to the rest of the</span>
+</span><span id="line-342"><span class="sd">    document leans machine; an unusually surprising one leans human. Neither claim</span>
+</span><span id="line-343"><span class="sd">    is absolute, and none of the paper's benchmark thresholds are used.</span>
+</span><span id="line-344">
+</span><span id="line-345"><span class="sd">    Needs the ``[local]`` extra. The first call downloads and caches the proxy model;</span>
+</span><span id="line-346"><span class="sd">    later calls on the same text cost no model time at all.</span>
+</span><span id="line-347"><span class="sd">    """</span>
+</span><span id="line-348">    <span class="k">yield from</span> <span class="n">_curvature_signals</span><span class="p">(</span>
+</span><span id="line-349">        <span class="n">_fast_detect_profile</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">_pick_device</span><span class="p">(</span><span class="n">device</span><span class="p">)),</span>
+</span><span id="line-350">        <span class="n">text</span><span class="p">,</span>
+</span><span id="line-351">        <span class="n">span</span><span class="p">,</span>
+</span><span id="line-352">        <span class="n">name</span><span class="o">=</span><span class="s2">"curvature-outlier"</span><span class="p">,</span>
+</span><span id="line-353">        <span class="n">detector</span><span class="o">=</span><span class="s2">"fast-detect-gpt"</span><span class="p">,</span>
+</span><span id="line-354">        <span class="n">statistic</span><span class="o">=</span><span class="s2">"conditional probability curvature"</span><span class="p">,</span>
+</span><span id="line-355">        <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span>
+</span><span id="line-356">        <span class="n">min_windows</span><span class="o">=</span><span class="n">min_windows</span><span class="p">,</span>
+</span><span id="line-357">        <span class="n">min_tokens</span><span class="o">=</span><span class="n">min_tokens</span><span class="p">,</span>
+</span><span id="line-358">    <span class="p">)</span></div>
 
-</span><span id="line-352">
-</span><span id="line-353">
-</span><span id="line-354"><span class="c1"># ----------------------------------------------------------------------- binoculars</span>
-</span><span id="line-355">
-</span><span id="line-356">
-</span><span id="line-357"><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-</span><span id="line-358"><span class="k">def</span><span class="w"> </span><span class="nf">_binoculars_profile</span><span class="p">(</span>
-</span><span id="line-359">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">observer_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">performer_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="line-360"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Profile</span><span class="p">:</span>
-</span><span id="line-361"><span class="w">    </span><span class="sd">"""Perplexity over cross-perplexity, accumulated per token.</span>
+</span><span id="line-359">
+</span><span id="line-360">
+</span><span id="line-361"><span class="c1"># ----------------------------------------------------------------------- binoculars</span>
 </span><span id="line-362">
-</span><span id="line-363"><span class="sd">    ``a`` is the performer's surprise at the token actually written; ``b`` is the</span>
-</span><span id="line-364"><span class="sd">    performer's surprise at what the observer expected. Their ratio over a window is</span>
-</span><span id="line-365"><span class="sd">    the paper's *B*. Machine text makes the two agree, so **low** B argues machine --</span>
-</span><span id="line-366"><span class="sd">    which is why this profile carries ``machine_sign = -1``.</span>
-</span><span id="line-367"><span class="sd">    """</span>
-</span><span id="line-368">    <span class="n">torch</span> <span class="o">=</span> <span class="n">_torch</span><span class="p">()</span>
-</span><span id="line-369">    <span class="n">obs_tokenizer</span><span class="p">,</span> <span class="n">observer</span> <span class="o">=</span> <span class="n">_load</span><span class="p">(</span><span class="n">observer_id</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
-</span><span id="line-370">    <span class="n">tokenizer</span><span class="p">,</span> <span class="n">performer</span> <span class="o">=</span> <span class="n">_load</span><span class="p">(</span><span class="n">performer_id</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
-</span><span id="line-371">    <span class="k">if</span> <span class="n">obs_tokenizer</span><span class="o">.</span><span class="n">get_vocab</span><span class="p">()</span> <span class="o">!=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">get_vocab</span><span class="p">():</span>
-</span><span id="line-372">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-373">            <span class="sa">f</span><span class="s2">"binoculars needs observer and performer to share a tokenizer; "</span>
-</span><span id="line-374">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">observer_id</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">performer_id</span><span class="si">!r}</span><span class="s2"> do not. Cross-perplexity between "</span>
-</span><span id="line-375">            <span class="s2">"models that disagree about what a token is has no meaning."</span>
-</span><span id="line-376">        <span class="p">)</span>
-</span><span id="line-377">
-</span><span id="line-378">    <span class="n">ids</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">_encode</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-</span><span id="line-379">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
-</span><span id="line-380">    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
-</span><span id="line-381">    <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
-</span><span id="line-382">
-</span><span id="line-383">    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-</span><span id="line-384">        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span> <span class="ow">in</span> <span class="n">_iter_chunks</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">WINDOW</span><span class="p">):</span>
-</span><span id="line-385">            <span class="n">chunk</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-</span><span id="line-386">            <span class="n">lprobs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">performer</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-387">            <span class="n">obs_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">observer</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-388">            <span class="n">cross</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">obs_probs</span> <span class="o">*</span> <span class="n">lprobs</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-389">            <span class="n">rows</span> <span class="o">=</span> <span class="n">_scored_rows</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
-</span><span id="line-390">            <span class="n">labels</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-</span><span id="line-391">            <span class="n">a</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">lprobs</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-</span><span id="line-392">            <span class="n">b</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">cross</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-</span><span id="line-393">
-</span><span id="line-394">    <span class="k">return</span> <span class="n">_Profile</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="s2">"ratio"</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">performer_id</span><span class="p">)</span>
-</span><span id="line-395">
-</span><span id="line-396">
+</span><span id="line-363">
+</span><span id="line-364"><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</span><span id="line-365"><span class="k">def</span><span class="w"> </span><span class="nf">_binoculars_profile</span><span class="p">(</span>
+</span><span id="line-366">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">observer_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">performer_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-367"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Profile</span><span class="p">:</span>
+</span><span id="line-368"><span class="w">    </span><span class="sd">"""Perplexity over cross-perplexity, accumulated per token.</span>
+</span><span id="line-369">
+</span><span id="line-370"><span class="sd">    ``a`` is the performer's surprise at the token actually written; ``b`` is the</span>
+</span><span id="line-371"><span class="sd">    performer's surprise at what the observer expected. Their ratio over a window is</span>
+</span><span id="line-372"><span class="sd">    the paper's *B*. Machine text makes the two agree, so **low** B argues machine --</span>
+</span><span id="line-373"><span class="sd">    which is why this profile carries ``machine_sign = -1``.</span>
+</span><span id="line-374"><span class="sd">    """</span>
+</span><span id="line-375">    <span class="n">torch</span> <span class="o">=</span> <span class="n">_torch</span><span class="p">()</span>
+</span><span id="line-376">    <span class="n">obs_tokenizer</span><span class="p">,</span> <span class="n">observer</span> <span class="o">=</span> <span class="n">_load</span><span class="p">(</span><span class="n">observer_id</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+</span><span id="line-377">    <span class="n">tokenizer</span><span class="p">,</span> <span class="n">performer</span> <span class="o">=</span> <span class="n">_load</span><span class="p">(</span><span class="n">performer_id</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+</span><span id="line-378">    <span class="k">if</span> <span class="n">obs_tokenizer</span><span class="o">.</span><span class="n">get_vocab</span><span class="p">()</span> <span class="o">!=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">get_vocab</span><span class="p">():</span>
+</span><span id="line-379">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-380">            <span class="sa">f</span><span class="s2">"binoculars needs observer and performer to share a tokenizer; "</span>
+</span><span id="line-381">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">observer_id</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">performer_id</span><span class="si">!r}</span><span class="s2"> do not. Cross-perplexity between "</span>
+</span><span id="line-382">            <span class="s2">"models that disagree about what a token is has no meaning."</span>
+</span><span id="line-383">        <span class="p">)</span>
+</span><span id="line-384">
+</span><span id="line-385">    <span class="n">ids</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">_encode</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</span><span id="line-386">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+</span><span id="line-387">    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+</span><span id="line-388">    <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+</span><span id="line-389">
+</span><span id="line-390">    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+</span><span id="line-391">        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span> <span class="ow">in</span> <span class="n">_iter_chunks</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">WINDOW</span><span class="p">):</span>
+</span><span id="line-392">            <span class="n">chunk</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-393">            <span class="n">lprobs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">performer</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-394">            <span class="n">obs_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">observer</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-395">            <span class="n">cross</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">obs_probs</span> <span class="o">*</span> <span class="n">lprobs</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-396">            <span class="n">rows</span> <span class="o">=</span> <span class="n">_scored_rows</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
+</span><span id="line-397">            <span class="n">labels</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-398">            <span class="n">a</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">lprobs</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-399">            <span class="n">b</span><span class="p">[</span><span class="n">keep</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">cross</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-400">
+</span><span id="line-401">    <span class="k">return</span> <span class="n">_Profile</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="s2">"ratio"</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">performer_id</span><span class="p">)</span>
+</span><span id="line-402">
+</span><span id="line-403">
 <div class="viewcode-block" id="binoculars">
 <a class="viewcode-back" href="../../_autosummary/ductus.detect.html#ductus.curvature.binoculars">[docs]</a>
-</span><span id="line-397"><span class="k">def</span><span class="w"> </span><span class="nf">binoculars</span><span class="p">(</span>
-</span><span id="line-398">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-399">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span>
-</span><span id="line-400">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-401">    <span class="n">observer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">BINOCULARS_OBSERVER</span><span class="p">,</span>
-</span><span id="line-402">    <span class="n">performer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">BINOCULARS_PERFORMER</span><span class="p">,</span>
-</span><span id="line-403">    <span class="n">bands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">BANDS</span><span class="p">,</span>
-</span><span id="line-404">    <span class="n">min_windows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_WINDOWS</span><span class="p">,</span>
-</span><span id="line-405">    <span class="n">min_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_TOKENS</span><span class="p">,</span>
-</span><span id="line-406">    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-407"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
-</span><span id="line-408"><span class="w">    </span><span class="sd">"""Cross-perplexity of a paired observer and performer, as a standing in this text.</span>
-</span><span id="line-409">
-</span><span id="line-410"><span class="sd">    Where :func:`fast_detect_gpt` asks how predictable a passage is, this asks whether</span>
-</span><span id="line-411"><span class="sd">    two closely related models are *unusually unsurprised in the same places* -- which</span>
-</span><span id="line-412"><span class="sd">    generalises better to generators neither model has seen.</span>
-</span><span id="line-413">
-</span><span id="line-414"><span class="sd">    Needs the ``[local]`` extra, and observer and performer must share a tokenizer.</span>
-</span><span id="line-415"><span class="sd">    """</span>
-</span><span id="line-416">    <span class="k">yield from</span> <span class="n">_curvature_signals</span><span class="p">(</span>
-</span><span id="line-417">        <span class="n">_binoculars_profile</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">observer</span><span class="p">,</span> <span class="n">performer</span><span class="p">,</span> <span class="n">_pick_device</span><span class="p">(</span><span class="n">device</span><span class="p">)),</span>
-</span><span id="line-418">        <span class="n">text</span><span class="p">,</span>
-</span><span id="line-419">        <span class="n">span</span><span class="p">,</span>
-</span><span id="line-420">        <span class="n">name</span><span class="o">=</span><span class="s2">"cross-perplexity-outlier"</span><span class="p">,</span>
-</span><span id="line-421">        <span class="n">detector</span><span class="o">=</span><span class="s2">"binoculars"</span><span class="p">,</span>
-</span><span id="line-422">        <span class="n">statistic</span><span class="o">=</span><span class="s2">"perplexity / cross-perplexity"</span><span class="p">,</span>
-</span><span id="line-423">        <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span>
-</span><span id="line-424">        <span class="n">min_windows</span><span class="o">=</span><span class="n">min_windows</span><span class="p">,</span>
-</span><span id="line-425">        <span class="n">min_tokens</span><span class="o">=</span><span class="n">min_tokens</span><span class="p">,</span>
-</span><span id="line-426">    <span class="p">)</span></div>
+</span><span id="line-404"><span class="k">def</span><span class="w"> </span><span class="nf">binoculars</span><span class="p">(</span>
+</span><span id="line-405">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-406">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span>
+</span><span id="line-407">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-408">    <span class="n">observer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">BINOCULARS_OBSERVER</span><span class="p">,</span>
+</span><span id="line-409">    <span class="n">performer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">BINOCULARS_PERFORMER</span><span class="p">,</span>
+</span><span id="line-410">    <span class="n">bands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">BANDS</span><span class="p">,</span>
+</span><span id="line-411">    <span class="n">min_windows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_WINDOWS</span><span class="p">,</span>
+</span><span id="line-412">    <span class="n">min_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MIN_TOKENS</span><span class="p">,</span>
+</span><span id="line-413">    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-414"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-415"><span class="w">    </span><span class="sd">"""Cross-perplexity of a paired observer and performer, as a standing in this text.</span>
+</span><span id="line-416">
+</span><span id="line-417"><span class="sd">    Where :func:`fast_detect_gpt` asks how predictable a passage is, this asks whether</span>
+</span><span id="line-418"><span class="sd">    two closely related models are *unusually unsurprised in the same places* -- which</span>
+</span><span id="line-419"><span class="sd">    generalises better to generators neither model has seen.</span>
+</span><span id="line-420">
+</span><span id="line-421"><span class="sd">    Needs the ``[local]`` extra, and observer and performer must share a tokenizer.</span>
+</span><span id="line-422"><span class="sd">    """</span>
+</span><span id="line-423">    <span class="k">yield from</span> <span class="n">_curvature_signals</span><span class="p">(</span>
+</span><span id="line-424">        <span class="n">_binoculars_profile</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">observer</span><span class="p">,</span> <span class="n">performer</span><span class="p">,</span> <span class="n">_pick_device</span><span class="p">(</span><span class="n">device</span><span class="p">)),</span>
+</span><span id="line-425">        <span class="n">text</span><span class="p">,</span>
+</span><span id="line-426">        <span class="n">span</span><span class="p">,</span>
+</span><span id="line-427">        <span class="n">name</span><span class="o">=</span><span class="s2">"cross-perplexity-outlier"</span><span class="p">,</span>
+</span><span id="line-428">        <span class="n">detector</span><span class="o">=</span><span class="s2">"binoculars"</span><span class="p">,</span>
+</span><span id="line-429">        <span class="n">statistic</span><span class="o">=</span><span class="s2">"perplexity / cross-perplexity"</span><span class="p">,</span>
+</span><span id="line-430">        <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span>
+</span><span id="line-431">        <span class="n">min_windows</span><span class="o">=</span><span class="n">min_windows</span><span class="p">,</span>
+</span><span id="line-432">        <span class="n">min_tokens</span><span class="o">=</span><span class="n">min_tokens</span><span class="p">,</span>
+</span><span id="line-433">    <span class="p">)</span></div>
 
-</span><span id="line-427">
-</span><span id="line-428">
-</span><span id="line-429"><span class="c1"># ------------------------------------------------------------------- shared banding</span>
-</span><span id="line-430">
-</span><span id="line-431">
-</span><span id="line-432"><span class="k">def</span><span class="w"> </span><span class="nf">_curvature_signals</span><span class="p">(</span>
-</span><span id="line-433">    <span class="n">profile</span><span class="p">:</span> <span class="n">_Profile</span><span class="p">,</span>
-</span><span id="line-434">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-435">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span>
-</span><span id="line-436">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-437">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-438">    <span class="n">detector</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-439">    <span class="n">statistic</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-440">    <span class="n">bands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
-</span><span id="line-441">    <span class="n">min_windows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-</span><span id="line-442">    <span class="n">min_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-</span><span id="line-443"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
-</span><span id="line-444"><span class="w">    </span><span class="sd">"""Band a span's standing against the rest of the document, or say nothing."""</span>
-</span><span id="line-445">    <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">_token_range</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">span</span><span class="p">)</span>
-</span><span id="line-446">    <span class="k">if</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">min_tokens</span><span class="p">:</span>
-</span><span id="line-447">        <span class="k">return</span>
-</span><span id="line-448">    <span class="n">reference</span> <span class="o">=</span> <span class="n">_reference_scores</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
-</span><span id="line-449">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">min_windows</span><span class="p">:</span>
-</span><span id="line-450">        <span class="k">return</span>
-</span><span id="line-451">
-</span><span id="line-452">    <span class="n">score</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
-</span><span id="line-453">    <span class="n">z</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">machine_sign</span> <span class="o">*</span> <span class="n">robust_z</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">reference</span><span class="p">)</span>
-</span><span id="line-454">    <span class="n">weight</span> <span class="o">=</span> <span class="n">band_of</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">bands</span><span class="p">)</span>
-</span><span id="line-455">    <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-456">        <span class="k">return</span>
-</span><span id="line-457">
-</span><span id="line-458">    <span class="n">machine</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;</span> <span class="mi">0</span>
-</span><span id="line-459">    <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
-</span><span id="line-460">        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-</span><span id="line-461">        <span class="n">direction</span><span class="o">=</span><span class="s2">"machine"</span> <span class="k">if</span> <span class="n">machine</span> <span class="k">else</span> <span class="s2">"human"</span><span class="p">,</span>
-</span><span id="line-462">        <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span>
-</span><span id="line-463">        <span class="n">detector</span><span class="o">=</span><span class="n">detector</span><span class="p">,</span>
-</span><span id="line-464">        <span class="n">value</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-</span><span id="line-465">        <span class="n">note</span><span class="o">=</span><span class="p">(</span>
-</span><span id="line-466">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">statistic</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> under </span><span class="si">{</span><span class="n">profile</span><span class="o">.</span><span class="n">model</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MADs "</span>
-</span><span id="line-467">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'flatter'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">machine</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'more surprising'</span><span class="si">}</span><span class="s2"> than the rest of this "</span>
-</span><span id="line-468">            <span class="sa">f</span><span class="s2">"document (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span><span class="si">}</span><span class="s2"> comparable windows); "</span>
-</span><span id="line-469">            <span class="s2">"unlike the other detectors this is a model's opinion about the text, "</span>
-</span><span id="line-470">            <span class="s2">"not a quotation from it"</span>
-</span><span id="line-471">        <span class="p">),</span>
-</span><span id="line-472">        <span class="n">span</span><span class="o">=</span><span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">span</span><span class="o">.</span><span class="n">level</span><span class="p">),</span>
-</span><span id="line-473">    <span class="p">)</span>
+</span><span id="line-434">
+</span><span id="line-435">
+</span><span id="line-436"><span class="c1"># ------------------------------------------------------------------- shared banding</span>
+</span><span id="line-437">
+</span><span id="line-438">
+</span><span id="line-439"><span class="k">def</span><span class="w"> </span><span class="nf">_curvature_signals</span><span class="p">(</span>
+</span><span id="line-440">    <span class="n">profile</span><span class="p">:</span> <span class="n">_Profile</span><span class="p">,</span>
+</span><span id="line-441">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-442">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span>
+</span><span id="line-443">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-444">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-445">    <span class="n">detector</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-446">    <span class="n">statistic</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-447">    <span class="n">bands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+</span><span id="line-448">    <span class="n">min_windows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span><span id="line-449">    <span class="n">min_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span><span id="line-450"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Signal</span><span class="p">]:</span>
+</span><span id="line-451"><span class="w">    </span><span class="sd">"""Band a span's standing against the rest of the document, or say nothing."""</span>
+</span><span id="line-452">    <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">_token_range</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">span</span><span class="p">)</span>
+</span><span id="line-453">    <span class="k">if</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">min_tokens</span><span class="p">:</span>
+</span><span id="line-454">        <span class="k">return</span>
+</span><span id="line-455">    <span class="n">reference</span> <span class="o">=</span> <span class="n">_reference_scores</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+</span><span id="line-456">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">min_windows</span><span class="p">:</span>
+</span><span id="line-457">        <span class="k">return</span>
+</span><span id="line-458">
+</span><span id="line-459">    <span class="n">score</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+</span><span id="line-460">    <span class="n">z</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">machine_sign</span> <span class="o">*</span> <span class="n">robust_z</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">reference</span><span class="p">)</span>
+</span><span id="line-461">    <span class="n">weight</span> <span class="o">=</span> <span class="n">band_of</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">bands</span><span class="p">)</span>
+</span><span id="line-462">    <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-463">        <span class="k">return</span>
+</span><span id="line-464">
+</span><span id="line-465">    <span class="n">machine</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</span><span id="line-466">    <span class="k">yield</span> <span class="n">Signal</span><span class="p">(</span>
+</span><span id="line-467">        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+</span><span id="line-468">        <span class="n">direction</span><span class="o">=</span><span class="s2">"machine"</span> <span class="k">if</span> <span class="n">machine</span> <span class="k">else</span> <span class="s2">"human"</span><span class="p">,</span>
+</span><span id="line-469">        <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span>
+</span><span id="line-470">        <span class="n">detector</span><span class="o">=</span><span class="n">detector</span><span class="p">,</span>
+</span><span id="line-471">        <span class="n">value</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+</span><span id="line-472">        <span class="n">note</span><span class="o">=</span><span class="p">(</span>
+</span><span id="line-473">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">statistic</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> under </span><span class="si">{</span><span class="n">profile</span><span class="o">.</span><span class="n">model</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MADs "</span>
+</span><span id="line-474">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'flatter'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">machine</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'more surprising'</span><span class="si">}</span><span class="s2"> than the rest of this "</span>
+</span><span id="line-475">            <span class="sa">f</span><span class="s2">"document (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span><span class="si">}</span><span class="s2"> comparable windows); "</span>
+</span><span id="line-476">            <span class="s2">"unlike the other detectors this is a model's opinion about the text, "</span>
+</span><span id="line-477">            <span class="s2">"not a quotation from it"</span>
+</span><span id="line-478">        <span class="p">),</span>
+</span><span id="line-479">        <span class="n">span</span><span class="o">=</span><span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">span</span><span class="o">.</span><span class="n">level</span><span class="p">),</span>
+</span><span id="line-480">    <span class="p">)</span>
 </span></code></pre></div>
     </div></div>
           </main>
@@ -668,7 +675,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+    <script src="../../_static/documentation_options.js?v=282f96c0"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

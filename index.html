@@ -139,6 +139,35 @@
 <li><p><strong>No detector survives a motivated adversary</strong>, and that is a proven result rather than a gap in current tooling [2].</p></li>
 </ul>
 <p>So this package describes <em>text</em>. It does not make claims about <em>people</em>, and it should not be used to.</p>
+<section id="and-this-package-s-own-false-positive-rate-is-not-small">
+<h3>And this package’s own false-positive rate is not small<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#and-this-package-s-own-false-positive-rate-is-not-small" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#and-this-package-s-own-false-positive-rate-is-not-small'">¶</a></h3>
+<p>It would be cheap to quote other people’s numbers and not measure our own. Across 350 human-written texts with known proficiency levels, the shipped defaults call a document <code class="docutils literal notranslate"><span class="pre">leans-machine</span></code> — always wrongly, every text in that corpus was written by a person — this often:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>beginner</p></th>
+<th class="head"><p>intermediate</p></th>
+<th class="head"><p>advanced</p></th>
+<th class="head"><p>native control</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>per document</strong></p></td>
+<td><p>14.6%</p></td>
+<td><p>23.0%</p></td>
+<td><p>25.7%</p></td>
+<td><p>24.0%</p></td>
+</tr>
+<tr class="row-odd"><td><p>per sentence</p></td>
+<td><p>2.1%</p></td>
+<td><p>3.0%</p></td>
+<td><p>3.1%</p></td>
+<td><p>2.9%</p></td>
+</tr>
+</tbody>
+</table>
+<p>Two things to take from that. <strong>A single flagged sentence is much better evidence than a flagged document</strong>, because a long document accumulates chances to trip one rule. And the bias here does <strong>not</strong> run the way the literature predicts: it tracks <em>formal, fluent, essayistic</em> writing rather than simple writing, because the deterministic detectors look for rhetorical constructions that good writers also use. The full measurement, including how much worse this was before Phase 2, is in <a class="reference internal" href="#misc/docs/phase-2-results.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">phase-2-results.md</span></code></span></a>.</p>
+</section>
 </section>
 <section id="what-it-looks-at">
 <h2>What it looks at<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#what-it-looks-at" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#what-it-looks-at'">¶</a></h2>
@@ -194,7 +223,8 @@
 </span><span id="line-2">ductus<span class="w"> </span>gauge<span class="w"> </span>draft.md<span class="w"> </span>--detectors<span class="w"> </span>fast-detect-gpt,binoculars
 </span></code></pre></div>
 </div>
-<p>They are opt-in because they were measured and did not beat the deterministic set on machine-written text — better recall, worse precision. They <em>did</em> find human-leaning evidence the deterministic detectors miss entirely. The numbers, including the unflattering ones, are in <a class="reference internal" href="#misc/docs/phase-1-results.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">phase-1-results.md</span></code></span></a>; why a continuous score becomes a banded signal rather than a weight is <a class="reference internal" href="#misc/docs/curvature-as-evidence.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">curvature-as-evidence.md</span></code></span></a>.</p>
+<p>They stay opt-in because they need <code class="docutils literal notranslate"><span class="pre">torch</span></code> and a model download, which the default must not. <strong>But if you have installed the extra, turn them on — at their default models.</strong> Measured against a second fixture whose machine text was <em>not</em> written to blend into its surroundings, they find 12 of 75 machine-written sentences at 86% precision where the deterministic set finds 0 of 75 — and they falsely accuse human writers far <em>less</em> often than the deterministic default does (6.3% of 350 human texts for <code class="docutils literal notranslate"><span class="pre">binoculars</span></code>, against 20.6%).</p>
+<p>Do not assume a bigger proxy model is an upgrade. A stronger Binoculars pair was measured, found more machine text on both fixtures, and <strong>nearly doubled its false accusations on human writing</strong> — so the defaults stayed where they were. If you change <code class="docutils literal notranslate"><span class="pre">model=</span></code>, <code class="docutils literal notranslate"><span class="pre">observer=</span></code> or <code class="docutils literal notranslate"><span class="pre">performer=</span></code>, re-run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">misc/measure_false_positives.py</span> <span class="pre">--pair-check</span></code> for your pair. The numbers, including the unflattering ones, are in <a class="reference internal" href="#misc/docs/phase-1-results.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">phase-1-results.md</span></code></span></a> and <a class="reference internal" href="#misc/docs/phase-2-results.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">phase-2-results.md</span></code></span></a>; why a continuous score becomes a banded signal rather than a weight is <a class="reference internal" href="#misc/docs/curvature-as-evidence.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">curvature-as-evidence.md</span></code></span></a>.</p>
 <p>Note what they do <em>not</em> do: they compare passages <strong>within</strong> a document and so cannot say whether a whole text is machine-written. Answering that honestly needs a calibration this package does not have yet.</p>
 </section>
 <section id="how-it-fits-together">
@@ -284,9 +314,10 @@
 </span><span id="line-2"><span class="n">gauge</span><span class="p">(</span>
 </span><span id="line-3">    <span class="n">text</span><span class="p">,</span> <span class="n">detectors</span><span class="o">=</span><span class="p">[</span><span class="s2">"forensic"</span><span class="p">,</span> <span class="s2">"rhetoric"</span><span class="p">]</span>
 </span><span id="line-4"><span class="p">)</span>  <span class="c1"># or your own (text, span) -&gt; Iterator[Signal]</span>
-</span><span id="line-5"><span class="n">gauge</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">aggregate</span><span class="o">=</span><span class="n">my_calibrated_scorer</span><span class="p">)</span>  <span class="c1"># replace the scoring model wholesale</span>
+</span><span id="line-5"><span class="n">gauge</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">aggregate</span><span class="o">=</span><span class="n">my_scorer</span><span class="p">)</span>  <span class="c1"># (signals, *, n_chars) -&gt; (lean, strength, label)</span>
 </span></code></pre></div>
 </div>
+<p>The <code class="docutils literal notranslate"><span class="pre">aggregate=</span></code> default is <code class="docutils literal notranslate"><span class="pre">density_aggregate</span></code>, which divides evidence by how much text produced it: two stray signals mean something different in 600 characters than in 3000. The length-blind <code class="docutils literal notranslate"><span class="pre">aggregate</span></code> it replaced is still exported, and the measurement that chose between them is in <a class="reference internal" href="#misc/docs/phase-2-results.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">phase-2-results.md</span></code></span></a> — it cut false accusations on human text from 34.3% to 20.6% at no measured cost in findings.</p>
 <p>A detector is a plain function <code class="docutils literal notranslate"><span class="pre">(text,</span> <span class="pre">span)</span> <span class="pre">-&gt;</span> <span class="pre">Iterator[Signal]</span></code>. Fast-DetectGPT and Binoculars are exactly that and nothing more — <code class="docutils literal notranslate"><span class="pre">ductus/curvature.py</span></code> adds no base class, no core change and no import cost. A vendor API would be one more function of the same shape; see <a class="reference internal" href="#misc/docs/roadmap.md"><span class="xref myst">the roadmap</span></a>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">DETECTORS</span></code> is the registry of everything nameable; <code class="docutils literal notranslate"><span class="pre">DEFAULT_DETECTORS</span></code> is what <code class="docutils literal notranslate"><span class="pre">detectors=None</span></code> means. They are deliberately different lists — a detector joins the default by beating what is already there on <code class="docutils literal notranslate"><span class="pre">tests/fixtures/mixed_authorship.json</span></code>, which <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">misc/measure_detectors.py</span></code> measures.</p>
 <p>For long documents, <code class="docutils literal notranslate"><span class="pre">iter_segments</span></code> is the streaming core and <code class="docutils literal notranslate"><span class="pre">gauge</span></code> is the batch facade over it.</p>
@@ -318,11 +349,14 @@
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-17 12:10 UTC from <a href="https://github.com/thorwhalen/ductus/commit/b2fab6e82e2fb4363327871e19fa84a9e57dae5e">b2fab6e</a> (main) · ductus 0.0.4 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-17 15:45 UTC from <a href="https://github.com/thorwhalen/ductus/commit/d6339fce087d03f391e921f1a3ba2065b45f0f0d">d6339fc</a> (main) · ductus 0.0.5 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
-<li><a :data-current="activeSection === '#there-is-no-percentage-in-this-package-and-that-is-the-point'" class="reference internal" href="#there-is-no-percentage-in-this-package-and-that-is-the-point">There is no percentage in this package, and that is the point</a></li>
+<li><a :data-current="activeSection === '#there-is-no-percentage-in-this-package-and-that-is-the-point'" class="reference internal" href="#there-is-no-percentage-in-this-package-and-that-is-the-point">There is no percentage in this package, and that is the point</a><ul>
+<li><a :data-current="activeSection === '#and-this-package-s-own-false-positive-rate-is-not-small'" class="reference internal" href="#and-this-package-s-own-false-positive-rate-is-not-small">And this package’s own false-positive rate is not small</a></li>
+</ul>
+</li>
 <li><a :data-current="activeSection === '#what-it-looks-at'" class="reference internal" href="#what-it-looks-at">What it looks at</a></li>
 <li><a :data-current="activeSection === '#how-it-fits-together'" class="reference internal" href="#how-it-fits-together">How it fits together</a></li>
 <li><a :data-current="activeSection === '#renderings'" class="reference internal" href="#renderings">Renderings</a><ul>
@@ -348,7 +382,7 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=8c5712d9"></script>
+<script src="_static/documentation_options.js?v=282f96c0"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

@@ -162,13 +162,19 @@ argument; see <code class="docutils literal notranslate"><span class="pre">misc/
 <tr class="row-odd"><td><p><a class="reference internal" href="#ductus.score.EVIDENCE_FULL" title="ductus.score.EVIDENCE_FULL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EVIDENCE_FULL</span></code></a></p></td>
 <td><p>The total signal weight at which <code class="docutils literal notranslate"><span class="pre">strength</span></code> saturates at 1.0.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ductus.score.REFERENCE_CHARS" title="ductus.score.REFERENCE_CHARS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">REFERENCE_CHARS</span></code></a></p></td>
+<td><p>How much text <a class="reference internal" href="#ductus.score.density_aggregate" title="ductus.score.density_aggregate"><code class="xref py py-func docutils literal notranslate"><span class="pre">density_aggregate()</span></code></a> treats as one "unit" of reading.</p></td>
+</tr>
 </tbody>
 </table>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.score.aggregate" title="ductus.score.aggregate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aggregate</span></code></a>(signals)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.score.aggregate" title="ductus.score.aggregate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aggregate</span></code></a>(signals, *[, n_chars])</p></td>
 <td><p>Reduce evidence to <code class="docutils literal notranslate"><span class="pre">(lean,</span> <span class="pre">strength,</span> <span class="pre">label)</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ductus.score.density_aggregate" title="ductus.score.density_aggregate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">density_aggregate</span></code></a>(signals, *[, n_chars])</p></td>
+<td><p>Like <a class="reference internal" href="#ductus.score.aggregate" title="ductus.score.aggregate"><code class="xref py py-func docutils literal notranslate"><span class="pre">aggregate()</span></code></a>, but <code class="docutils literal notranslate"><span class="pre">strength</span></code> is an evidence <em>rate</em>, not a total.</p></td>
 </tr>
 </tbody>
 </table>
@@ -184,17 +190,30 @@ it is “about three moderate signals”, chosen to be legible rather than exact
 <dd><p>Beyond this, a segment is called as leaning one way.</p>
 </dd></dl>
 <dl class="py data">
+<dt class="sig sig-object py" id="ductus.score.REFERENCE_CHARS">
+<span class="sig-prename descclassname"><span class="pre">ductus.score.</span></span><span class="sig-name descname"><span class="pre">REFERENCE_CHARS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000</span></span><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.score.REFERENCE_CHARS" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.score.REFERENCE_CHARS'">¶</a></dt>
+<dd><p>How much text <a class="reference internal" href="#ductus.score.density_aggregate" title="ductus.score.density_aggregate"><code class="xref py py-func docutils literal notranslate"><span class="pre">density_aggregate()</span></code></a> treats as one “unit” of reading. Above this
+length a passage must produce proportionally more evidence to reach the same
+<code class="docutils literal notranslate"><span class="pre">strength</span></code>. Selected on human-written text; see <code class="docutils literal notranslate"><span class="pre">misc/docs/phase-2-results.md</span></code>.</p>
+</dd></dl>
+<dl class="py data">
 <dt class="sig sig-object py" id="ductus.score.STRENGTH_FLOOR">
 <span class="sig-prename descclassname"><span class="pre">ductus.score.</span></span><span class="sig-name descname"><span class="pre">STRENGTH_FLOOR</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.2</span></span><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.score.STRENGTH_FLOOR" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.score.STRENGTH_FLOOR'">¶</a></dt>
 <dd><p>Below this much total evidence, no label is claimed at all.</p>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="ductus.score.aggregate">
-<span class="sig-prename descclassname"><span class="pre">ductus.score.</span></span><span class="sig-name descname"><span class="pre">aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signals</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/score.html#aggregate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.score.aggregate" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.score.aggregate'">¶</a></dt>
-<dd><p>Reduce evidence to <code class="docutils literal notranslate"><span class="pre">(lean,</span> <span class="pre">strength,</span> <span class="pre">label)</span></code>.</p>
+<span class="sig-prename descclassname"><span class="pre">ductus.score.</span></span><span class="sig-name descname"><span class="pre">aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signals</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/score.html#aggregate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.score.aggregate" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.score.aggregate'">¶</a></dt>
+<dd><p>Reduce evidence to <code class="docutils literal notranslate"><span class="pre">(lean,</span> <span class="pre">strength,</span> <span class="pre">label)</span></code>. Length-blind, by construction.</p>
 <p>Neutral signals count toward <code class="docutils literal notranslate"><span class="pre">strength</span></code> but never toward <code class="docutils literal notranslate"><span class="pre">lean</span></code> – they
 are real evidence that the passage is unusual without being evidence about
 who wrote it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">n_chars</span></code> is accepted and <strong>deliberately ignored</strong>. The seam passes it so a
+scorer <em>can</em> reason about how much text produced the evidence; this one does not,
+which is a choice with a measured cost: on human-written text the chance of a
+false accusation rises from 11% to 74% with document length alone, because two
+stray signals weigh the same in 600 characters as in 3000. See
+<a class="reference internal" href="#ductus.score.density_aggregate" title="ductus.score.density_aggregate"><code class="xref py py-func docutils literal notranslate"><span class="pre">density_aggregate()</span></code></a> and <code class="docutils literal notranslate"><span class="pre">misc/docs/phase-2-results.md</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>]</span></p>
@@ -208,14 +227,45 @@ who wrote it.</p>
 </span></code></pre></div>
 </div>
 </dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="ductus.score.density_aggregate">
+<span class="sig-prename descclassname"><span class="pre">ductus.score.</span></span><span class="sig-name descname"><span class="pre">density_aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signals</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/score.html#density_aggregate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.score.density_aggregate" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.score.density_aggregate'">¶</a></dt>
+<dd><p>Like <a class="reference internal" href="#ductus.score.aggregate" title="ductus.score.aggregate"><code class="xref py py-func docutils literal notranslate"><span class="pre">aggregate()</span></code></a>, but <code class="docutils literal notranslate"><span class="pre">strength</span></code> is an evidence <em>rate</em>, not a total.</p>
+<p>Two signals in 600 characters is a different claim from two in 3000, and the
+length-blind scorer cannot tell them apart. This one divides the evidence by how
+much text produced it, above a reference length of <a class="reference internal" href="#ductus.score.REFERENCE_CHARS" title="ductus.score.REFERENCE_CHARS"><code class="xref py py-data docutils literal notranslate"><span class="pre">REFERENCE_CHARS</span></code></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">lean</span></code> is untouched. It still reads ±1.0 off a single weak signal, and that
+jaggedness is deliberate – smoothing it is how <code class="docutils literal notranslate"><span class="pre">lean</span></code> would quietly become a
+quantity-integrating score, which is to say a probability. See
+<code class="docutils literal notranslate"><span class="pre">misc/docs/what-calibration-means-here.md</span></code>.</p>
+<p>The scaling only ever <em>divides</em>, never multiplies, so this scorer can only remove
+accusations, never add one. Short passages behave exactly as before.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>]</span></p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Signal</span>
+</span><span id="line-2"><span class="gp">&gt;&gt;&gt; </span><span class="n">evidence</span> <span class="o">=</span> <span class="p">[</span><span class="n">Signal</span><span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"machine"</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">)]</span>
+</span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="n">density_aggregate</span><span class="p">(</span><span class="n">evidence</span><span class="p">,</span> <span class="n">n_chars</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>        <span class="c1"># short: unchanged</span>
+</span><span id="line-4"><span class="go">(1.0, 0.267, 'leans-machine')</span>
+</span><span id="line-5"><span class="gp">&gt;&gt;&gt; </span><span class="n">density_aggregate</span><span class="p">(</span><span class="n">evidence</span><span class="p">,</span> <span class="n">n_chars</span><span class="o">=</span><span class="mi">4000</span><span class="p">)</span>       <span class="c1"># the same evidence, spread thin</span>
+</span><span id="line-6"><span class="go">(1.0, 0.067, 'no-evidence')</span>
+</span><span id="line-7"><span class="gp">&gt;&gt;&gt; </span><span class="n">density_aggregate</span><span class="p">(</span><span class="n">evidence</span><span class="p">)</span> <span class="o">==</span> <span class="n">aggregate</span><span class="p">(</span><span class="n">evidence</span><span class="p">)</span>  <span class="c1"># no length, no opinion</span>
+</span><span id="line-8"><span class="go">True</span>
+</span></code></pre></div>
+</div>
+</dd></dl>
 </section>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
 <li><a :data-current="activeSection === '#ductus.score.EVIDENCE_FULL'" class="reference internal" href="#ductus.score.EVIDENCE_FULL"><code class="docutils literal notranslate"><span class="pre">EVIDENCE_FULL</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.score.LEAN_THRESHOLD'" class="reference internal" href="#ductus.score.LEAN_THRESHOLD"><code class="docutils literal notranslate"><span class="pre">LEAN_THRESHOLD</span></code></a></li>
+<li><a :data-current="activeSection === '#ductus.score.REFERENCE_CHARS'" class="reference internal" href="#ductus.score.REFERENCE_CHARS"><code class="docutils literal notranslate"><span class="pre">REFERENCE_CHARS</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.score.STRENGTH_FLOOR'" class="reference internal" href="#ductus.score.STRENGTH_FLOOR"><code class="docutils literal notranslate"><span class="pre">STRENGTH_FLOOR</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.score.aggregate'" class="reference internal" href="#ductus.score.aggregate"><code class="docutils literal notranslate"><span class="pre">aggregate()</span></code></a></li>
+<li><a :data-current="activeSection === '#ductus.score.density_aggregate'" class="reference internal" href="#ductus.score.density_aggregate"><code class="docutils literal notranslate"><span class="pre">density_aggregate()</span></code></a></li>
 </ul>
 </div>
 </aside>
@@ -229,7 +279,7 @@ who wrote it.</p>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=8c5712d9"></script>
+<script src="../_static/documentation_options.js?v=282f96c0"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

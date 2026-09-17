@@ -181,125 +181,137 @@
 </span><span id="line-9"><span class="sd">:func:`gauge` collects them into a :class:`~ductus.base.Report`.</span>
 </span><span id="line-10">
 </span><span id="line-11"><span class="sd">The three seams are keyword arguments, each defaulting to something that</span>
-</span><span id="line-12"><span class="sd">genuinely works rather than to a stub:</span>
-</span><span id="line-13">
-</span><span id="line-14"><span class="sd">===============  ==========================================  ==========================</span>
-</span><span id="line-15"><span class="sd">seam             v1 default                                  swap in</span>
-</span><span id="line-16"><span class="sd">===============  ==========================================  ==========================</span>
-</span><span id="line-17"><span class="sd">``segmenter=``   ``"paragraph"``                             ``"sentence"``, a callable</span>
-</span><span id="line-18"><span class="sd">``detectors=``   all four deterministic detectors            a model-based detector</span>
-</span><span id="line-19"><span class="sd">``aggregate=``   :func:`ductus.score.aggregate`              a calibrated scorer</span>
+</span><span id="line-12"><span class="sd">genuinely works rather than to a stub. The ``aggregate=`` default normalises evidence</span>
+</span><span id="line-13"><span class="sd">by how much text produced it; the length-blind :func:`ductus.score.aggregate` is still</span>
+</span><span id="line-14"><span class="sd">there, and ``misc/docs/phase-2-results.md`` has the measurement that chose between</span>
+</span><span id="line-15"><span class="sd">them -- on human-written text the length-blind scorer's false-accusation rate ran from</span>
+</span><span id="line-16"><span class="sd">11% to 74% with document length alone.</span>
+</span><span id="line-17">
+</span><span id="line-18"><span class="sd">===============  ==========================================  ==========================</span>
+</span><span id="line-19"><span class="sd">seam             v1 default                                  swap in</span>
 </span><span id="line-20"><span class="sd">===============  ==========================================  ==========================</span>
-</span><span id="line-21">
-</span><span id="line-22"><span class="sd">``extra_signals=`` is not a seam but an input: evidence produced elsewhere --</span>
-</span><span id="line-23"><span class="sd">by an agent reading the text, by a vendor API -- attached to the segment that</span>
-</span><span id="line-24"><span class="sd">contains it. It is how the shipped skills feed a model's reading back in.</span>
+</span><span id="line-21"><span class="sd">``segmenter=``   ``"paragraph"``                             ``"sentence"``, a callable</span>
+</span><span id="line-22"><span class="sd">``detectors=``   all four deterministic detectors            a model-based detector</span>
+</span><span id="line-23"><span class="sd">``aggregate=``   :func:`ductus.score.density_aggregate`      :func:`ductus.score.aggregate`</span>
+</span><span id="line-24"><span class="sd">===============  ==========================================  ==========================</span>
 </span><span id="line-25">
-</span><span id="line-26"><span class="sd">&gt;&gt;&gt; report = gauge("Great question! Let's delve into this robust tapestry.")</span>
-</span><span id="line-27"><span class="sd">&gt;&gt;&gt; report.document.label</span>
-</span><span id="line-28"><span class="sd">'leans-machine'</span>
-</span><span id="line-29"><span class="sd">&gt;&gt;&gt; report = gauge("Sent the export Friday. Two sites, not five. Call if it breaks.")</span>
-</span><span id="line-30"><span class="sd">&gt;&gt;&gt; report.document.label</span>
-</span><span id="line-31"><span class="sd">'no-evidence'</span>
-</span><span id="line-32"><span class="sd">"""</span>
-</span><span id="line-33">
-</span><span id="line-34"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-</span><span id="line-35">
-</span><span id="line-36"><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
-</span><span id="line-37"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Sequence</span>
-</span><span id="line-38">
-</span><span id="line-39"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Report</span><span class="p">,</span> <span class="n">Segment</span><span class="p">,</span> <span class="n">Signal</span><span class="p">,</span> <span class="n">Span</span>
-</span><span id="line-40"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.detect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detectors_from</span>
-</span><span id="line-41"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.score</span><span class="w"> </span><span class="kn">import</span> <span class="n">aggregate</span> <span class="k">as</span> <span class="n">default_aggregate</span>
-</span><span id="line-42"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.segment</span><span class="w"> </span><span class="kn">import</span> <span class="n">spans_of</span>
-</span><span id="line-43">
-</span><span id="line-44"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"gauge"</span><span class="p">,</span> <span class="s2">"iter_segments"</span><span class="p">]</span>
-</span><span id="line-45">
-</span><span id="line-46"><span class="n">Aggregator</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Signal</span><span class="p">]],</span> <span class="s2">"tuple[float, float, str]"</span><span class="p">]</span>
+</span><span id="line-26"><span class="sd">``extra_signals=`` is not a seam but an input: evidence produced elsewhere --</span>
+</span><span id="line-27"><span class="sd">by an agent reading the text, by a vendor API -- attached to the segment that</span>
+</span><span id="line-28"><span class="sd">contains it. It is how the shipped skills feed a model's reading back in.</span>
+</span><span id="line-29">
+</span><span id="line-30"><span class="sd">&gt;&gt;&gt; report = gauge("Great question! Let's delve into this robust tapestry.")</span>
+</span><span id="line-31"><span class="sd">&gt;&gt;&gt; report.document.label</span>
+</span><span id="line-32"><span class="sd">'leans-machine'</span>
+</span><span id="line-33"><span class="sd">&gt;&gt;&gt; report = gauge("Sent the export Friday. Two sites, not five. Call if it breaks.")</span>
+</span><span id="line-34"><span class="sd">&gt;&gt;&gt; report.document.label</span>
+</span><span id="line-35"><span class="sd">'no-evidence'</span>
+</span><span id="line-36"><span class="sd">"""</span>
+</span><span id="line-37">
+</span><span id="line-38"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+</span><span id="line-39">
+</span><span id="line-40"><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+</span><span id="line-41"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Sequence</span>
+</span><span id="line-42">
+</span><span id="line-43"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Report</span><span class="p">,</span> <span class="n">Segment</span><span class="p">,</span> <span class="n">Signal</span><span class="p">,</span> <span class="n">Span</span>
+</span><span id="line-44"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.detect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detectors_from</span>
+</span><span id="line-45"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.score</span><span class="w"> </span><span class="kn">import</span> <span class="n">density_aggregate</span> <span class="k">as</span> <span class="n">default_aggregate</span>
+</span><span id="line-46"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.segment</span><span class="w"> </span><span class="kn">import</span> <span class="n">spans_of</span>
 </span><span id="line-47">
-</span><span id="line-48">
+</span><span id="line-48"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"gauge"</span><span class="p">,</span> <span class="s2">"iter_segments"</span><span class="p">]</span>
+</span><span id="line-49">
+</span><span id="line-50"><span class="c1">#: The ``aggregate=`` seam. ``n_chars`` is passed by keyword so a scorer can reason</span>
+</span><span id="line-51"><span class="c1">#: about how much text produced the evidence -- a rate rather than a total. The</span>
+</span><span id="line-52"><span class="c1">#: default scorer ignores it; :func:`ductus.score.density_aggregate` does not.</span>
+</span><span id="line-53"><span class="n">Aggregator</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="s2">"tuple[float, float, str]"</span><span class="p">]</span>
+</span><span id="line-54">
+</span><span id="line-55">
 <div class="viewcode-block" id="iter_segments">
 <a class="viewcode-back" href="../../_autosummary/ductus.core.html#ductus.iter_segments">[docs]</a>
-</span><span id="line-49"><span class="k">def</span><span class="w"> </span><span class="nf">iter_segments</span><span class="p">(</span>
-</span><span id="line-50">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-51">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-52">    <span class="n">segmenter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Span</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">"paragraph"</span><span class="p">,</span>
-</span><span id="line-53">    <span class="n">detectors</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-54">    <span class="n">aggregate</span><span class="p">:</span> <span class="n">Aggregator</span> <span class="o">=</span> <span class="n">default_aggregate</span><span class="p">,</span>
-</span><span id="line-55">    <span class="n">extra_signals</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Signal</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
-</span><span id="line-56"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Segment</span><span class="p">]:</span>
-</span><span id="line-57"><span class="w">    </span><span class="sd">"""Yield one scored segment at a time.</span>
-</span><span id="line-58">
-</span><span id="line-59"><span class="sd">    &gt;&gt;&gt; segs = list(iter_segments("Let's delve in.\\n\\nSent it Friday."))</span>
-</span><span id="line-60"><span class="sd">    &gt;&gt;&gt; len(segs), segs[0].label</span>
-</span><span id="line-61"><span class="sd">    (2, 'leans-machine')</span>
-</span><span id="line-62"><span class="sd">    """</span>
-</span><span id="line-63">    <span class="n">fns</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">detectors_from</span><span class="p">(</span><span class="n">detectors</span><span class="p">)</span>
-</span><span id="line-64">    <span class="n">injected</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">extra_signals</span><span class="p">)</span>
-</span><span id="line-65">    <span class="k">for</span> <span class="n">span</span> <span class="ow">in</span> <span class="n">spans_of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">segmenter</span><span class="p">):</span>
-</span><span id="line-66">        <span class="n">signals</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Signal</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-67">        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">fns</span><span class="p">:</span>
-</span><span id="line-68">            <span class="n">signals</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">))</span>
-</span><span id="line-69">        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">injected</span><span class="p">:</span>
-</span><span id="line-70">            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">span</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">span</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">span</span><span class="p">):</span>
-</span><span id="line-71">                <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-</span><span id="line-72">        <span class="n">signals</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">span</span> <span class="k">else</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-</span><span id="line-73">        <span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">aggregate</span><span class="p">(</span><span class="n">signals</span><span class="p">)</span>
-</span><span id="line-74">        <span class="k">yield</span> <span class="n">Segment</span><span class="p">(</span>
-</span><span id="line-75">            <span class="n">span</span><span class="o">=</span><span class="n">span</span><span class="p">,</span> <span class="n">signals</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">signals</span><span class="p">),</span> <span class="n">lean</span><span class="o">=</span><span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="o">=</span><span class="n">strength</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span>
-</span><span id="line-76">        <span class="p">)</span></div>
+</span><span id="line-56"><span class="k">def</span><span class="w"> </span><span class="nf">iter_segments</span><span class="p">(</span>
+</span><span id="line-57">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-58">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-59">    <span class="n">segmenter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Span</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">"paragraph"</span><span class="p">,</span>
+</span><span id="line-60">    <span class="n">detectors</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-61">    <span class="n">aggregate</span><span class="p">:</span> <span class="n">Aggregator</span> <span class="o">=</span> <span class="n">default_aggregate</span><span class="p">,</span>
+</span><span id="line-62">    <span class="n">extra_signals</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Signal</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+</span><span id="line-63"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Segment</span><span class="p">]:</span>
+</span><span id="line-64"><span class="w">    </span><span class="sd">"""Yield one scored segment at a time.</span>
+</span><span id="line-65">
+</span><span id="line-66"><span class="sd">    &gt;&gt;&gt; segs = list(iter_segments("Let's delve in.\\n\\nSent it Friday."))</span>
+</span><span id="line-67"><span class="sd">    &gt;&gt;&gt; len(segs), segs[0].label</span>
+</span><span id="line-68"><span class="sd">    (2, 'leans-machine')</span>
+</span><span id="line-69"><span class="sd">    """</span>
+</span><span id="line-70">    <span class="n">fns</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">detectors_from</span><span class="p">(</span><span class="n">detectors</span><span class="p">)</span>
+</span><span id="line-71">    <span class="n">injected</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">extra_signals</span><span class="p">)</span>
+</span><span id="line-72">    <span class="k">for</span> <span class="n">span</span> <span class="ow">in</span> <span class="n">spans_of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">segmenter</span><span class="p">):</span>
+</span><span id="line-73">        <span class="n">signals</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Signal</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-74">        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">fns</span><span class="p">:</span>
+</span><span id="line-75">            <span class="n">signals</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="p">))</span>
+</span><span id="line-76">        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">injected</span><span class="p">:</span>
+</span><span id="line-77">            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">span</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">span</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">span</span><span class="p">):</span>
+</span><span id="line-78">                <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</span><span id="line-79">        <span class="n">signals</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">span</span><span class="o">.</span><span class="n">start</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">span</span> <span class="k">else</span> <span class="n">span</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</span><span id="line-80">        <span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">aggregate</span><span class="p">(</span><span class="n">signals</span><span class="p">,</span> <span class="n">n_chars</span><span class="o">=</span><span class="n">span</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+</span><span id="line-81">        <span class="k">yield</span> <span class="n">Segment</span><span class="p">(</span>
+</span><span id="line-82">            <span class="n">span</span><span class="o">=</span><span class="n">span</span><span class="p">,</span> <span class="n">signals</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">signals</span><span class="p">),</span> <span class="n">lean</span><span class="o">=</span><span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="o">=</span><span class="n">strength</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span>
+</span><span id="line-83">        <span class="p">)</span></div>
 
-</span><span id="line-77">
-</span><span id="line-78">
+</span><span id="line-84">
+</span><span id="line-85">
 <div class="viewcode-block" id="gauge">
 <a class="viewcode-back" href="../../_autosummary/ductus.core.html#ductus.gauge">[docs]</a>
-</span><span id="line-79"><span class="k">def</span><span class="w"> </span><span class="nf">gauge</span><span class="p">(</span>
-</span><span id="line-80">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-81">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-82">    <span class="n">segmenter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Span</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">"paragraph"</span><span class="p">,</span>
-</span><span id="line-83">    <span class="n">detectors</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-84">    <span class="n">aggregate</span><span class="p">:</span> <span class="n">Aggregator</span> <span class="o">=</span> <span class="n">default_aggregate</span><span class="p">,</span>
-</span><span id="line-85">    <span class="n">extra_signals</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Signal</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
-</span><span id="line-86"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Report</span><span class="p">:</span>
-</span><span id="line-87"><span class="w">    </span><span class="sd">"""Score ``text`` and roll the segments up into a report.</span>
-</span><span id="line-88">
-</span><span id="line-89"><span class="sd">    The document-level lean is computed over *all* signals in the document, not</span>
-</span><span id="line-90"><span class="sd">    by averaging the segment leans -- averaging would let two short, heavily</span>
-</span><span id="line-91"><span class="sd">    flagged paragraphs outvote a long clean one.</span>
-</span><span id="line-92">
-</span><span id="line-93"><span class="sd">    &gt;&gt;&gt; r = gauge("It is important to note that this is a robust tapestry.")</span>
-</span><span id="line-94"><span class="sd">    &gt;&gt;&gt; r.document.lean &gt; 0 and r.n_chars == 55</span>
-</span><span id="line-95"><span class="sd">    True</span>
-</span><span id="line-96"><span class="sd">    &gt;&gt;&gt; r.segmenter, len(r.detectors)</span>
-</span><span id="line-97"><span class="sd">    ('paragraph', 4)</span>
-</span><span id="line-98"><span class="sd">    """</span>
-</span><span id="line-99">    <span class="n">_</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="n">detectors_from</span><span class="p">(</span><span class="n">detectors</span><span class="p">)</span>
-</span><span id="line-100">    <span class="n">segments</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-</span><span id="line-101">        <span class="n">iter_segments</span><span class="p">(</span>
-</span><span id="line-102">            <span class="n">text</span><span class="p">,</span>
-</span><span id="line-103">            <span class="n">segmenter</span><span class="o">=</span><span class="n">segmenter</span><span class="p">,</span>
-</span><span id="line-104">            <span class="n">detectors</span><span class="o">=</span><span class="n">detectors</span><span class="p">,</span>
-</span><span id="line-105">            <span class="n">aggregate</span><span class="o">=</span><span class="n">aggregate</span><span class="p">,</span>
-</span><span id="line-106">            <span class="n">extra_signals</span><span class="o">=</span><span class="n">extra_signals</span><span class="p">,</span>
-</span><span id="line-107">        <span class="p">)</span>
-</span><span id="line-108">    <span class="p">)</span>
-</span><span id="line-109">    <span class="n">all_signals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="n">segments</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">seg</span><span class="o">.</span><span class="n">signals</span><span class="p">)</span>
-</span><span id="line-110">    <span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">aggregate</span><span class="p">(</span><span class="n">all_signals</span><span class="p">)</span>
-</span><span id="line-111">    <span class="n">document</span> <span class="o">=</span> <span class="n">Segment</span><span class="p">(</span>
-</span><span id="line-112">        <span class="n">span</span><span class="o">=</span><span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="s2">"document"</span><span class="p">),</span>
-</span><span id="line-113">        <span class="n">signals</span><span class="o">=</span><span class="p">(),</span>
-</span><span id="line-114">        <span class="n">lean</span><span class="o">=</span><span class="n">lean</span><span class="p">,</span>
-</span><span id="line-115">        <span class="n">strength</span><span class="o">=</span><span class="n">strength</span><span class="p">,</span>
-</span><span id="line-116">        <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
-</span><span id="line-117">    <span class="p">)</span>
-</span><span id="line-118">    <span class="k">return</span> <span class="n">Report</span><span class="p">(</span>
-</span><span id="line-119">        <span class="n">text_sha256</span><span class="o">=</span><span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span>
-</span><span id="line-120">        <span class="n">n_chars</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
-</span><span id="line-121">        <span class="n">document</span><span class="o">=</span><span class="n">document</span><span class="p">,</span>
-</span><span id="line-122">        <span class="n">segments</span><span class="o">=</span><span class="n">segments</span><span class="p">,</span>
-</span><span id="line-123">        <span class="n">detectors</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
-</span><span id="line-124">        <span class="n">segmenter</span><span class="o">=</span><span class="n">segmenter</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">segmenter</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"custom"</span><span class="p">,</span>
-</span><span id="line-125">    <span class="p">)</span></div>
+</span><span id="line-86"><span class="k">def</span><span class="w"> </span><span class="nf">gauge</span><span class="p">(</span>
+</span><span id="line-87">    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-88">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-89">    <span class="n">segmenter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Span</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">"paragraph"</span><span class="p">,</span>
+</span><span id="line-90">    <span class="n">detectors</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-91">    <span class="n">aggregate</span><span class="p">:</span> <span class="n">Aggregator</span> <span class="o">=</span> <span class="n">default_aggregate</span><span class="p">,</span>
+</span><span id="line-92">    <span class="n">extra_signals</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Signal</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+</span><span id="line-93"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Report</span><span class="p">:</span>
+</span><span id="line-94"><span class="w">    </span><span class="sd">"""Score ``text`` and roll the segments up into a report.</span>
+</span><span id="line-95">
+</span><span id="line-96"><span class="sd">    The document-level lean is computed over *all* signals in the document, not</span>
+</span><span id="line-97"><span class="sd">    by averaging the segment leans -- averaging would let two short, heavily</span>
+</span><span id="line-98"><span class="sd">    flagged paragraphs outvote a long clean one.</span>
+</span><span id="line-99">
+</span><span id="line-100"><span class="sd">    &gt;&gt;&gt; r = gauge("It is important to note that this is a robust tapestry.")</span>
+</span><span id="line-101"><span class="sd">    &gt;&gt;&gt; r.document.lean &gt; 0 and r.n_chars == 55</span>
+</span><span id="line-102"><span class="sd">    True</span>
+</span><span id="line-103"><span class="sd">    &gt;&gt;&gt; r.segmenter, len(r.detectors)</span>
+</span><span id="line-104"><span class="sd">    ('paragraph', 4)</span>
+</span><span id="line-105"><span class="sd">    """</span>
+</span><span id="line-106">    <span class="n">_</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="n">detectors_from</span><span class="p">(</span><span class="n">detectors</span><span class="p">)</span>
+</span><span id="line-107">    <span class="n">segments</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+</span><span id="line-108">        <span class="n">iter_segments</span><span class="p">(</span>
+</span><span id="line-109">            <span class="n">text</span><span class="p">,</span>
+</span><span id="line-110">            <span class="n">segmenter</span><span class="o">=</span><span class="n">segmenter</span><span class="p">,</span>
+</span><span id="line-111">            <span class="n">detectors</span><span class="o">=</span><span class="n">detectors</span><span class="p">,</span>
+</span><span id="line-112">            <span class="n">aggregate</span><span class="o">=</span><span class="n">aggregate</span><span class="p">,</span>
+</span><span id="line-113">            <span class="n">extra_signals</span><span class="o">=</span><span class="n">extra_signals</span><span class="p">,</span>
+</span><span id="line-114">        <span class="p">)</span>
+</span><span id="line-115">    <span class="p">)</span>
+</span><span id="line-116">    <span class="n">all_signals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="n">segments</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">seg</span><span class="o">.</span><span class="n">signals</span><span class="p">)</span>
+</span><span id="line-117">    <span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">aggregate</span><span class="p">(</span><span class="n">all_signals</span><span class="p">,</span> <span class="n">n_chars</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+</span><span id="line-118">    <span class="n">document</span> <span class="o">=</span> <span class="n">Segment</span><span class="p">(</span>
+</span><span id="line-119">        <span class="n">span</span><span class="o">=</span><span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="s2">"document"</span><span class="p">),</span>
+</span><span id="line-120">        <span class="n">signals</span><span class="o">=</span><span class="p">(),</span>
+</span><span id="line-121">        <span class="n">lean</span><span class="o">=</span><span class="n">lean</span><span class="p">,</span>
+</span><span id="line-122">        <span class="n">strength</span><span class="o">=</span><span class="n">strength</span><span class="p">,</span>
+</span><span id="line-123">        <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+</span><span id="line-124">    <span class="p">)</span>
+</span><span id="line-125">    <span class="k">return</span> <span class="n">Report</span><span class="p">(</span>
+</span><span id="line-126">        <span class="n">text_sha256</span><span class="o">=</span><span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span>
+</span><span id="line-127">        <span class="n">n_chars</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
+</span><span id="line-128">        <span class="n">document</span><span class="o">=</span><span class="n">document</span><span class="p">,</span>
+</span><span id="line-129">        <span class="n">segments</span><span class="o">=</span><span class="n">segments</span><span class="p">,</span>
+</span><span id="line-130">        <span class="n">detectors</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
+</span><span id="line-131">        <span class="n">segmenter</span><span class="o">=</span><span class="n">segmenter</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">segmenter</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"custom"</span><span class="p">,</span>
+</span><span id="line-132">        <span class="c1"># Which scorer produced these labels. Still "uncalibrated" -- nothing here is</span>
+</span><span id="line-133">        <span class="c1"># a calibrated probability and nothing ever will be -- but since Phase 2 there</span>
+</span><span id="line-134">        <span class="c1"># is more than one scorer, and two reports that do not say which one ran are</span>
+</span><span id="line-135">        <span class="c1"># not comparable. See misc/docs/what-calibration-means-here.md.</span>
+</span><span id="line-136">        <span class="n">calibration</span><span class="o">=</span><span class="sa">f</span><span class="s2">"uncalibrated (</span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">aggregate</span><span class="p">,</span><span class="w"> </span><span class="s1">'__name__'</span><span class="p">,</span><span class="w"> </span><span class="s1">'custom'</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+</span><span id="line-137">    <span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -314,7 +326,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+    <script src="../../_static/documentation_options.js?v=282f96c0"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

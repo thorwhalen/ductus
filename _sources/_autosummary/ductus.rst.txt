@@ -9,6 +9,7 @@
    .. autosummary::
    
       aggregate
+      density_aggregate
       gauge
       iter_segments
       iter_tell_matches

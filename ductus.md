@@ -1,4 +1,4 @@
-> built 2026-09-17 12:10 UTC from b2fab6e (main) · ductus 0.0.4. Details: build_info.json
+> built 2026-09-17 15:45 UTC from d6339fc (main) · ductus 0.0.5. Details: build_info.json
 
 # index.html.md
 
@@ -40,6 +40,17 @@ Four things are true and belong in any report you make from this:
 
 So this package describes *text*. It does not make claims about *people*, and it should not be used to.
 
+### And this package’s own false-positive rate is not small
+
+It would be cheap to quote other people’s numbers and not measure our own. Across 350 human-written texts with known proficiency levels, the shipped defaults call a document `leans-machine` — always wrongly, every text in that corpus was written by a person — this often:
+
+|                  | beginner   | intermediate   | advanced   | native control   |
+|------------------|------------|----------------|------------|------------------|
+| **per document** | 14.6%      | 23.0%          | 25.7%      | 24.0%            |
+| per sentence     | 2.1%       | 3.0%           | 3.1%       | 2.9%             |
+
+Two things to take from that. **A single flagged sentence is much better evidence than a flagged document**, because a long document accumulates chances to trip one rule. And the bias here does **not** run the way the literature predicts: it tracks *formal, fluent, essayistic* writing rather than simple writing, because the deterministic detectors look for rhetorical constructions that good writers also use. The full measurement, including how much worse this was before Phase 2, is in [`phase-2-results.md`]().
+
 ## What it looks at
 
 Four detectors ship, all deterministic, all free, none needing a model or a key.
@@ -66,7 +77,9 @@ pip install "ductus[local]"
 ductus gauge draft.md --detectors fast-detect-gpt,binoculars
 ```
 
-They are opt-in because they were measured and did not beat the deterministic set on machine-written text — better recall, worse precision. They *did* find human-leaning evidence the deterministic detectors miss entirely. The numbers, including the unflattering ones, are in [`phase-1-results.md`](); why a continuous score becomes a banded signal rather than a weight is [`curvature-as-evidence.md`]().
+They stay opt-in because they need `torch` and a model download, which the default must not. **But if you have installed the extra, turn them on — at their default models.** Measured against a second fixture whose machine text was *not* written to blend into its surroundings, they find 12 of 75 machine-written sentences at 86% precision where the deterministic set finds 0 of 75 — and they falsely accuse human writers far *less* often than the deterministic default does (6.3% of 350 human texts for `binoculars`, against 20.6%).
+
+Do not assume a bigger proxy model is an upgrade. A stronger Binoculars pair was measured, found more machine text on both fixtures, and **nearly doubled its false accusations on human writing** — so the defaults stayed where they were. If you change `model=`, `observer=` or `performer=`, re-run `python misc/measure_false_positives.py --pair-check` for your pair. The numbers, including the unflattering ones, are in [`phase-1-results.md`]() and [`phase-2-results.md`](); why a continuous score becomes a banded signal rather than a weight is [`curvature-as-evidence.md`]().
 
 Note what they do *not* do: they compare passages **within** a document and so cannot say whether a whole text is machine-written. Answering that honestly needs a calibration this package does not have yet.
 
@@ -126,8 +139,10 @@ gauge(text, segmenter="sentence")  # or "paragraph", "document", or a callable
 gauge(
     text, detectors=["forensic", "rhetoric"]
 )  # or your own (text, span) -> Iterator[Signal]
-gauge(text, aggregate=my_calibrated_scorer)  # replace the scoring model wholesale
+gauge(text, aggregate=my_scorer)  # (signals, *, n_chars) -> (lean, strength, label)
 ```
+
+The `aggregate=` default is `density_aggregate`, which divides evidence by how much text produced it: two stray signals mean something different in 600 characters than in 3000. The length-blind `aggregate` it replaced is still exported, and the measurement that chose between them is in [`phase-2-results.md`]() — it cut false accusations on human text from 34.3% to 20.6% at no measured cost in findings.
 
 A detector is a plain function `(text, span) -> Iterator[Signal]`. Fast-DetectGPT and Binoculars are exactly that and nothing more — `ductus/curvature.py` adds no base class, no core change and no import cost. A vendor API would be one more function of the same shape; see [the roadmap]().
 
@@ -317,13 +332,17 @@ to paint as results arrive.
 [`gauge()`](_autosummary/ductus.core.html.md#ductus.core.gauge) collects them into a [`Report`](_autosummary/ductus.base.html.md#ductus.base.Report).
 
 The three seams are keyword arguments, each defaulting to something that
-genuinely works rather than to a stub:
+genuinely works rather than to a stub. The `aggregate=` default normalises evidence
+by how much text produced it; the length-blind [`ductus.score.aggregate()`](_autosummary/ductus.score.html.md#ductus.score.aggregate) is still
+there, and `misc/docs/phase-2-results.md` has the measurement that chose between
+them – on human-written text the length-blind scorer’s false-accusation rate ran from
+11% to 74% with document length alone.
 
-| seam         | v1 default                                                                                       | swap in                  |
-|--------------|--------------------------------------------------------------------------------------------------|--------------------------|
-| `segmenter=` | `"paragraph"`                                                                                    | `"sentence"`, a callable |
-| `detectors=` | all four deterministic detectors                                                                 | a model-based detector   |
-| `aggregate=` | [`ductus.score.aggregate()`](_autosummary/ductus.score.html.md#ductus.score.aggregate) | a calibrated scorer      |
+| seam         | v1 default                                                                                                       | swap in                                                                                          |
+|--------------|------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| `segmenter=` | `"paragraph"`                                                                                                    | `"sentence"`, a callable                                                                         |
+| `detectors=` | all four deterministic detectors                                                                                 | a model-based detector                                                                           |
+| `aggregate=` | [`ductus.score.density_aggregate()`](_autosummary/ductus.score.html.md#ductus.score.density_aggregate) | [`ductus.score.aggregate()`](_autosummary/ductus.score.html.md#ductus.score.aggregate) |
 
 `extra_signals=` is not a seam but an input: evidence produced elsewhere –
 by an agent reading the text, by a vendor API – attached to the segment that
@@ -344,7 +363,7 @@ contains it. It is how the shipped skills feed a model’s reading back in.
 |-------------------------------------------------------------------------------------------------|--------------------------------------------------------|
 | [`iter_segments`](_autosummary/ductus.core.html.md#ductus.core.iter_segments)(text, \*[, segmenter, ...])      | Yield one scored segment at a time.                    |
 
-### ductus.core.gauge(text, \*, segmenter='paragraph', detectors=None, aggregate=<function aggregate>, extra_signals=())
+### ductus.core.gauge(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
 Score `text` and roll the segments up into a report.
 
@@ -363,7 +382,7 @@ True
 ('paragraph', 4)
 ```
 
-### ductus.core.iter_segments(text, \*, segmenter='paragraph', detectors=None, aggregate=<function aggregate>, extra_signals=())
+### ductus.core.iter_segments(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
 Yield one scored segment at a time.
 
@@ -751,17 +770,23 @@ Three seams, each one keyword argument with a working default:
 `segmenter=` (how the text is cut up), `detectors=` (what produces evidence),
 `aggregate=` (how evidence becomes a lean).
 
+**This package’s own false-positive rate is measured, and it is not small**: 20.6% of
+350 human-written documents are called `leans-machine` by the shipped defaults, and a
+flagged *sentence* is much better evidence than a flagged *document*. See
+`misc/docs/phase-2-results.md` before reporting anything from this.
+
 ### Functions
 
-| [`aggregate`](_autosummary/ductus.html.md#ductus.aggregate)(signals)                               | Reduce evidence to `(lean, strength, label)`.                    |
-|---------------------------------------------------------------------------------------------------|------------------------------------------------------------------|
-| [`gauge`](_autosummary/ductus.html.md#ductus.gauge)(text, \*[, segmenter, detectors, ...])     | Score `text` and roll the segments up into a report.             |
-| [`iter_segments`](_autosummary/ductus.html.md#ductus.iter_segments)(text, \*[, segmenter, ...])        | Yield one scored segment at a time.                              |
-| [`iter_tell_matches`](_autosummary/ductus.html.md#ductus.iter_tell_matches)(text, \*[, rules, tiers, ...]) | Every catalogue hit in `text`, in document order.                |
-| [`load_rules`](_autosummary/ductus.html.md#ductus.load_rules)([path])                               | The catalogue's rules, compiled.                                 |
-| [`to_html`](_autosummary/ductus.html.md#ductus.to_html)(report, \*[, text, title, subtitle])     | A single self-contained HTML file.                               |
-| [`to_json`](_autosummary/ductus.html.md#ductus.to_json)(report, \*[, indent])                    | The whole report, serialized.                                    |
-| [`to_markdown`](_autosummary/ductus.html.md#ductus.to_markdown)(report, \*[, text, title])           | A readable diagnosis: synopsis first, then the flagged segments. |
+| [`aggregate`](_autosummary/ductus.html.md#ductus.aggregate)(signals, \*[, n_chars])                | Reduce evidence to `(lean, strength, label)`.                                                                         |
+|---------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| [`density_aggregate`](_autosummary/ductus.html.md#ductus.density_aggregate)(signals, \*[, n_chars])        | Like [`aggregate()`](_autosummary/ductus.html.md#ductus.aggregate), but `strength` is an evidence *rate*, not a total. |
+| [`gauge`](_autosummary/ductus.html.md#ductus.gauge)(text, \*[, segmenter, detectors, ...])     | Score `text` and roll the segments up into a report.                                                                  |
+| [`iter_segments`](_autosummary/ductus.html.md#ductus.iter_segments)(text, \*[, segmenter, ...])        | Yield one scored segment at a time.                                                                                   |
+| [`iter_tell_matches`](_autosummary/ductus.html.md#ductus.iter_tell_matches)(text, \*[, rules, tiers, ...]) | Every catalogue hit in `text`, in document order.                                                                     |
+| [`load_rules`](_autosummary/ductus.html.md#ductus.load_rules)([path])                               | The catalogue's rules, compiled.                                                                                      |
+| [`to_html`](_autosummary/ductus.html.md#ductus.to_html)(report, \*[, text, title, subtitle])     | A single self-contained HTML file.                                                                                    |
+| [`to_json`](_autosummary/ductus.html.md#ductus.to_json)(report, \*[, indent])                    | The whole report, serialized.                                                                                         |
+| [`to_markdown`](_autosummary/ductus.html.md#ductus.to_markdown)(report, \*[, text, title])           | A readable diagnosis: synopsis first, then the flagged segments.                                                      |
 
 ### Classes
 
@@ -863,13 +888,20 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 One named rule: a tier, a message, and the patterns that trigger it.
 
-### ductus.aggregate(signals)
+### ductus.aggregate(signals, , n_chars=None)
 
-Reduce evidence to `(lean, strength, label)`.
+Reduce evidence to `(lean, strength, label)`. Length-blind, by construction.
 
 Neutral signals count toward `strength` but never toward `lean` – they
 are real evidence that the passage is unusual without being evidence about
 who wrote it.
+
+`n_chars` is accepted and **deliberately ignored**. The seam passes it so a
+scorer *can* reason about how much text produced the evidence; this one does not,
+which is a choice with a measured cost: on human-written text the chance of a
+false accusation rises from 11% to 74% with document length alone, because two
+stray signals weigh the same in 600 characters as in 3000. See
+[`density_aggregate()`](_autosummary/ductus.html.md#ductus.density_aggregate) and `misc/docs/phase-2-results.md`.
 
 * **Return type:**
   [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
@@ -882,7 +914,37 @@ who wrote it.
 (0.0, 0.6, 'uncertain')
 ```
 
-### ductus.gauge(text, \*, segmenter='paragraph', detectors=None, aggregate=<function aggregate>, extra_signals=())
+### ductus.density_aggregate(signals, , n_chars=None)
+
+Like [`aggregate()`](_autosummary/ductus.html.md#ductus.aggregate), but `strength` is an evidence *rate*, not a total.
+
+Two signals in 600 characters is a different claim from two in 3000, and the
+length-blind scorer cannot tell them apart. This one divides the evidence by how
+much text produced it, above a reference length of `REFERENCE_CHARS`.
+
+`lean` is untouched. It still reads ±1.0 off a single weak signal, and that
+jaggedness is deliberate – smoothing it is how `lean` would quietly become a
+quantity-integrating score, which is to say a probability. See
+`misc/docs/what-calibration-means-here.md`.
+
+The scaling only ever *divides*, never multiplies, so this scorer can only remove
+accusations, never add one. Short passages behave exactly as before.
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+```pycon
+>>> from ductus.base import Signal
+>>> evidence = [Signal("x", "machine", 0.4, "d")]
+>>> density_aggregate(evidence, n_chars=500)        # short: unchanged
+(1.0, 0.267, 'leans-machine')
+>>> density_aggregate(evidence, n_chars=4000)       # the same evidence, spread thin
+(1.0, 0.067, 'no-evidence')
+>>> density_aggregate(evidence) == aggregate(evidence)  # no length, no opinion
+True
+```
+
+### ductus.gauge(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
 Score `text` and roll the segments up into a report.
 
@@ -901,7 +963,7 @@ True
 ('paragraph', 4)
 ```
 
-### ductus.iter_segments(text, \*, segmenter='paragraph', detectors=None, aggregate=<function aggregate>, extra_signals=())
+### ductus.iter_segments(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
 Yield one scored segment at a time.
 
@@ -1130,15 +1192,17 @@ argument; see `misc/docs/roadmap.md`.
 
 ### Module Attributes
 
-| [`LEAN_THRESHOLD`](_autosummary/ductus.score.html.md#ductus.score.LEAN_THRESHOLD)   | Beyond this, a segment is called as leaning one way.          |
-|-------------------------------------------------------------------|---------------------------------------------------------------|
-| [`STRENGTH_FLOOR`](_autosummary/ductus.score.html.md#ductus.score.STRENGTH_FLOOR)   | Below this much total evidence, no label is claimed at all.   |
-| [`EVIDENCE_FULL`](_autosummary/ductus.score.html.md#ductus.score.EVIDENCE_FULL)    | The total signal weight at which `strength` saturates at 1.0. |
+| [`LEAN_THRESHOLD`](_autosummary/ductus.score.html.md#ductus.score.LEAN_THRESHOLD)   | Beyond this, a segment is called as leaning one way.                                                                |
+|-------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| [`STRENGTH_FLOOR`](_autosummary/ductus.score.html.md#ductus.score.STRENGTH_FLOOR)   | Below this much total evidence, no label is claimed at all.                                                         |
+| [`EVIDENCE_FULL`](_autosummary/ductus.score.html.md#ductus.score.EVIDENCE_FULL)    | The total signal weight at which `strength` saturates at 1.0.                                                       |
+| [`REFERENCE_CHARS`](_autosummary/ductus.score.html.md#ductus.score.REFERENCE_CHARS)  | How much text [`density_aggregate()`](_autosummary/ductus.score.html.md#ductus.score.density_aggregate) treats as one "unit" of reading. |
 
 ### Functions
 
-| [`aggregate`](_autosummary/ductus.score.html.md#ductus.score.aggregate)(signals)   | Reduce evidence to `(lean, strength, label)`.   |
-|-----------------------------------------------------------------------|-------------------------------------------------|
+| [`aggregate`](_autosummary/ductus.score.html.md#ductus.score.aggregate)(signals, \*[, n_chars])         | Reduce evidence to `(lean, strength, label)`.                                                                         |
+|--------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| [`density_aggregate`](_autosummary/ductus.score.html.md#ductus.score.density_aggregate)(signals, \*[, n_chars]) | Like [`aggregate()`](_autosummary/ductus.score.html.md#ductus.score.aggregate), but `strength` is an evidence *rate*, not a total. |
 
 ### ductus.score.EVIDENCE_FULL *= 1.5*
 
@@ -1149,17 +1213,30 @@ it is “about three moderate signals”, chosen to be legible rather than exact
 
 Beyond this, a segment is called as leaning one way.
 
+### ductus.score.REFERENCE_CHARS *= 1000*
+
+How much text [`density_aggregate()`](_autosummary/ductus.score.html.md#ductus.score.density_aggregate) treats as one “unit” of reading. Above this
+length a passage must produce proportionally more evidence to reach the same
+`strength`. Selected on human-written text; see `misc/docs/phase-2-results.md`.
+
 ### ductus.score.STRENGTH_FLOOR *= 0.2*
 
 Below this much total evidence, no label is claimed at all.
 
-### ductus.score.aggregate(signals)
+### ductus.score.aggregate(signals, , n_chars=None)
 
-Reduce evidence to `(lean, strength, label)`.
+Reduce evidence to `(lean, strength, label)`. Length-blind, by construction.
 
 Neutral signals count toward `strength` but never toward `lean` – they
 are real evidence that the passage is unusual without being evidence about
 who wrote it.
+
+`n_chars` is accepted and **deliberately ignored**. The seam passes it so a
+scorer *can* reason about how much text produced the evidence; this one does not,
+which is a choice with a measured cost: on human-written text the chance of a
+false accusation rises from 11% to 74% with document length alone, because two
+stray signals weigh the same in 600 characters as in 3000. See
+[`density_aggregate()`](_autosummary/ductus.score.html.md#ductus.score.density_aggregate) and `misc/docs/phase-2-results.md`.
 
 * **Return type:**
   [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
@@ -1170,6 +1247,36 @@ who wrote it.
 (-1.0, 0.4, 'leans-human')
 >>> aggregate([Signal("x", "neutral", 0.9, "d")])
 (0.0, 0.6, 'uncertain')
+```
+
+### ductus.score.density_aggregate(signals, , n_chars=None)
+
+Like [`aggregate()`](_autosummary/ductus.score.html.md#ductus.score.aggregate), but `strength` is an evidence *rate*, not a total.
+
+Two signals in 600 characters is a different claim from two in 3000, and the
+length-blind scorer cannot tell them apart. This one divides the evidence by how
+much text produced it, above a reference length of [`REFERENCE_CHARS`](_autosummary/ductus.score.html.md#ductus.score.REFERENCE_CHARS).
+
+`lean` is untouched. It still reads ±1.0 off a single weak signal, and that
+jaggedness is deliberate – smoothing it is how `lean` would quietly become a
+quantity-integrating score, which is to say a probability. See
+`misc/docs/what-calibration-means-here.md`.
+
+The scaling only ever *divides*, never multiplies, so this scorer can only remove
+accusations, never add one. Short passages behave exactly as before.
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+```pycon
+>>> from ductus.base import Signal
+>>> evidence = [Signal("x", "machine", 0.4, "d")]
+>>> density_aggregate(evidence, n_chars=500)        # short: unchanged
+(1.0, 0.267, 'leans-machine')
+>>> density_aggregate(evidence, n_chars=4000)       # the same evidence, spread thin
+(1.0, 0.067, 'no-evidence')
+>>> density_aggregate(evidence) == aggregate(evidence)  # no length, no opinion
+True
 ```
 
 
@@ -1479,16 +1586,18 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-17 12:10 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/b2fab6e82e2fb4363327871e19fa84a9e57dae5e"><code>b2fab6e</code></a> on branch <code>main</code>, for **ductus 0.0.4** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-17 15:45 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/d6339fce087d03f391e921f1a3ba2065b45f0f0d"><code>d6339fc</code></a> on branch <code>main</code>, for **ductus 0.0.5** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.0.5) is behind the latest release on PyPI (0.0.6): `pip install ductus` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/b2fab6e82e2fb4363327871e19fa84a9e57dae5e"><code>b2fab6e82e2fb4363327871e19fa84a9e57dae5e</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/d6339fce087d03f391e921f1a3ba2065b45f0f0d"><code>d6339fce087d03f391e921f1a3ba2065b45f0f0d</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -1499,9 +1608,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35219467476">35219467476</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35242096377">35242096377</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>b2fab6e82e2fb4363327871e19fa84a9e57dae5e</code> (in the history of the built commit) |
+| Event commit | <code>d6339fce087d03f391e921f1a3ba2065b45f0f0d</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1526,13 +1635,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.4/">0.0.4</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ductus/0.0.6/">0.0.6</a>, newer than the documented version (0.0.5).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout b2fab6e82e2fb4363327871e19fa84a9e57dae5e
+git checkout d6339fce087d03f391e921f1a3ba2065b45f0f0d
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

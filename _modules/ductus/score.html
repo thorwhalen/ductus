@@ -207,58 +207,136 @@
 </span><span id="line-35">
 </span><span id="line-36"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Signal</span>
 </span><span id="line-37">
-</span><span id="line-38"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"EVIDENCE_FULL"</span><span class="p">,</span> <span class="s2">"LEAN_THRESHOLD"</span><span class="p">,</span> <span class="s2">"STRENGTH_FLOOR"</span><span class="p">,</span> <span class="s2">"aggregate"</span><span class="p">]</span>
-</span><span id="line-39">
-</span><span id="line-40"><span class="c1">#: Beyond this, a segment is called as leaning one way.</span>
-</span><span id="line-41"><span class="n">LEAN_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.45</span>
-</span><span id="line-42"><span class="c1">#: Below this much total evidence, no label is claimed at all.</span>
-</span><span id="line-43"><span class="n">STRENGTH_FLOOR</span> <span class="o">=</span> <span class="mf">0.20</span>
-</span><span id="line-44"><span class="c1">#: The total signal weight at which ``strength`` saturates at 1.0. Not fitted --</span>
-</span><span id="line-45"><span class="c1">#: it is "about three moderate signals", chosen to be legible rather than exact.</span>
-</span><span id="line-46"><span class="n">EVIDENCE_FULL</span> <span class="o">=</span> <span class="mf">1.5</span>
-</span><span id="line-47">
-</span><span id="line-48">
+</span><span id="line-38"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="line-39">    <span class="s2">"EVIDENCE_FULL"</span><span class="p">,</span>
+</span><span id="line-40">    <span class="s2">"LEAN_THRESHOLD"</span><span class="p">,</span>
+</span><span id="line-41">    <span class="s2">"REFERENCE_CHARS"</span><span class="p">,</span>
+</span><span id="line-42">    <span class="s2">"STRENGTH_FLOOR"</span><span class="p">,</span>
+</span><span id="line-43">    <span class="s2">"aggregate"</span><span class="p">,</span>
+</span><span id="line-44">    <span class="s2">"density_aggregate"</span><span class="p">,</span>
+</span><span id="line-45"><span class="p">]</span>
+</span><span id="line-46">
+</span><span id="line-47"><span class="c1">#: Beyond this, a segment is called as leaning one way.</span>
+</span><span id="line-48"><span class="n">LEAN_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.45</span>
+</span><span id="line-49"><span class="c1">#: Below this much total evidence, no label is claimed at all.</span>
+</span><span id="line-50"><span class="n">STRENGTH_FLOOR</span> <span class="o">=</span> <span class="mf">0.20</span>
+</span><span id="line-51"><span class="c1">#: The total signal weight at which ``strength`` saturates at 1.0. Not fitted --</span>
+</span><span id="line-52"><span class="c1">#: it is "about three moderate signals", chosen to be legible rather than exact.</span>
+</span><span id="line-53"><span class="n">EVIDENCE_FULL</span> <span class="o">=</span> <span class="mf">1.5</span>
+</span><span id="line-54"><span class="c1">#: How much text :func:`density_aggregate` treats as one "unit" of reading. Above this</span>
+</span><span id="line-55"><span class="c1">#: length a passage must produce proportionally more evidence to reach the same</span>
+</span><span id="line-56"><span class="c1">#: ``strength``. Selected on human-written text; see ``misc/docs/phase-2-results.md``.</span>
+</span><span id="line-57"><span class="n">REFERENCE_CHARS</span> <span class="o">=</span> <span class="mi">1000</span>
+</span><span id="line-58">
+</span><span id="line-59">
+</span><span id="line-60"><span class="k">def</span><span class="w"> </span><span class="nf">_directional</span><span class="p">(</span><span class="n">signals</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Signal</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+</span><span id="line-61"><span class="w">    </span><span class="sd">"""Machine, human and neutral weight in ``signals``.</span>
+</span><span id="line-62">
+</span><span id="line-63"><span class="sd">    &gt;&gt;&gt; from ductus.base import Signal</span>
+</span><span id="line-64"><span class="sd">    &gt;&gt;&gt; _directional([Signal("x", "machine", 0.4, "d"), Signal("y", "human", 0.1, "d")])</span>
+</span><span id="line-65"><span class="sd">    (0.4, 0.1, 0.0)</span>
+</span><span id="line-66"><span class="sd">    """</span>
+</span><span id="line-67">    <span class="k">return</span> <span class="p">(</span>
+</span><span id="line-68">        <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">signals</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">"machine"</span><span class="p">)),</span>
+</span><span id="line-69">        <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">signals</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">"human"</span><span class="p">)),</span>
+</span><span id="line-70">        <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">signals</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">"neutral"</span><span class="p">)),</span>
+</span><span id="line-71">    <span class="p">)</span>
+</span><span id="line-72">
+</span><span id="line-73">
+</span><span id="line-74"><span class="k">def</span><span class="w"> </span><span class="nf">_label</span><span class="p">(</span><span class="n">lean</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">strength</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">machine</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">human</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-75"><span class="w">    </span><span class="sd">"""The coarse call, from a lean and how much evidence stands behind it.</span>
+</span><span id="line-76">
+</span><span id="line-77"><span class="sd">    &gt;&gt;&gt; _label(1.0, 0.5, 0.75, 0.0), _label(1.0, 0.05, 0.07, 0.0)</span>
+</span><span id="line-78"><span class="sd">    ('leans-machine', 'no-evidence')</span>
+</span><span id="line-79"><span class="sd">    """</span>
+</span><span id="line-80">    <span class="k">if</span> <span class="n">strength</span> <span class="o">&lt;</span> <span class="n">STRENGTH_FLOOR</span><span class="p">:</span>
+</span><span id="line-81">        <span class="k">return</span> <span class="s2">"no-evidence"</span>
+</span><span id="line-82">    <span class="k">if</span> <span class="n">lean</span> <span class="o">&gt;=</span> <span class="n">LEAN_THRESHOLD</span><span class="p">:</span>
+</span><span id="line-83">        <span class="k">return</span> <span class="s2">"leans-machine"</span>
+</span><span id="line-84">    <span class="k">if</span> <span class="n">lean</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="n">LEAN_THRESHOLD</span><span class="p">:</span>
+</span><span id="line-85">        <span class="k">return</span> <span class="s2">"leans-human"</span>
+</span><span id="line-86">    <span class="k">if</span> <span class="n">machine</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">human</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-87">        <span class="k">return</span> <span class="s2">"mixed-signals"</span>
+</span><span id="line-88">    <span class="k">return</span> <span class="s2">"uncertain"</span>
+</span><span id="line-89">
+</span><span id="line-90">
 <div class="viewcode-block" id="aggregate">
 <a class="viewcode-back" href="../../_autosummary/ductus.score.html#ductus.aggregate">[docs]</a>
-</span><span id="line-49"><span class="k">def</span><span class="w"> </span><span class="nf">aggregate</span><span class="p">(</span><span class="n">signals</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Signal</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-</span><span id="line-50"><span class="w">    </span><span class="sd">"""Reduce evidence to ``(lean, strength, label)``.</span>
-</span><span id="line-51">
-</span><span id="line-52"><span class="sd">    Neutral signals count toward ``strength`` but never toward ``lean`` -- they</span>
-</span><span id="line-53"><span class="sd">    are real evidence that the passage is unusual without being evidence about</span>
-</span><span id="line-54"><span class="sd">    who wrote it.</span>
-</span><span id="line-55">
-</span><span id="line-56"><span class="sd">    &gt;&gt;&gt; from ductus.base import Signal</span>
-</span><span id="line-57"><span class="sd">    &gt;&gt;&gt; aggregate([Signal("x", "human", 0.6, "d")])</span>
-</span><span id="line-58"><span class="sd">    (-1.0, 0.4, 'leans-human')</span>
-</span><span id="line-59"><span class="sd">    &gt;&gt;&gt; aggregate([Signal("x", "neutral", 0.9, "d")])</span>
-</span><span id="line-60"><span class="sd">    (0.0, 0.6, 'uncertain')</span>
-</span><span id="line-61"><span class="sd">    """</span>
-</span><span id="line-62">    <span class="k">if</span> <span class="ow">not</span> <span class="n">signals</span><span class="p">:</span>
-</span><span id="line-63">        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"no-evidence"</span>
-</span><span id="line-64">
-</span><span id="line-65">    <span class="n">machine</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">signals</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">"machine"</span><span class="p">)</span>
-</span><span id="line-66">    <span class="n">human</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">signals</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">"human"</span><span class="p">)</span>
-</span><span id="line-67">    <span class="n">neutral</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">signals</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">"neutral"</span><span class="p">)</span>
-</span><span id="line-68">
-</span><span id="line-69">    <span class="n">directional</span> <span class="o">=</span> <span class="n">machine</span> <span class="o">+</span> <span class="n">human</span>
-</span><span id="line-70">    <span class="n">total</span> <span class="o">=</span> <span class="n">directional</span> <span class="o">+</span> <span class="n">neutral</span>
-</span><span id="line-71">    <span class="k">if</span> <span class="n">total</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="line-72">        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"no-evidence"</span>
-</span><span id="line-73">
-</span><span id="line-74">    <span class="n">lean</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">machine</span> <span class="o">-</span> <span class="n">human</span><span class="p">)</span> <span class="o">/</span> <span class="n">directional</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">directional</span> <span class="k">else</span> <span class="mf">0.0</span>
-</span><span id="line-75">    <span class="n">strength</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span> <span class="o">/</span> <span class="n">EVIDENCE_FULL</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
-</span><span id="line-76">
-</span><span id="line-77">    <span class="k">if</span> <span class="n">strength</span> <span class="o">&lt;</span> <span class="n">STRENGTH_FLOOR</span><span class="p">:</span>
-</span><span id="line-78">        <span class="k">return</span> <span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="s2">"no-evidence"</span>
-</span><span id="line-79">    <span class="k">if</span> <span class="n">lean</span> <span class="o">&gt;=</span> <span class="n">LEAN_THRESHOLD</span><span class="p">:</span>
-</span><span id="line-80">        <span class="n">label</span> <span class="o">=</span> <span class="s2">"leans-machine"</span>
-</span><span id="line-81">    <span class="k">elif</span> <span class="n">lean</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="n">LEAN_THRESHOLD</span><span class="p">:</span>
-</span><span id="line-82">        <span class="n">label</span> <span class="o">=</span> <span class="s2">"leans-human"</span>
-</span><span id="line-83">    <span class="k">elif</span> <span class="n">machine</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">human</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="line-84">        <span class="n">label</span> <span class="o">=</span> <span class="s2">"mixed-signals"</span>
-</span><span id="line-85">    <span class="k">else</span><span class="p">:</span>
-</span><span id="line-86">        <span class="n">label</span> <span class="o">=</span> <span class="s2">"uncertain"</span>
-</span><span id="line-87">    <span class="k">return</span> <span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">label</span></div>
+</span><span id="line-91"><span class="k">def</span><span class="w"> </span><span class="nf">aggregate</span><span class="p">(</span>
+</span><span id="line-92">    <span class="n">signals</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Signal</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">n_chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-93"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+</span><span id="line-94"><span class="w">    </span><span class="sd">"""Reduce evidence to ``(lean, strength, label)``. Length-blind, by construction.</span>
+</span><span id="line-95">
+</span><span id="line-96"><span class="sd">    Neutral signals count toward ``strength`` but never toward ``lean`` -- they</span>
+</span><span id="line-97"><span class="sd">    are real evidence that the passage is unusual without being evidence about</span>
+</span><span id="line-98"><span class="sd">    who wrote it.</span>
+</span><span id="line-99">
+</span><span id="line-100"><span class="sd">    ``n_chars`` is accepted and **deliberately ignored**. The seam passes it so a</span>
+</span><span id="line-101"><span class="sd">    scorer *can* reason about how much text produced the evidence; this one does not,</span>
+</span><span id="line-102"><span class="sd">    which is a choice with a measured cost: on human-written text the chance of a</span>
+</span><span id="line-103"><span class="sd">    false accusation rises from 11% to 74% with document length alone, because two</span>
+</span><span id="line-104"><span class="sd">    stray signals weigh the same in 600 characters as in 3000. See</span>
+</span><span id="line-105"><span class="sd">    :func:`density_aggregate` and ``misc/docs/phase-2-results.md``.</span>
+</span><span id="line-106">
+</span><span id="line-107"><span class="sd">    &gt;&gt;&gt; from ductus.base import Signal</span>
+</span><span id="line-108"><span class="sd">    &gt;&gt;&gt; aggregate([Signal("x", "human", 0.6, "d")])</span>
+</span><span id="line-109"><span class="sd">    (-1.0, 0.4, 'leans-human')</span>
+</span><span id="line-110"><span class="sd">    &gt;&gt;&gt; aggregate([Signal("x", "neutral", 0.9, "d")])</span>
+</span><span id="line-111"><span class="sd">    (0.0, 0.6, 'uncertain')</span>
+</span><span id="line-112"><span class="sd">    """</span>
+</span><span id="line-113">    <span class="k">if</span> <span class="ow">not</span> <span class="n">signals</span><span class="p">:</span>
+</span><span id="line-114">        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"no-evidence"</span>
+</span><span id="line-115">
+</span><span id="line-116">    <span class="n">machine</span><span class="p">,</span> <span class="n">human</span><span class="p">,</span> <span class="n">neutral</span> <span class="o">=</span> <span class="n">_directional</span><span class="p">(</span><span class="n">signals</span><span class="p">)</span>
+</span><span id="line-117">    <span class="n">directional</span> <span class="o">=</span> <span class="n">machine</span> <span class="o">+</span> <span class="n">human</span>
+</span><span id="line-118">    <span class="n">total</span> <span class="o">=</span> <span class="n">directional</span> <span class="o">+</span> <span class="n">neutral</span>
+</span><span id="line-119">    <span class="k">if</span> <span class="n">total</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-120">        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"no-evidence"</span>
+</span><span id="line-121">
+</span><span id="line-122">    <span class="n">lean</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">machine</span> <span class="o">-</span> <span class="n">human</span><span class="p">)</span> <span class="o">/</span> <span class="n">directional</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">directional</span> <span class="k">else</span> <span class="mf">0.0</span>
+</span><span id="line-123">    <span class="n">strength</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span> <span class="o">/</span> <span class="n">EVIDENCE_FULL</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+</span><span id="line-124">    <span class="k">return</span> <span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">_label</span><span class="p">(</span><span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">machine</span><span class="p">,</span> <span class="n">human</span><span class="p">)</span></div>
+
+</span><span id="line-125">
+</span><span id="line-126">
+<div class="viewcode-block" id="density_aggregate">
+<a class="viewcode-back" href="../../_autosummary/ductus.score.html#ductus.density_aggregate">[docs]</a>
+</span><span id="line-127"><span class="k">def</span><span class="w"> </span><span class="nf">density_aggregate</span><span class="p">(</span>
+</span><span id="line-128">    <span class="n">signals</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Signal</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">n_chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-129"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+</span><span id="line-130"><span class="w">    </span><span class="sd">"""Like :func:`aggregate`, but ``strength`` is an evidence *rate*, not a total.</span>
+</span><span id="line-131">
+</span><span id="line-132"><span class="sd">    Two signals in 600 characters is a different claim from two in 3000, and the</span>
+</span><span id="line-133"><span class="sd">    length-blind scorer cannot tell them apart. This one divides the evidence by how</span>
+</span><span id="line-134"><span class="sd">    much text produced it, above a reference length of :data:`REFERENCE_CHARS`.</span>
+</span><span id="line-135">
+</span><span id="line-136"><span class="sd">    ``lean`` is untouched. It still reads ±1.0 off a single weak signal, and that</span>
+</span><span id="line-137"><span class="sd">    jaggedness is deliberate -- smoothing it is how ``lean`` would quietly become a</span>
+</span><span id="line-138"><span class="sd">    quantity-integrating score, which is to say a probability. See</span>
+</span><span id="line-139"><span class="sd">    ``misc/docs/what-calibration-means-here.md``.</span>
+</span><span id="line-140">
+</span><span id="line-141"><span class="sd">    The scaling only ever *divides*, never multiplies, so this scorer can only remove</span>
+</span><span id="line-142"><span class="sd">    accusations, never add one. Short passages behave exactly as before.</span>
+</span><span id="line-143">
+</span><span id="line-144"><span class="sd">    &gt;&gt;&gt; from ductus.base import Signal</span>
+</span><span id="line-145"><span class="sd">    &gt;&gt;&gt; evidence = [Signal("x", "machine", 0.4, "d")]</span>
+</span><span id="line-146"><span class="sd">    &gt;&gt;&gt; density_aggregate(evidence, n_chars=500)        # short: unchanged</span>
+</span><span id="line-147"><span class="sd">    (1.0, 0.267, 'leans-machine')</span>
+</span><span id="line-148"><span class="sd">    &gt;&gt;&gt; density_aggregate(evidence, n_chars=4000)       # the same evidence, spread thin</span>
+</span><span id="line-149"><span class="sd">    (1.0, 0.067, 'no-evidence')</span>
+</span><span id="line-150"><span class="sd">    &gt;&gt;&gt; density_aggregate(evidence) == aggregate(evidence)  # no length, no opinion</span>
+</span><span id="line-151"><span class="sd">    True</span>
+</span><span id="line-152"><span class="sd">    """</span>
+</span><span id="line-153">    <span class="n">machine</span><span class="p">,</span> <span class="n">human</span><span class="p">,</span> <span class="n">neutral</span> <span class="o">=</span> <span class="n">_directional</span><span class="p">(</span><span class="n">signals</span><span class="p">)</span>
+</span><span id="line-154">    <span class="n">directional</span> <span class="o">=</span> <span class="n">machine</span> <span class="o">+</span> <span class="n">human</span>
+</span><span id="line-155">    <span class="n">total</span> <span class="o">=</span> <span class="n">directional</span> <span class="o">+</span> <span class="n">neutral</span>
+</span><span id="line-156">    <span class="k">if</span> <span class="n">total</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-157">        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"no-evidence"</span>
+</span><span id="line-158">
+</span><span id="line-159">    <span class="n">scale</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="n">n_chars</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">REFERENCE_CHARS</span><span class="p">)</span>
+</span><span id="line-160">    <span class="n">lean</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">machine</span> <span class="o">-</span> <span class="n">human</span><span class="p">)</span> <span class="o">/</span> <span class="n">directional</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">directional</span> <span class="k">else</span> <span class="mf">0.0</span>
+</span><span id="line-161">    <span class="n">strength</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span> <span class="o">/</span> <span class="p">(</span><span class="n">EVIDENCE_FULL</span> <span class="o">*</span> <span class="n">scale</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+</span><span id="line-162">    <span class="k">return</span> <span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">_label</span><span class="p">(</span><span class="n">lean</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="n">machine</span><span class="p">,</span> <span class="n">human</span><span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -273,7 +351,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+    <script src="../../_static/documentation_options.js?v=282f96c0"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

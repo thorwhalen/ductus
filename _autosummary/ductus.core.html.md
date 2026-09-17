@@ -11,13 +11,17 @@ to paint as results arrive.
 [`gauge()`](#ductus.core.gauge) collects them into a [`Report`](ductus.base.html.md#ductus.base.Report).
 
 The three seams are keyword arguments, each defaulting to something that
-genuinely works rather than to a stub:
+genuinely works rather than to a stub. The `aggregate=` default normalises evidence
+by how much text produced it; the length-blind [`ductus.score.aggregate()`](ductus.score.html.md#ductus.score.aggregate) is still
+there, and `misc/docs/phase-2-results.md` has the measurement that chose between
+them – on human-written text the length-blind scorer’s false-accusation rate ran from
+11% to 74% with document length alone.
 
-| seam         | v1 default                                                                                       | swap in                  |
-|--------------|--------------------------------------------------------------------------------------------------|--------------------------|
-| `segmenter=` | `"paragraph"`                                                                                    | `"sentence"`, a callable |
-| `detectors=` | all four deterministic detectors                                                                 | a model-based detector   |
-| `aggregate=` | [`ductus.score.aggregate()`](ductus.score.html.md#ductus.score.aggregate) | a calibrated scorer      |
+| seam         | v1 default                                                                                                       | swap in                                                                                          |
+|--------------|------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| `segmenter=` | `"paragraph"`                                                                                                    | `"sentence"`, a callable                                                                         |
+| `detectors=` | all four deterministic detectors                                                                                 | a model-based detector                                                                           |
+| `aggregate=` | [`ductus.score.density_aggregate()`](ductus.score.html.md#ductus.score.density_aggregate) | [`ductus.score.aggregate()`](ductus.score.html.md#ductus.score.aggregate) |
 
 `extra_signals=` is not a seam but an input: evidence produced elsewhere –
 by an agent reading the text, by a vendor API – attached to the segment that
@@ -38,7 +42,7 @@ contains it. It is how the shipped skills feed a model’s reading back in.
 |-------------------------------------------------------------------------------------------------|--------------------------------------------------------|
 | [`iter_segments`](#ductus.core.iter_segments)(text, \*[, segmenter, ...])      | Yield one scored segment at a time.                    |
 
-### ductus.core.gauge(text, \*, segmenter='paragraph', detectors=None, aggregate=<function aggregate>, extra_signals=())
+### ductus.core.gauge(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
 Score `text` and roll the segments up into a report.
 
@@ -57,7 +61,7 @@ True
 ('paragraph', 4)
 ```
 
-### ductus.core.iter_segments(text, \*, segmenter='paragraph', detectors=None, aggregate=<function aggregate>, extra_signals=())
+### ductus.core.iter_segments(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
 Yield one scored segment at a time.
 

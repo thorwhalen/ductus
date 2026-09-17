@@ -30,17 +30,23 @@ Three seams, each one keyword argument with a working default:
 `segmenter=` (how the text is cut up), `detectors=` (what produces evidence),
 `aggregate=` (how evidence becomes a lean).
 
+**This package’s own false-positive rate is measured, and it is not small**: 20.6% of
+350 human-written documents are called `leans-machine` by the shipped defaults, and a
+flagged *sentence* is much better evidence than a flagged *document*. See
+`misc/docs/phase-2-results.md` before reporting anything from this.
+
 ### Functions
 
-| [`aggregate`](#ductus.aggregate)(signals)                               | Reduce evidence to `(lean, strength, label)`.                    |
-|---------------------------------------------------------------------------------------------------|------------------------------------------------------------------|
-| [`gauge`](#ductus.gauge)(text, \*[, segmenter, detectors, ...])     | Score `text` and roll the segments up into a report.             |
-| [`iter_segments`](#ductus.iter_segments)(text, \*[, segmenter, ...])        | Yield one scored segment at a time.                              |
-| [`iter_tell_matches`](#ductus.iter_tell_matches)(text, \*[, rules, tiers, ...]) | Every catalogue hit in `text`, in document order.                |
-| [`load_rules`](#ductus.load_rules)([path])                               | The catalogue's rules, compiled.                                 |
-| [`to_html`](#ductus.to_html)(report, \*[, text, title, subtitle])     | A single self-contained HTML file.                               |
-| [`to_json`](#ductus.to_json)(report, \*[, indent])                    | The whole report, serialized.                                    |
-| [`to_markdown`](#ductus.to_markdown)(report, \*[, text, title])           | A readable diagnosis: synopsis first, then the flagged segments. |
+| [`aggregate`](#ductus.aggregate)(signals, \*[, n_chars])                | Reduce evidence to `(lean, strength, label)`.                                                                         |
+|---------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| [`density_aggregate`](#ductus.density_aggregate)(signals, \*[, n_chars])        | Like [`aggregate()`](#ductus.aggregate), but `strength` is an evidence *rate*, not a total. |
+| [`gauge`](#ductus.gauge)(text, \*[, segmenter, detectors, ...])     | Score `text` and roll the segments up into a report.                                                                  |
+| [`iter_segments`](#ductus.iter_segments)(text, \*[, segmenter, ...])        | Yield one scored segment at a time.                                                                                   |
+| [`iter_tell_matches`](#ductus.iter_tell_matches)(text, \*[, rules, tiers, ...]) | Every catalogue hit in `text`, in document order.                                                                     |
+| [`load_rules`](#ductus.load_rules)([path])                               | The catalogue's rules, compiled.                                                                                      |
+| [`to_html`](#ductus.to_html)(report, \*[, text, title, subtitle])     | A single self-contained HTML file.                                                                                    |
+| [`to_json`](#ductus.to_json)(report, \*[, indent])                    | The whole report, serialized.                                                                                         |
+| [`to_markdown`](#ductus.to_markdown)(report, \*[, text, title])           | A readable diagnosis: synopsis first, then the flagged segments.                                                      |
 
 ### Classes
 
@@ -142,13 +148,20 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 One named rule: a tier, a message, and the patterns that trigger it.
 
-### ductus.aggregate(signals)
+### ductus.aggregate(signals, , n_chars=None)
 
-Reduce evidence to `(lean, strength, label)`.
+Reduce evidence to `(lean, strength, label)`. Length-blind, by construction.
 
 Neutral signals count toward `strength` but never toward `lean` – they
 are real evidence that the passage is unusual without being evidence about
 who wrote it.
+
+`n_chars` is accepted and **deliberately ignored**. The seam passes it so a
+scorer *can* reason about how much text produced the evidence; this one does not,
+which is a choice with a measured cost: on human-written text the chance of a
+false accusation rises from 11% to 74% with document length alone, because two
+stray signals weigh the same in 600 characters as in 3000. See
+[`density_aggregate()`](#ductus.density_aggregate) and `misc/docs/phase-2-results.md`.
 
 * **Return type:**
   [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
@@ -161,7 +174,37 @@ who wrote it.
 (0.0, 0.6, 'uncertain')
 ```
 
-### ductus.gauge(text, \*, segmenter='paragraph', detectors=None, aggregate=<function aggregate>, extra_signals=())
+### ductus.density_aggregate(signals, , n_chars=None)
+
+Like [`aggregate()`](#ductus.aggregate), but `strength` is an evidence *rate*, not a total.
+
+Two signals in 600 characters is a different claim from two in 3000, and the
+length-blind scorer cannot tell them apart. This one divides the evidence by how
+much text produced it, above a reference length of `REFERENCE_CHARS`.
+
+`lean` is untouched. It still reads ±1.0 off a single weak signal, and that
+jaggedness is deliberate – smoothing it is how `lean` would quietly become a
+quantity-integrating score, which is to say a probability. See
+`misc/docs/what-calibration-means-here.md`.
+
+The scaling only ever *divides*, never multiplies, so this scorer can only remove
+accusations, never add one. Short passages behave exactly as before.
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+```pycon
+>>> from ductus.base import Signal
+>>> evidence = [Signal("x", "machine", 0.4, "d")]
+>>> density_aggregate(evidence, n_chars=500)        # short: unchanged
+(1.0, 0.267, 'leans-machine')
+>>> density_aggregate(evidence, n_chars=4000)       # the same evidence, spread thin
+(1.0, 0.067, 'no-evidence')
+>>> density_aggregate(evidence) == aggregate(evidence)  # no length, no opinion
+True
+```
+
+### ductus.gauge(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
 Score `text` and roll the segments up into a report.
 
@@ -180,7 +223,7 @@ True
 ('paragraph', 4)
 ```
 
-### ductus.iter_segments(text, \*, segmenter='paragraph', detectors=None, aggregate=<function aggregate>, extra_signals=())
+### ductus.iter_segments(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
 Yield one scored segment at a time.
 

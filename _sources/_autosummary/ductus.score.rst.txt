@@ -11,10 +11,12 @@ ductus.score
       LEAN_THRESHOLD
       STRENGTH_FLOOR
       EVIDENCE_FULL
+      REFERENCE_CHARS
    
    .. rubric:: Functions
 
    .. autosummary::
    
       aggregate
+      density_aggregate
    
