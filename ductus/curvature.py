@@ -158,6 +158,21 @@ def _iter_chunks(n: int, window: int = WINDOW) -> Iterator[tuple[int, int, int]]
         start, keep = end - stride, end
 
 
+def _scored_rows(start: int, end: int, keep: int) -> slice:
+    """Logit rows predicting document positions ``[keep, end)`` of chunk ``[start, end)``.
+
+    Row ``j`` predicts the token at ``start + j + 1``, so position ``p`` is read from
+    row ``p - start - 1``. The chunk's last row predicts a position past its own end
+    and is never used.
+
+    >>> _scored_rows(0, 8, 1)
+    slice(0, 7, None)
+    >>> _scored_rows(4, 12, 8)
+    slice(3, 7, None)
+    """
+    return slice(keep - start - 1, end - start - 1)
+
+
 @dataclass(frozen=True)
 class _Profile:
     """Per-token accumulators for one document, and how a window turns into a score.
@@ -295,11 +310,11 @@ def _fast_detect_profile(text: str, model_id: str, device: str) -> _Profile:
             probs = torch.softmax(logits, dim=-1)
             mean_ref = (probs * lprobs).sum(dim=-1)
             var_ref = (probs * lprobs.square()).sum(dim=-1) - mean_ref.square()
-            for pos in range(keep, end):
-                row = pos - start - 1
-                ll = lprobs[row, int(ids[pos])].item()
-                a[pos] = ll - mean_ref[row].item()
-                b[pos] = max(var_ref[row].item(), 0.0)
+            rows = _scored_rows(start, end, keep)
+            labels = ids[keep:end].unsqueeze(-1).to(device)
+            ll = lprobs[rows].gather(-1, labels).squeeze(-1)
+            a[keep:end] = (ll - mean_ref[rows]).tolist()
+            b[keep:end] = var_ref[rows].clamp_min(0.0).tolist()
 
     return _Profile(offsets, tuple(a), tuple(b), "curvature", +1.0, model_id)
 
@@ -371,10 +386,10 @@ def _binoculars_profile(
             lprobs = torch.log_softmax(performer(chunk).logits[0].float(), dim=-1)
             obs_probs = torch.softmax(observer(chunk).logits[0].float(), dim=-1)
             cross = -(obs_probs * lprobs).sum(dim=-1)
-            for pos in range(keep, end):
-                row = pos - start - 1
-                a[pos] = -lprobs[row, int(ids[pos])].item()
-                b[pos] = cross[row].item()
+            rows = _scored_rows(start, end, keep)
+            labels = ids[keep:end].unsqueeze(-1).to(device)
+            a[keep:end] = (-lprobs[rows].gather(-1, labels).squeeze(-1)).tolist()
+            b[keep:end] = cross[rows].tolist()
 
     return _Profile(offsets, tuple(a), tuple(b), "ratio", -1.0, performer_id)
 
