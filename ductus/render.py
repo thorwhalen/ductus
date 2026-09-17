@@ -181,25 +181,38 @@ mark:focus{outline:2px solid var(--ul);outline-offset:1px}
 .para:hover .badge{opacity:1}
 .lane{display:flex;gap:3px;margin:3px 0 12px 14px;height:4px}
 .lane i{height:4px;border-radius:2px;display:block}
-aside{position:fixed;right:16px;bottom:16px;max-width:340px;background:var(--card);
- border:1px solid var(--line);border-radius:6px;padding:12px 14px;
+aside{position:fixed;right:16px;bottom:16px;width:min(340px,calc(100vw - 32px));
+ background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 14px;
  font:12px/1.55 ui-sans-serif,system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.16);
  display:none;z-index:9}
 aside.on{display:block}
+/* Anchored beside the highlight it explains: the reason should be where the eye already
+   is, not in a corner the reader has to look away to find. JS sets left/top. */
+aside.at{right:auto;bottom:auto}
 aside .dir{font-weight:600}
 aside .dir.machine{color:var(--m1)}aside .dir.human{color:var(--h1)}
 aside .why{margin-top:7px;padding-top:7px;border-top:1px solid var(--line)}
 footer{border-top:1px solid var(--line);padding-top:16px;padding-bottom:48px;
  font:12px/1.6 ui-sans-serif,system-ui,sans-serif;color:var(--muted)}
-@media(max-width:640px){aside{left:16px;right:16px;max-width:none}}
+/* Too narrow to sit beside anything: fall back to a bottom sheet. */
+@media(max-width:640px){aside,aside.at{left:16px;right:16px;top:auto;bottom:16px;width:auto}}
 """
 
 _JS = """
 const D=JSON.parse(document.getElementById('ductus-data').textContent);
 const box=document.getElementById('tip');
-function show(e){const s=D[e.currentTarget.dataset.k];if(!s)return;
+const ANCHOR_MIN_WIDTH=641, GAP=10, EDGE=12;
+function place(el){
+ if(innerWidth<ANCHOR_MIN_WIDTH){box.classList.remove('at');box.style.left=box.style.top='';return;}
+ box.classList.add('at');
+ const r=el.getBoundingClientRect(),w=box.offsetWidth,h=box.offsetHeight;
+ let y=r.bottom+GAP; if(y+h>innerHeight-EDGE) y=Math.max(EDGE,r.top-h-GAP);
+ const x=Math.min(Math.max(EDGE,r.left),innerWidth-w-EDGE);
+ box.style.left=x+'px';box.style.top=y+'px';}
+function show(e){const el=e.currentTarget,s=D[el.dataset.k];if(!s)return;
  box.innerHTML='<b>'+s.n+'</b> &middot; <span class="dir '+s.d+'">'+s.d+'</span> &middot; weight '+
- s.w.toFixed(2)+' &middot; '+s.t+'<div class="why">'+s.r+'</div>';box.classList.add('on');}
+ s.w.toFixed(2)+' &middot; '+s.t+'<div class="why">'+s.r+'</div>';
+ box.classList.add('on');place(el);}
 function hide(){box.classList.remove('on');}
 for(const m of document.querySelectorAll('mark')){m.tabIndex=0;
  m.addEventListener('mouseenter',show);m.addEventListener('mouseleave',hide);

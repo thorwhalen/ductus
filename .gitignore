@@ -8,3 +8,7 @@ dist/
 .venv/
 .DS_Store
 .claude/handoffs/
+
+# demo capture intermediates (the GIF itself is committed)
+misc/demo/_capture/
+misc/demo/report.html
