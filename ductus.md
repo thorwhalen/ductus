@@ -1,4 +1,4 @@
-> built 2026-09-17 07:26 UTC from 0c2ebf9 (main) · ductus 0.0.1. Details: build_info.json
+> built 2026-09-17 07:33 UTC from 4778977 (main) · ductus 0.0.2. Details: build_info.json
 
 # index.html.md
 
@@ -1243,18 +1243,16 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-17 07:26 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/0c2ebf99f2e44142f687c7930c990255229a6256"><code>0c2ebf9</code></a> on branch <code>main</code>, for **ductus 0.0.1** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-17 07:33 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/47789771e317188fff8b77d8208be6c321691e2d"><code>4778977</code></a> on branch <code>main</code>, for **ductus 0.0.2** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.1) is behind the latest release on PyPI (0.0.2): `pip install ductus` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/0c2ebf99f2e44142f687c7930c990255229a6256"><code>0c2ebf99f2e44142f687c7930c990255229a6256</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/47789771e317188fff8b77d8208be6c321691e2d"><code>47789771e317188fff8b77d8208be6c321691e2d</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -1265,9 +1263,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35194439588">35194439588</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35195023804">35195023804</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>0c2ebf99f2e44142f687c7930c990255229a6256</code> (in the history of the built commit) |
+| Event commit | <code>47789771e317188fff8b77d8208be6c321691e2d</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1292,13 +1290,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.2/">0.0.2</a>, newer than the documented version (0.0.1).
+Latest release: <a href="https://pypi.org/project/ductus/0.0.2/">0.0.2</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout 0c2ebf99f2e44142f687c7930c990255229a6256
+git checkout 47789771e317188fff8b77d8208be6c321691e2d
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
