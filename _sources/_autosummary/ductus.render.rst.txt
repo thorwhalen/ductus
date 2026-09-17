@@ -1,0 +1,14 @@
+ductus.render
+=============
+
+.. automodule:: ductus.render
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      to_html
+      to_json
+      to_markdown
+   

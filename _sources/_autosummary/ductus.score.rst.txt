@@ -1,0 +1,20 @@
+ductus.score
+============
+
+.. automodule:: ductus.score
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      LEAN_THRESHOLD
+      STRENGTH_FLOOR
+      EVIDENCE_FULL
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      aggregate
+   

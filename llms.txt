@@ -1,0 +1,29 @@
+# ductus
+
+> Gauge which parts of a text read as machine-written, and why, with the evidence anchored to exact characters
+
+
+## Pages
+
+- [ductus](index.html.md): Gauge which parts of a text read as machine-written, and say why — with every finding anchored to th...
+- [API reference](api.html.md): | [`ductus`](_autosummary/ductus.html.md#module-ductus)   | ductus -- gauge which parts of a text re...
+- [ductus](_autosummary/ductus.html.md): ductus – gauge which parts of a text read as machine-written, and why.
+- [ductus.base](_autosummary/ductus.base.html.md): The data model: where a finding lives, what it claims, and how much it weighs.
+- [ductus.core](_autosummary/ductus.core.html.md): The core: stream segments, or take the whole report. Everything else is a surface.
+- [ductus.data](_autosummary/ductus.data.html.md): Page content
+- [ductus.detect](_autosummary/ductus.detect.html.md): The detectors – the `detectors=` seam. Each one turns a span into evidence.
+- [ductus.render](_autosummary/ductus.render.html.md): Turning a report into something a person reads: JSON, Markdown, or HTML.
+- [ductus.score](_autosummary/ductus.score.html.md): Turning evidence into a lean – the `aggregate=` seam.
+- [ductus.segment](_autosummary/ductus.segment.html.md): Cutting a text into the units that get scored – the `segmenter=` seam.
+- [ductus.tells](_autosummary/ductus.tells.html.md): The tells catalogue: named regular-expression patterns, tiered by confidence.
+- [ductus.tools](_autosummary/ductus.tools.html.md): The verb SSOT: plain functions, JSON-ready in, JSON-ready out.
+- [For AI agents](ai-agents.html.md): `ductus` ships artifacts for coding agents alongside its code. This page lists
+- [About this build](about-this-build.html.md): This documentation was built on **2026-09-17 07:26 UTC** from commit <a href="https://github.com/tho...
+
+---
+
+For more comprehensive documentation, see [ductus.md](ductus.md)
+
+## Build
+
+- [build_info.json](build_info.json): build provenance (commit, version, tool versions, whether the docs match the package)

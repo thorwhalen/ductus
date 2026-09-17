@@ -1,0 +1,20 @@
+ductus.segment
+==============
+
+.. automodule:: ductus.segment
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      SEGMENTERS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      paragraph_spans
+      sentence_spans
+      spans_of
+   

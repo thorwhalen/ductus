@@ -1,0 +1,22 @@
+ductus.detect
+=============
+
+.. automodule:: ductus.detect
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DETECTORS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      detectors_from
+      forensic
+      rhetoric
+      rhythm
+      tells
+   

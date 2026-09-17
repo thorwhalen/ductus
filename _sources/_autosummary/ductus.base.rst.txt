@@ -1,0 +1,23 @@
+ductus.base
+===========
+
+.. automodule:: ductus.base
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      SCHEMA_VERSION
+      DIRECTIONS
+      LABELS
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Report
+      Segment
+      Signal
+      Span
+   

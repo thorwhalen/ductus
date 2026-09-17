@@ -1,0 +1,16 @@
+ductus.tools
+============
+
+.. automodule:: ductus.tools
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      detectors
+      gauge
+      install_skills
+      segmenters
+      tells
+   

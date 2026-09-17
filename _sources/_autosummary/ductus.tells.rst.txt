@@ -1,0 +1,28 @@
+ductus.tells
+============
+
+.. automodule:: ductus.tells
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      TIER_WEIGHT
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      iter_tell_matches
+      load_catalogue
+      load_rules
+      metrics
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      TellMatch
+      TellRule
+   

@@ -1,0 +1,13 @@
+ductus.core
+===========
+
+.. automodule:: ductus.core
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      gauge
+      iter_segments
+   

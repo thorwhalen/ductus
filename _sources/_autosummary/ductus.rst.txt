@@ -1,0 +1,45 @@
+﻿ductus
+======
+
+.. automodule:: ductus
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      aggregate
+      gauge
+      iter_segments
+      iter_tell_matches
+      load_rules
+      to_html
+      to_json
+      to_markdown
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Report
+      Segment
+      Signal
+      Span
+      TellMatch
+      TellRule
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   base
+   core
+   data
+   detect
+   render
+   score
+   segment
+   tells
+   tools

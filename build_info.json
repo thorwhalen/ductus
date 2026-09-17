@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "built_at": "2026-09-17T07:26:41Z",
+  "package": {
+    "name": "ductus",
+    "version": "0.0.1",
+    "display_name": "ductus",
+    "source": "pyproject.toml"
+  },
+  "git": {
+    "available": true,
+    "commit": "0c2ebf99f2e44142f687c7930c990255229a6256",
+    "short_commit": "0c2ebf9",
+    "branch": "main",
+    "tags": [],
+    "dirty": false,
+    "remote_url": "https://github.com/thorwhalen/ductus",
+    "commit_url": "https://github.com/thorwhalen/ductus/commit/0c2ebf99f2e44142f687c7930c990255229a6256",
+    "error": null
+  },
+  "ci": {
+    "provider": "github",
+    "repository": "thorwhalen/ductus",
+    "sha": "0c2ebf99f2e44142f687c7930c990255229a6256",
+    "sha_in_history": true,
+    "ref": "refs/heads/main",
+    "ref_name": "main",
+    "run_id": "35194439588",
+    "run_url": "https://github.com/thorwhalen/ductus/actions/runs/35194439588",
+    "server_url": "https://github.com"
+  },
+  "tools": {
+    "epythet": "0.2.12",
+    "sphinx": "9.1.0",
+    "docutils": "0.22.4",
+    "python": "3.12.14"
+  },
+  "config": {
+    "theme": "auto",
+    "html_theme": "sphinxawesome_theme",
+    "accent": "#5e4698",
+    "mode": "auto",
+    "api_generator": "autosummary",
+    "ignore": [
+      "tests/",
+      "scrap/",
+      "examples/"
+    ],
+    "agent_outputs": true,
+    "aggregates": [
+      "md"
+    ],
+    "ai_artifacts": true,
+    "provenance": true,
+    "docs_dir": "docsrc"
+  },
+  "site": {
+    "modules_documented": 10,
+    "objects_documented": 58
+  },
+  "pypi": {
+    "checked": true,
+    "latest": "0.0.2",
+    "relation": "behind",
+    "error": null
+  },
+  "reproduce": "git clone https://github.com/thorwhalen/ductus && cd ductus\ngit checkout 0c2ebf99f2e44142f687c7930c990255229a6256\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "warnings": [],
+  "alignment": {
+    "aligned": false,
+    "notes": [
+      "The documented version (0.0.1) is behind the latest release on PyPI (0.0.2): `pip install ductus` gives newer code than these docs describe."
+    ]
+  }
+}
