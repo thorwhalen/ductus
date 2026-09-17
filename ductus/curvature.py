@@ -248,7 +248,14 @@ def _reference_scores(profile: _Profile, lo: int, hi: int) -> list[float]:
 
 @lru_cache(maxsize=4)
 def _load(model_id: str, device: str):
-    """Tokenizer and model, loaded once per id. Kept warm for the session."""
+    """Tokenizer and model, loaded once per id. Kept warm for the session.
+
+    Warm is the right default: a session that scores several texts with one detector
+    pays the load once. The cost is that every model touched stays resident -- four
+    GPT-2-family models is about 10GB in float32 -- so code that sweeps across many
+    models should call ``_load.cache_clear()`` between them. ``misc/measure_model_ladder.py``
+    does exactly that, and was swapping rather than computing until it did.
+    """
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     tokenizer = AutoTokenizer.from_pretrained(model_id)
