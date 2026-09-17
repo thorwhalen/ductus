@@ -3,7 +3,8 @@
 Run it directly; it needs the ``[local]`` extra and downloads the proxy models on
 first use::
 
-    python misc/measure_detectors.py
+    python misc/measure_detectors.py              # both fixtures
+    python misc/measure_detectors.py roft         # just one
 
 The criterion is fixed before the numbers are looked at, and is stated in
 ``misc/docs/phase-1-results.md``:
@@ -24,6 +25,7 @@ clean label to score them against.
 from __future__ import annotations
 
 import json
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,7 +33,18 @@ from pathlib import Path
 from ductus import gauge
 from ductus.base import Segment
 
-FIXTURE = Path(__file__).parent.parent / "tests" / "fixtures" / "mixed_authorship.json"
+FIXTURES = {
+    # Interleaved machine spans written to fill gaps in human prose -- close to a
+    # worst case for a perplexity method, because the machine text was written to
+    # match its surroundings.
+    "llmtrace": Path(__file__).parent.parent
+    / "tests"
+    / "fixtures"
+    / "mixed_authorship.json",
+    # One human prefix, then a machine continuation: a single boundary, and a fairer
+    # test of the same detectors. Different ground-truth shape on purpose.
+    "roft": Path(__file__).parent.parent / "tests" / "fixtures" / "roft_boundary.json",
+}
 
 DETECTOR_SETS: dict[str, list[str]] = {
     "deterministic (baseline)": ["tells", "forensic", "rhetoric", "rhythm"],
@@ -156,25 +169,33 @@ def measure(name: str, detectors: list[str], documents, *, segmenter: str) -> Sc
 
 
 def main() -> None:
-    documents = json.loads(FIXTURE.read_text(encoding="utf-8"))["documents"]
-    for segmenter in ("sentence", "paragraph"):
-        print(f"\n### segmenter = {segmenter!r} ({len(documents)} documents)\n")
-        print(
-            "| detector set | signals | machine recall | machine precision "
-            "| human recall | human precision | agreement | time |"
-        )
-        print("|---|---|---|---|---|---|---|---|")
-        baseline = None
-        for name, detectors in DETECTOR_SETS.items():
-            score = measure(name, detectors, documents, segmenter=segmenter)
-            baseline = baseline or score
-            print(score.row(), flush=True)
-            if score is not baseline:
-                beats = (
-                    score.machine_hits > baseline.machine_hits
-                    and score.machine_precision >= baseline.machine_precision
-                )
-                print(f"<!-- gate: {name} beats baseline = {beats} -->", flush=True)
+    wanted = [a for a in sys.argv[1:] if not a.startswith("-")] or list(FIXTURES)
+    segmenters = (
+        ("sentence",) if "--sentence-only" in sys.argv else ("sentence", "paragraph")
+    )
+    for fixture in wanted:
+        documents = json.loads(FIXTURES[fixture].read_text(encoding="utf-8"))["documents"]
+        for segmenter in segmenters:
+            print(
+                f"\n### {fixture} — segmenter {segmenter!r} "
+                f"({len(documents)} documents)\n"
+            )
+            print(
+                "| detector set | signals | machine recall | machine precision "
+                "| human recall | human precision | agreement | time |"
+            )
+            print("|---|---|---|---|---|---|---|---|")
+            baseline = None
+            for name, detectors in DETECTOR_SETS.items():
+                score = measure(name, detectors, documents, segmenter=segmenter)
+                baseline = baseline or score
+                print(score.row(), flush=True)
+                if score is not baseline:
+                    beats = (
+                        score.machine_hits > baseline.machine_hits
+                        and score.machine_precision >= baseline.machine_precision
+                    )
+                    print(f"<!-- gate: {name} beats baseline = {beats} -->", flush=True)
 
 
 if __name__ == "__main__":

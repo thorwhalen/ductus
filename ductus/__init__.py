@@ -25,6 +25,11 @@ evidence strength, and a coarse label you can argue with. See
 Three seams, each one keyword argument with a working default:
 ``segmenter=`` (how the text is cut up), ``detectors=`` (what produces evidence),
 ``aggregate=`` (how evidence becomes a lean).
+
+**This package's own false-positive rate is measured, and it is not small**: 20.6% of
+350 human-written documents are called ``leans-machine`` by the shipped defaults, and a
+flagged *sentence* is much better evidence than a flagged *document*. See
+``misc/docs/phase-2-results.md`` before reporting anything from this.
 """
 
 from ductus.base import (
@@ -38,7 +43,7 @@ from ductus.base import (
 from ductus.core import gauge, iter_segments
 from ductus.detect import DETECTORS
 from ductus.render import to_html, to_json, to_markdown
-from ductus.score import aggregate
+from ductus.score import aggregate, density_aggregate
 from ductus.segment import SEGMENTERS
 from ductus.tells import TellMatch, TellRule, iter_tell_matches, load_rules
 
@@ -63,6 +68,7 @@ __all__ = [
     "TellRule",
     "__version__",
     "aggregate",
+    "density_aggregate",
     "gauge",
     "iter_segments",
     "iter_tell_matches",

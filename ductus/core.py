@@ -9,14 +9,18 @@ to paint as results arrive.
 :func:`gauge` collects them into a :class:`~ductus.base.Report`.
 
 The three seams are keyword arguments, each defaulting to something that
-genuinely works rather than to a stub:
+genuinely works rather than to a stub. The ``aggregate=`` default normalises evidence
+by how much text produced it; the length-blind :func:`ductus.score.aggregate` is still
+there, and ``misc/docs/phase-2-results.md`` has the measurement that chose between
+them -- on human-written text the length-blind scorer's false-accusation rate ran from
+11% to 74% with document length alone.
 
 ===============  ==========================================  ==========================
 seam             v1 default                                  swap in
 ===============  ==========================================  ==========================
 ``segmenter=``   ``"paragraph"``                             ``"sentence"``, a callable
 ``detectors=``   all four deterministic detectors            a model-based detector
-``aggregate=``   :func:`ductus.score.aggregate`              a calibrated scorer
+``aggregate=``   :func:`ductus.score.density_aggregate`      :func:`ductus.score.aggregate`
 ===============  ==========================================  ==========================
 
 ``extra_signals=`` is not a seam but an input: evidence produced elsewhere --
@@ -38,12 +42,15 @@ from collections.abc import Callable, Iterable, Iterator, Sequence
 
 from ductus.base import Report, Segment, Signal, Span
 from ductus.detect import detectors_from
-from ductus.score import aggregate as default_aggregate
+from ductus.score import density_aggregate as default_aggregate
 from ductus.segment import spans_of
 
 __all__ = ["gauge", "iter_segments"]
 
-Aggregator = Callable[[Sequence[Signal]], "tuple[float, float, str]"]
+#: The ``aggregate=`` seam. ``n_chars`` is passed by keyword so a scorer can reason
+#: about how much text produced the evidence -- a rate rather than a total. The
+#: default scorer ignores it; :func:`ductus.score.density_aggregate` does not.
+Aggregator = Callable[..., "tuple[float, float, str]"]
 
 
 def iter_segments(
@@ -70,7 +77,7 @@ def iter_segments(
             if s.span is None or span.contains(s.span):
                 signals.append(s)
         signals.sort(key=lambda s: (s.span.start if s.span else span.start, s.name))
-        lean, strength, label = aggregate(signals)
+        lean, strength, label = aggregate(signals, n_chars=span.length)
         yield Segment(
             span=span, signals=tuple(signals), lean=lean, strength=strength, label=label
         )
@@ -107,7 +114,7 @@ def gauge(
         )
     )
     all_signals = tuple(s for seg in segments for s in seg.signals)
-    lean, strength, label = aggregate(all_signals)
+    lean, strength, label = aggregate(all_signals, n_chars=len(text))
     document = Segment(
         span=Span.of(text, 0, len(text), level="document"),
         signals=(),

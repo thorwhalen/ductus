@@ -1,0 +1,297 @@
+{
+ "_comment": "Ground truth of a different SHAPE from mixed_authorship.json, on purpose: one human-written prefix followed by a machine continuation, so the truth is a single boundary rather than several interleaved spans. `true_boundary_char` is the first machine-written character; `ai_char_intervals` restates it in the other fixture's shape so one harness can read both. Two documents at each of the nine possible boundary positions. Selection required at least 60 characters on each side of the boundary, so that both halves are measurable at all; that rule is blind to any detector's output. Used by tests/test_roft_boundary.py.",
+ "_source": "RoFT (Real or Fake Text), https://github.com/kirubarajan/roft -- generations-davinci-reddit-stories-test, nucleus p=0.4",
+ "_license": "RoFT is MIT (Copyright 2020 Arun Kirubarajan); this is a small verbatim slice, redistributed with attribution. The human prefixes originate upstream in the Reddit Writing Prompts corpus (Fan et al. 2018, distributed with fairseq); they are short excerpts and are reproduced here for research use. The continuations are GPT-3 (davinci) output.",
+ "_citation": "Dugan L, Ippolito D, Kirubarajan A, Shi S, Callison-Burch C. Real or Fake Text? Investigating Human Ability to Detect Boundaries Between Human-Written and Machine-Generated Text. AAAI 2023. arXiv:2212.12672",
+ "_prompt_source_citation": "Fan A, Lewis M, Dauphin Y. Hierarchical Neural Story Generation. ACL 2018. arXiv:1805.04833",
+ "documents": [
+  {
+   "id": "roft-davinci-stories-264",
+   "text": "Away from the fires that warm our home be sure to wear your coat and goggles. And remember, if you are going to be outside for a long time, make sure you take a break and warm up. This is the time of year when it is easy to get frostbite or hypothermia. So be careful! Brianna:) (9/11/2015 12:46:10 PM) - Hello everyone! It's Brianna here with my favorite things about fall. I love fall because it's so beautiful outside and there are so many fun things to do like go on hayrides, pick apples at an orchard, play in the leaves and have bonfires with friends. My favorite thing about fall is that I can wear boots again!",
+   "human_sentences": 1,
+   "n_sentences": 10,
+   "true_boundary_char": 78,
+   "ai_char_intervals": [
+    [
+     78,
+     619
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-865",
+   "text": "Mar stood at the water 's edge as if he were on the edge of a canyon. He stared at the water, as if he were looking for something. \"I think I see it,\" he said. \"It's there.\" He pointed to a spot in the middle of the river. \"There's a light there.\" \"What is it?\" Kian asked, squinting into the distance. \"Is that where we're going?\" He didn't see anything but dark water and a few rocks sticking out of it here and there. The moon was hidden behind clouds, so they couldn't even use its light to guide them anymore.",
+   "human_sentences": 1,
+   "n_sentences": 10,
+   "true_boundary_char": 70,
+   "ai_char_intervals": [
+    [
+     70,
+     514
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-1425",
+   "text": "Aliens existed, we knew that. We had known that for a long time. But we had never been able to prove it. Now, at last, we had the proof. And with that proof came a new sense of responsibility. We were not alone in the universe; there were other intelligent beings out there somewhere. And they might be hostile! \"I remember that night very well,\" my father said to me as he reminisced about his time on Mars, \"because I was called into an emergency meeting with the President and several members of his cabinet.\" \"The President?\" I asked him in surprise. \"You mean Mr. Nixon?\"",
+   "human_sentences": 2,
+   "n_sentences": 10,
+   "true_boundary_char": 65,
+   "ai_char_intervals": [
+    [
+     65,
+     576
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-1676",
+   "text": "Ayen Liakian, a young elf from Xyrdove, staggered into the cave. They had tried everything to defeat the northern orcs. The elves had fought bravely, but they were outnumbered. \"We have to leave,\" Ayen said. \"They're coming.\" Araia was sitting on the floor of the cave, looking at a map of Xyrdove and surrounding areas. She looked up at Ayen with her piercing blue eyes and shook her head. \"No,\" she said in a calm voice that belied the situation they were in. \"We can't leave yet.\" She pointed to a spot on the map where there was an X drawn over it with black ink from one of Araia's quills.",
+   "human_sentences": 2,
+   "n_sentences": 10,
+   "true_boundary_char": 120,
+   "ai_char_intervals": [
+    [
+     120,
+     594
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-513",
+   "text": "Its been one day and sixteen minutes since Astrid Burnham has been declared missing. The search party moves to another point, checking off another square. There's still a lot of ground to cover and the only place they think their missing person disappeared to. \"I'm going to take a look around here,\" Stiles says, standing in the middle of the clearing. He looks up at the trees and sees something hanging from one of them. \"Hey, I think I found something.\" \"What is it?\" Scott asks as he moves closer to Stiles. The others follow suit and they all stare up at what Stiles has found. It's a large white piece of cloth that hangs from one tree branch to another like a flag or banner. \"What is that?\"",
+   "human_sentences": 3,
+   "n_sentences": 10,
+   "true_boundary_char": 261,
+   "ai_char_intervals": [
+    [
+     261,
+     699
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-597",
+   "text": "\"I hate you.\" Her hands banged uselessly against my chest as her hazel eyes started to leak horribly everywhere, slightly darkening my blue cotton shirt. I counted the tear drops one-by-one as they fell, for a lack of anything better to say or do. \" I hate you, I hate you, I hate you.\" \"I know,\" I said. \"I'm sorry.\" She shook her head and cried harder. \"You're not sorry! You don't even care!\" She pulled away from me and sat up on the bed, wiping at her eyes with the back of her hand.",
+   "human_sentences": 3,
+   "n_sentences": 10,
+   "true_boundary_char": 250,
+   "ai_char_intervals": [
+    [
+     250,
+     488
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-1250",
+   "text": "I 'd been walking for as long as I could remember. I don't remember beginning my journey, and I certainly don't remember why I was walking. All I know is that I've been walking for a very long time. I turned around and looked back at the road I 'd travelled so far, and I looked ahead of me at the road I still needed to walk. I looked back at the road I 'd travelled so far, and I saw that it was littered with bones. I looked ahead of me at the road I still needed to walk, and it was littered with bones as well. The further along the road I walked, the more bones there were. It seemed that no matter how far or how long a person walked on this particular road, they would eventually end up in a pile of their own bones. There were many piles of human remains scattered all over this land; some piles were small while others were large; some piles had only one bone while others had hundreds of them. Some piles contained complete skeletons while others contained only partial skeletons; some piles even contained skulls and heads without bodies attached to them.",
+   "human_sentences": 4,
+   "n_sentences": 10,
+   "true_boundary_char": 327,
+   "ai_char_intervals": [
+    [
+     327,
+     1067
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-543",
+   "text": "\"Sir, please describe who you are, and what happened on the 25th December 2015.\" \" I'm Frederick Gibaltar. I am... well.. was, the lead scientist in the White Christmas Project. Our intent was to show the world that we perfected the weather control mechanisms. We were going to use it to bring a white Christmas to the world. We wanted everyone in the world to be able to experience snow for once.\" \"So what happened?\" \"We were testing it, and everything was going fine. The weather was cooperating with us, and we had a lot of snow fall over London. It was amazing!",
+   "human_sentences": 4,
+   "n_sentences": 10,
+   "true_boundary_char": 261,
+   "ai_char_intervals": [
+    [
+     261,
+     566
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-13",
+   "text": "\"How can mirrors be real, if our eyes aren't real?\" Jaden speaks slowly, his tone serious, as his eyes make contact first with Taylor, and then with Kanye. He sets the card printed with his tweet upon the podium. \" Taylor, you have five minutes to answer.\" \" Well,\" Taylor smiles and pulls a wave of blond hair behind her ear, her eyes scanning the audience with nervousness, \"I think, we, as a country, do need to look in the mirror --\" \"I'mma let you finish,\" Kanye interjected. \" But Beyoncé had one of the best videos of all time.\" Taylor continues, \"But you know, Kanye West is entitled to his opinion. And I'm sure he's going to go on and say --\" \"How can mirrors be real if our eyes aren't real?\" Kanye repeats. The audience laughs and applauds. Taylor looks around nervously as she begins her response: \"I'm not going to pretend that I've never been in a feud before,\" she says with a nervous laugh, her voice shaking slightly.",
+   "human_sentences": 5,
+   "n_sentences": 10,
+   "true_boundary_char": 483,
+   "ai_char_intervals": [
+    [
+     483,
+     935
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-296",
+   "text": "I got introduced much more recently to Discworld compared to a lot of other people in the thread. I've done tons of reading but his was never a series that made it into the small library of books I had. That is until I started searching more and looking more. I happened upon The Color of Magic. I didn't read it for a while because I realized that it was a \"two-parter\" with The Light Fantastic. I finally read it and was immediately hooked. I bought the rest of the series and started reading them. I've read all of them at least once, some twice or more. I love his writing style, his humor, and how he makes you think about things in a different way than you normally would have thought about them before reading him. He's definitely one of my favorite authors now!",
+   "human_sentences": 5,
+   "n_sentences": 10,
+   "true_boundary_char": 397,
+   "ai_char_intervals": [
+    [
+     397,
+     769
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-1134",
+   "text": "„What if we make it a theme party? It's not a normal Halloween party then, right? \", whispered Ghost Flick while scratching her pale head. „ Yea maybe... I dunno.\" The Slasher Film leaned back and grabbed another beer. With a hefty swing of his machete he flicked off the crown cap. „But I don't know what we could do.\" „I have an idea!”, said the other girl. „We could go as a theme party! Like... horror movie characters!\"",
+   "human_sentences": 6,
+   "n_sentences": 10,
+   "true_boundary_char": 283,
+   "ai_char_intervals": [
+    [
+     283,
+     424
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-750",
+   "text": "***Present day, somewhere in the Kivu province of the Democratic Republic of Congo*** Their home was made of concrete with a tin roof. It was home to the girl, her parents, her grandmother, and 3 siblings. The outside was painted red, yellow and green, in bright swirling patterns. Her mother had done it when they first moved in, when her older brother was first born, when things were simpler. She loved the home, she loved the way the sun came streaming through the cracks in the walls to shine on her as she helped her mother pound grain in the mornings. She loved the sound the tin roof made in the rainy season, a gentle drumroll to ease her to sleep. She loved the way her father's hand felt on her head when he came home from work, a gentle pat to say hello. She loved the way her grandmother's voice sounded as she sang them all to sleep at night. She loved it all, and she would never have traded it for anything in the world. But now that was gone.",
+   "human_sentences": 6,
+   "n_sentences": 10,
+   "true_boundary_char": 658,
+   "ai_char_intervals": [
+    [
+     658,
+     959
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-1282",
+   "text": "And then there was light. A small LED was blinking quietly in the corner of a solid black box. Logan looked at it and nodded in satisfaction. He packed up his things, turned off the lights, and closed the door in the basement. Only a small green LED was glowing in the comlete darkness, as the lonely star in the infinite space. It was the last light remaining in the dying world. Logan was never to return here, he wasn't expecting to live much longer. The End. Back to the story archive. Hits: 592,943 Added 2012-12-29 | Updated 2013-02-05 | Rating: 4.5 (13 Votes) | Views: 13,030 , Tagged : 1 Comment #1 by bbobbins",
+   "human_sentences": 7,
+   "n_sentences": 10,
+   "true_boundary_char": 454,
+   "ai_char_intervals": [
+    [
+     454,
+     618
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-871",
+   "text": "I ticked my latest hacking job and two successful assassinations from my list and leaned back. * Nothing like a successful week* I thought and stripped out of my clothes, strewing them purposefully across the room. Then I lay down on the familiar mat labeled with my ID number. It felt comfortable and familiar as it quietly vibrated back into the tube where it had come from. Cables snaked their way into the ports around my body. I heard the tube seal shut and it immediately started filling with liquid. I should probably know what the stuff is, but really all I care about is that it feels warm and like being stroked all over. I lay there and let the liquid do its work. It always feels like it's taking longer than it should, but I guess that's just because I'm impatient. The tube drained and my skin tingled as the nanites crawled over me, fixing any damage from my latest adventure.",
+   "human_sentences": 7,
+   "n_sentences": 10,
+   "true_boundary_char": 632,
+   "ai_char_intervals": [
+    [
+     632,
+     891
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-1225",
+   "text": "\"And what is this one?\" asked John as he pulled the heavy sword from its sheath. The handle of the sword was covered in a thick coat of dust, but the blade shone like a full-moon, even in the dim light of the torchlit cave. \" You are holding in your hands Excalibur, the sword of the late King Arthur. Have you heard of him? It is quite heavy and was magical only in the hands of Arthur himself … if it is a sword you are after, might I recommend Tyrfing.\" the old man pulled another sword from the shelf, this one with a golden hilt. \" This was the sword used by the grandson of Odin, forged by two of the greatest smiths who ever walked the Earth. It is lighter than Excalibur, but it has a bit more bite to it.\" \"I think I'll take the one with the hilt of gold,\" said John.",
+   "human_sentences": 8,
+   "n_sentences": 10,
+   "true_boundary_char": 650,
+   "ai_char_intervals": [
+    [
+     650,
+     776
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-450",
+   "text": "The woman 's hand shakes quietly, almost politely, as if it realizes the inconvenience that the shaking gives the owner of the hands that if affects. He notices the microscopic fluctuations and surreptitiously puts his hands over hers, a gesture of soft devotion matched only by the warmth in his eyes. This unassuming display of affection is missed by the boy, engrossed as he is in an epic-nailbiting- legendary game of what is apparently Mario Kart. As many times as I view this scene, I still do not know what it means. The woman glances at the man and smiles, an inner smile that does not burst out in happiness but rather warms the receiver from head to toe. It is reserved for the man and the boy. The boy, who continues to be stubbornly oblivious of this scene. Something which the man notices, as he frowns and words twist out of his mouth, causing the game to be sullenly placed on the floor. The boy is oblivious to this as well, but the woman sees it and smiles. The man notices her smile and smiles back, a smile that says \"I love you\" without saying anything at all.",
+   "human_sentences": 8,
+   "n_sentences": 10,
+   "true_boundary_char": 903,
+   "ai_char_intervals": [
+    [
+     903,
+     1080
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-1499",
+   "text": "I couldn't sleep at all last night. My mom tried to cook me one of her famous cakes. She's a level 37 chef, with a baking specialty. Her cakes are world-renowned. My Dad passed away when I was 16, he was a level 35 cop, chasing down some level 40 thieves. They stabbed him. It took two level 50 officers, the highest level you can be, to stop them. See, when you turn 18, you're taken to the testing center at the Job Placement Association. They control all aspect of civilization to keep everything in balance. You're given a test, and depending on your score, you get placed in a job.",
+   "human_sentences": 9,
+   "n_sentences": 10,
+   "true_boundary_char": 512,
+   "ai_char_intervals": [
+    [
+     512,
+     586
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  },
+  {
+   "id": "roft-davinci-stories-724",
+   "text": "The multi-tentacled face of the dark lord Cthulhu bore black, beady eyes that stared into Andy's as he unwrapped the carefully adorned box. When he saw the figurine Andy's face first lit up in excitement at the purple trim of the box then quickly fell into consternation and confusion. He was, like most ten year olds, unfamiliar with the work of H.P. Lovecraft and did not understand what a'Dark Lord Cthulhu '(as the box so boldly claimed) was. All he knew was that it wasn't Buzz Lightyear, the only thing he'd wanted for his birthday. Andy was a good kid, and not one to shirk at a free toy, so he lay the box carefully on his bed and finished his birthday trying to not look as dejected as he was. And his plastic cage, Cthulhu slept. The squid faced figure did not awaken when the other toys came to life. Eyes open, the Priest-God lay still as the toys tapped on the plastic and shouted at him, and when the runes and symbols on the box- which they had assumed to be gibberish) started to glow they backed off, and went about their normal business. Andy returned from his birthday celebration and didn't even open the bizarre toy, just put it away on a shelf by the window, and everyone forgot about it, and fell asleep. Andy had been in bed for a few hours when he heard the sound of plastic rustling.",
+   "human_sentences": 9,
+   "n_sentences": 10,
+   "true_boundary_char": 1228,
+   "ai_char_intervals": [
+    [
+     1228,
+     1309
+    ]
+   ],
+   "model": "gpt-3 davinci",
+   "decoding": "nucleus p=0.4",
+   "prompt_source": "reddit-writing-prompts"
+  }
+ ]
+}

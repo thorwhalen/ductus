@@ -8,7 +8,7 @@
 |---|---|---|
 | `segmenter=` | `"paragraph"` (also `"sentence"`, `"document"`, or any callable) | **CLI** (`cw` over `tools._dispatch_funcs`), **agent skills** (`ductus/data/skills/`) |
 | `detectors=` | `tells`, `forensic`, `rhetoric`, `rhythm` — all deterministic, zero extra deps. `fast-detect-gpt` and `binoculars` ship in the `[local]` extra: registered, **opt-in**, off by default — see `misc/docs/phase-1-results.md` | MCP / HTTP / frontend: **questions answered, not built** — see `misc/docs/roadmap.md` |
-| `aggregate=` | `score.aggregate`, a transparent weighted sum | |
+| `aggregate=` | `score.density_aggregate` — the same weighted sum, divided by how much text produced it. `score.aggregate` is the length-blind original, still exported | |
 
 **NOT seams**, on purpose: report templates, arg parsing, the four dataclasses, the colour ramp, the tier→weight map.
 
@@ -20,7 +20,7 @@ segment.py   segmenters (the `segmenter=` seam); pure generators over exact offs
 tells.py     the catalogue: load_rules, iter_tell_matches, metrics  <- acquaint imports these
 detect.py    the four deterministic detectors (the `detectors=` seam) + the registry
 curvature.py Fast-DetectGPT and Binoculars ([local] extra, deferred torch import)
-score.py     aggregate(): evidence -> (lean, strength, label). No percentage. Ever.
+score.py     (density_)aggregate(): evidence -> (lean, strength, label). No percentage. Ever.
 core.py      iter_segments() streams, gauge() batches over it
 render.py    to_json / to_markdown / to_html (self-contained, no CDN, two-channel highlighting)
 tools.py     the verb SSOT: JSON in, JSON out, never prints or exits
@@ -38,13 +38,16 @@ data/        tells.yaml, skills/, agents/
 - **The core stays cheap to import.** `torch`/`transformers` live in the `[local]` extra behind deferred imports. `pyyaml` and `cw` are the only hard dependencies.
 - **"No findings" is a weak result, not a clean bill**, and the renderers say so.
 - **The deterministic layer has high precision and low recall** — 7 signals across the 12 known-mixed fixture documents at sentence granularity (11 at paragraph). `tests/test_ground_truth.py` asserts that floor rather than a flattering number. Do not raise the assertion to make a change look good.
+- **Calibrate the instrument, not the verdict.** Fitting may tune how much each *kind* of evidence weighs, or how evidence is normalised — properties of the tool, publishable as a table. It may never produce a per-document estimate of P(machine), however renamed. The operational test: if a reader who knows the procedure can invert the reported output back into a probability, the package is emitting one. `lean` must stay a ratio that reaches ±1.0 on a single weak signal; that jaggedness is the guardrail, not a defect. Full argument: `misc/docs/what-calibration-means-here.md`.
+- **This package's own false-positive rate is measured, and it is not small** — 20.6% of 350 human-written documents are called `leans-machine` by the shipped defaults (`misc/docs/phase-2-results.md`). The bias runs toward *formal, fluent* writing, not simple writing, which is the opposite of the direction the literature warns about and is explained by what the deterministic detectors look for. Re-measure with `python misc/measure_false_positives.py` after any change to rules, weights or thresholds.
 - **A detector joins `DEFAULT_DETECTORS` by measurement, never by being new.** `DETECTORS` is the registry; `DEFAULT_DETECTORS` is what `detectors=None` means, and they are deliberately not the same list. The gate and its criterion are `misc/measure_detectors.py`; the standing result is `misc/docs/phase-1-results.md`. The model-based pair did not clear it and is off by default.
 
 ## Conventions
 
 - Python ≥ 3.10, keyword-only from the 2nd or 3rd position, functional over OOP, dataclasses for data.
 - Every module has a docstring with doctests that run (`pytest --doctest-modules ductus`).
-- Tests in `tests/`; the ground-truth fixture is a vendored LLMTrace slice (Apache-2.0) and must not be edited to make a test pass.
+- Tests in `tests/`; two vendored ground-truth fixtures — `mixed_authorship.json` (LLMTrace, Apache-2.0, interleaved machine spans) and `roft_boundary.json` (RoFT, MIT, one human prefix then a machine continuation). Neither may be edited to make a test pass. Their shapes differ on purpose: a detector that only works on one of them has a result about the fixture.
+- Corpora that cannot be redistributed are **measured, not vendored**: `misc/measure_false_positives.py` downloads W&I+LOCNESS to `~/.local/share/ductus/corpora/` and the numbers are committed instead of the data. Never add a non-redistributable corpus to the repo.
 - Conventional Commits, no AI attribution.
 
 ## Cross-package
