@@ -6,7 +6,7 @@
 
 | Seam | Current default | Built surfaces |
 |---|---|---|
-| `segmenter=` | `"paragraph"` (also `"sentence"`, `"document"`, or any callable) | **CLI** (`cw` over `tools._dispatch_funcs`), **agent skills** (`ductus/data/skills/`) |
+| `segmenter=` | `"paragraph"` (also `"sentence"`, `"document"`, or any callable) | **CLI** (`cw` over `tools._dispatch_funcs`), **agent skills** (`ductus/data/skills/`), **MCP** (`py2mcp` over the same list) |
 | `detectors=` | `tells`, `forensic`, `rhetoric`, `rhythm` — all deterministic, zero extra deps. `fast-detect-gpt` and `binoculars` ship in the `[local]` extra: registered, **opt-in**, off by default — see `misc/docs/phase-1-results.md` | MCP / HTTP / frontend: **questions answered, not built** — see `misc/docs/roadmap.md` |
 | `aggregate=` | `score.density_aggregate` — the same weighted sum, divided by how much text produced it. `score.aggregate` is the length-blind original, still exported | |
 
@@ -24,6 +24,7 @@ score.py     (density_)aggregate(): evidence -> (lean, strength, label). No perc
 core.py      iter_segments() streams, gauge() batches over it
 render.py    to_json / to_markdown / to_html (self-contained, no CDN, two-channel highlighting)
 tools.py     the verb SSOT: JSON in, JSON out, never prints or exits
+mcp.py       the MCP surface ([mcp] extra); TOOL_REFS is DERIVED from _dispatch_funcs
 __main__.py  cw.dispatch over tools._dispatch_funcs -- one line, no adapter
 data/        tells.yaml, skills/, agents/
 ```
@@ -34,7 +35,8 @@ data/        tells.yaml, skills/, agents/
 - **Human-leaning signals are first-class.** A detector that can only accuse is not a measuring instrument. Mechanical artifacts (mid-sentence line breaks, mixed apostrophes, L2 slips) are often the most decisive evidence in a file.
 - **An offset always finds the text it claims.** Every `Span` carries offsets *and* quote/prefix/suffix. `tests/test_ground_truth.py::test_every_signal_span_indexes_the_original_text` is the guard. A judgment whose quote is gone is **dropped, never re-anchored by offset** — mis-anchoring attaches a reason to text it was never about.
 - **A detector is a function, not a class.** `(text, span) -> Iterator[Signal]`. If yours needs a base class or a registry, it is not a detector yet.
-- **Nothing in `tools.py` prints or exits.** The CLI is `cw`; MCP would be `py2mcp` string refs to the same functions.
+- **Nothing in `tools.py` prints or exits.** The CLI is `cw`; MCP is `py2mcp` string refs to the same functions.
+- **A surface never gets its own verb list.** `ductus/mcp.py` *derives* `TOOL_REFS` from `tools._dispatch_funcs`, so there is nothing to keep in sync and no parity test to write — a parity test between two surfaces means there are two implementations. A verb that changes the host declares it at its own definition with `@host_mutating`, and surfaces filter on that property rather than on a second list.
 - **The core stays cheap to import.** `torch`/`transformers` live in the `[local]` extra behind deferred imports. `pyyaml` and `cw` are the only hard dependencies.
 - **"No findings" is a weak result, not a clean bill**, and the renderers say so.
 - **The deterministic layer has high precision and low recall** — 7 signals across the 12 known-mixed fixture documents at sentence granularity (11 at paragraph). `tests/test_ground_truth.py` asserts that floor rather than a flattering number. Do not raise the assertion to make a change look good.
