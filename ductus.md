@@ -1,4 +1,4 @@
-> built 2026-09-17 07:33 UTC from 4778977 (main) · ductus 0.0.2. Details: build_info.json
+> built 2026-09-17 11:43 UTC from b232077 (main) · ductus 0.0.3. Details: build_info.json
 
 # index.html.md
 
@@ -54,6 +54,33 @@ Four detectors ship, all deterministic, all free, none needing a model or a key.
 Note that several of these argue *for* a human. A detector that can only ever accuse is not a measuring instrument. In practice the mechanical signals are often the most decisive thing in a file, in either direction.
 
 The deterministic pass finds phrases, artifacts and a few shapes. **It cannot find prose that is machine-written and bland** — for that a model has to read it, which is what the shipped agent skills are for.
+
+## How it fits together
+
+The three amber boxes are the seams — each is one keyword argument. Everything below `Report` is a renderer, and renderers are pure functions of it: nothing in the analysis knows or cares which one you call, and adding a fourth changes nothing upstream.
+
+## Renderings
+
+One analysis, three outputs. Pick by who is reading.
+
+| Renderer                  | CLI                               | Output                                                                                           | Reach for it when                                                                             |
+|---------------------------|-----------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| `to_markdown(report)`     | `ductus gauge draft.md`           | A synopsis, a table of flagged segments, then a *Why* section quoting each signal and its reason | A terminal, a PR comment, a document, an agent that needs to reason about the result in prose |
+| `to_html(report, text=…)` | `--format html --out report.html` | One self-contained file — no build step, no CDN, no network                                      | You want to *see* where the evidence is, and read why without losing your place               |
+| `to_json(report)`         | `--format json`                   | The full structure: every span, signal, weight and reason                                        | A frontend, a pipeline, a calibration run, anything that is not a person                      |
+
+### The HTML rendering
+
+![Hovering a highlighted span in a ductus HTML report: the reason, direction, weight and detector appear beside it](https://raw.githubusercontent.com/thorwhalen/ductus/main/misc/demo/ductus-report.gif)
+
+Hover (or keyboard-focus) any highlight and the reason appears beside it — which detector fired, which direction it argues, and what it weighs. Paragraphs carry a left border and a lean badge; the bar under each one is its evidence, one segment per signal.
+
+Two deliberate choices, both from the annotation-systems research in [`misc/docs/research/`]():
+
+- **Hue encodes score, and only score.** A perceptually-uniform ramp, warm for machine-leaning and cool for human-leaning, with lightness re-clamped per theme so it works in light and dark mode. Overlap is shown *structurally*, in the lane under the paragraph, never by blending colours — stacking translucent fills is what makes overlapping highlights unreadable.
+- **The reason is anchored to the highlight**, not parked in a corner, so the eye does not have to leave the text to find out why. Below 640px it falls back to a bottom sheet.
+
+The GIF above was recorded with [`walkthru`](https://github.com/thorwhalen/walkthru) driving a real browser — the script is [`misc/demo/make_gif.py`](), and it is the whole pipeline: measure where the highlights are, build a demo document whose camera zooms to them, play it against a recording page, render the capture to a GIF.
 
 ## Agent skills
 
@@ -1243,16 +1270,18 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-17 07:33 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/47789771e317188fff8b77d8208be6c321691e2d"><code>4778977</code></a> on branch <code>main</code>, for **ductus 0.0.2** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-17 11:43 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/b232077979a230ddfa03492c976658999e70c432"><code>b232077</code></a> on branch <code>main</code>, for **ductus 0.0.3** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.0.3) is behind the latest release on PyPI (0.0.4): `pip install ductus` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/47789771e317188fff8b77d8208be6c321691e2d"><code>47789771e317188fff8b77d8208be6c321691e2d</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/b232077979a230ddfa03492c976658999e70c432"><code>b232077979a230ddfa03492c976658999e70c432</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -1263,9 +1292,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35195023804">35195023804</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35217106809">35217106809</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>47789771e317188fff8b77d8208be6c321691e2d</code> (in the history of the built commit) |
+| Event commit | <code>b232077979a230ddfa03492c976658999e70c432</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1290,13 +1319,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.2/">0.0.2</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ductus/0.0.4/">0.0.4</a>, newer than the documented version (0.0.3).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout 47789771e317188fff8b77d8208be6c321691e2d
+git checkout b232077979a230ddfa03492c976658999e70c432
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

@@ -51,6 +51,33 @@ Note that several of these argue *for* a human. A detector that can only ever ac
 
 The deterministic pass finds phrases, artifacts and a few shapes. **It cannot find prose that is machine-written and bland** — for that a model has to read it, which is what the shipped agent skills are for.
 
+## How it fits together
+
+The three amber boxes are the seams — each is one keyword argument. Everything below `Report` is a renderer, and renderers are pure functions of it: nothing in the analysis knows or cares which one you call, and adding a fourth changes nothing upstream.
+
+## Renderings
+
+One analysis, three outputs. Pick by who is reading.
+
+| Renderer                  | CLI                               | Output                                                                                           | Reach for it when                                                                             |
+|---------------------------|-----------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| `to_markdown(report)`     | `ductus gauge draft.md`           | A synopsis, a table of flagged segments, then a *Why* section quoting each signal and its reason | A terminal, a PR comment, a document, an agent that needs to reason about the result in prose |
+| `to_html(report, text=…)` | `--format html --out report.html` | One self-contained file — no build step, no CDN, no network                                      | You want to *see* where the evidence is, and read why without losing your place               |
+| `to_json(report)`         | `--format json`                   | The full structure: every span, signal, weight and reason                                        | A frontend, a pipeline, a calibration run, anything that is not a person                      |
+
+### The HTML rendering
+
+![Hovering a highlighted span in a ductus HTML report: the reason, direction, weight and detector appear beside it](https://raw.githubusercontent.com/thorwhalen/ductus/main/misc/demo/ductus-report.gif)
+
+Hover (or keyboard-focus) any highlight and the reason appears beside it — which detector fired, which direction it argues, and what it weighs. Paragraphs carry a left border and a lean badge; the bar under each one is its evidence, one segment per signal.
+
+Two deliberate choices, both from the annotation-systems research in [`misc/docs/research/`]():
+
+- **Hue encodes score, and only score.** A perceptually-uniform ramp, warm for machine-leaning and cool for human-leaning, with lightness re-clamped per theme so it works in light and dark mode. Overlap is shown *structurally*, in the lane under the paragraph, never by blending colours — stacking translucent fills is what makes overlapping highlights unreadable.
+- **The reason is anchored to the highlight**, not parked in a corner, so the eye does not have to leave the text to find out why. Below 640px it falls back to a bottom sheet.
+
+The GIF above was recorded with [`walkthru`](https://github.com/thorwhalen/walkthru) driving a real browser — the script is [`misc/demo/make_gif.py`](), and it is the whole pipeline: measure where the highlights are, build a demo document whose camera zooms to them, play it against a recording page, render the capture to a GIF.
+
 ## Agent skills
 
 The primary surface. Two skills and a subagent ship inside the package and install with one command:

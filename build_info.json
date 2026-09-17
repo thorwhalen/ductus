@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-09-17T07:33:41Z",
+  "built_at": "2026-09-17T11:43:51Z",
   "package": {
     "name": "ductus",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "display_name": "ductus",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "47789771e317188fff8b77d8208be6c321691e2d",
-    "short_commit": "4778977",
+    "commit": "b232077979a230ddfa03492c976658999e70c432",
+    "short_commit": "b232077",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/ductus",
-    "commit_url": "https://github.com/thorwhalen/ductus/commit/47789771e317188fff8b77d8208be6c321691e2d",
+    "commit_url": "https://github.com/thorwhalen/ductus/commit/b232077979a230ddfa03492c976658999e70c432",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/ductus",
-    "sha": "47789771e317188fff8b77d8208be6c321691e2d",
+    "sha": "b232077979a230ddfa03492c976658999e70c432",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "35195023804",
-    "run_url": "https://github.com/thorwhalen/ductus/actions/runs/35195023804",
+    "run_id": "35217106809",
+    "run_url": "https://github.com/thorwhalen/ductus/actions/runs/35217106809",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -60,14 +60,16 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.0.2",
-    "relation": "same",
+    "latest": "0.0.4",
+    "relation": "behind",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/ductus && cd ductus\ngit checkout 47789771e317188fff8b77d8208be6c321691e2d\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/ductus && cd ductus\ngit checkout b232077979a230ddfa03492c976658999e70c432\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
-    "aligned": true,
-    "notes": []
+    "aligned": false,
+    "notes": [
+      "The documented version (0.0.3) is behind the latest release on PyPI (0.0.4): `pip install ductus` gives newer code than these docs describe."
+    ]
   }
 }
