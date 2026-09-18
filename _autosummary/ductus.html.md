@@ -56,7 +56,7 @@ flagged *sentence* is much better evidence than a flagged *document*. See
 | [`Signal`](#ductus.Signal)(name, direction, weight, detector[, ...]) | One piece of evidence about one span.                                     |
 | [`Span`](#ductus.Span)(start, end, quote[, prefix, suffix, level]) | A character range, with redundant selectors so it survives an edit.       |
 | [`TellMatch`](#ductus.TellMatch)(rule_id, tier, message, start, ...)    | Where a rule fired, and on what text.                                     |
-| [`TellRule`](#ductus.TellRule)(id, tier, message, patterns)            | One named rule: a tier, a message, and the patterns that trigger it.      |
+| [`TellRule`](#ductus.TellRule)(id, tier, message, patterns[, ...])     | One named rule: a tier, a message, and the patterns that trigger it.      |
 
 ### *class* ductus.Report(text_sha256, n_chars, document, segments, detectors, segmenter, schema_version='1', calibration='uncalibrated', meta=<factory>)
 
@@ -136,17 +136,50 @@ Build a span over `text`, capturing its re-anchoring context.
 'ef'
 ```
 
-### *class* ductus.TellMatch(rule_id, tier, message, start, end, matched)
+### *class* ductus.TellMatch(rule_id, tier, message, start, end, matched, weight=0.0)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Where a rule fired, and on what text.
 
-### *class* ductus.TellRule(id, tier, message, patterns)
+#### weight *: [float](https://docs.python.org/3/builtins/functions.html#float)* *= 0.0*
+
+The rule’s evidential weight – its per-rule override when it has one, else its
+tier’s. Carried here so a consumer never has to re-derive it from `tier`, which
+would silently discard the override. Defaulted so existing constructions still
+work; [`iter_tell_matches()`](#ductus.iter_tell_matches) always fills it in.
+
+### *class* ductus.TellRule(id, tier, message, patterns, weight_override=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 One named rule: a tier, a message, and the patterns that trigger it.
+
+#### *property* weight *: [float](https://docs.python.org/3/builtins/functions.html#float)*
+
+the per-rule override when set, else the tier’s.
+
+```pycon
+>>> TellRule("x", "E", "m", (), weight_override=0.15).weight
+0.15
+>>> TellRule("x", "E", "m", ()).weight
+0.5
+```
+
+* **Type:**
+  Evidential weight
+
+#### weight_override *: [float](https://docs.python.org/3/builtins/functions.html#float) | [None](https://docs.python.org/3/builtins/constants.html#None)* *= None*
+
+An optional per-rule override of the tier’s weight, read from `weight:` in
+the catalogue. It exists because a rule’s **tier** and its \*\*evidential
+weight\*\* answer different questions, and a rule can be right about one and
+wrong about the other: `summary-closer` catches “In conclusion,” which is
+reasonable style advice (`acquaint` enforces tiers) and almost worthless as
+evidence about *who wrote the text* (`ductus` uses weights). Overriding the
+weight changes this package only – `acquaint` reads `tier` and never
+`weight`. Changing a tier is a two-package decision; see
+`misc/docs/document-verdict-decision.md`.
 
 ### ductus.aggregate(signals, , n_chars=None)
 
@@ -208,9 +241,17 @@ True
 
 Score `text` and roll the segments up into a report.
 
-The document-level lean is computed over *all* signals in the document, not
-by averaging the segment leans – averaging would let two short, heavily
-flagged paragraphs outvote a long clean one.
+The document-level verdict is computed from the **segment verdicts**, by
+[`ductus.score.roll_up()`](ductus.score.html.md#ductus.score.roll_up), not from the pooled signals. Pooling every signal in
+the document and scoring the heap is what made a long human document more likely
+to be accused for being long: with a ~3% per-segment false-flag rate, the chance
+that something fires grows with the segment count. What is asked instead is what
+*fraction* of the segments carry directional evidence and which way they point –
+length-normalised by construction. `misc/docs/document-verdict-decision.md` has
+the argument and what it cost.
+
+The segments themselves are untouched by this, and remain the better evidence: a
+flagged sentence says much more than a flagged document.
 
 * **Return type:**
   [`Report`](ductus.base.html.md#ductus.base.Report)

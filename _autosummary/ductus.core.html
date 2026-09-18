@@ -183,9 +183,16 @@ contains it. It is how the shipped skills feed a model’s reading back in.</p>
 <dt class="sig sig-object py" id="ductus.core.gauge">
 <span class="sig-prename descclassname"><span class="pre">ductus.core.</span></span><span class="sig-name descname"><span class="pre">gauge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmenter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'paragraph'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">density_aggregate&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_signals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/core.html#gauge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.core.gauge" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.core.gauge'">¶</a></dt>
 <dd><p>Score <code class="docutils literal notranslate"><span class="pre">text</span></code> and roll the segments up into a report.</p>
-<p>The document-level lean is computed over <em>all</em> signals in the document, not
-by averaging the segment leans – averaging would let two short, heavily
-flagged paragraphs outvote a long clean one.</p>
+<p>The document-level verdict is computed from the <strong>segment verdicts</strong>, by
+<a class="reference internal" href="ductus.score.html#ductus.score.roll_up" title="ductus.score.roll_up"><code class="xref py py-func docutils literal notranslate"><span class="pre">ductus.score.roll_up()</span></code></a>, not from the pooled signals. Pooling every signal in
+the document and scoring the heap is what made a long human document more likely
+to be accused for being long: with a ~3% per-segment false-flag rate, the chance
+that something fires grows with the segment count. What is asked instead is what
+<em>fraction</em> of the segments carry directional evidence and which way they point –
+length-normalised by construction. <code class="docutils literal notranslate"><span class="pre">misc/docs/document-verdict-decision.md</span></code> has
+the argument and what it cost.</p>
+<p>The segments themselves are untouched by this, and remain the better evidence: a
+flagged sentence says much more than a flagged document.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ductus.base.html#ductus.base.Report" title="ductus.base.Report"><code class="xref py py-class docutils literal notranslate"><span class="pre">Report</span></code></a></span></p>
@@ -233,7 +240,7 @@ flagged paragraphs outvote a long clean one.</p>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=1fd71caa"></script>
+<script src="../_static/documentation_options.js?v=bbaf98b3"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

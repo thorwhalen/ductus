@@ -20,7 +20,7 @@
 - [ductus.tells](_autosummary/ductus.tells.html.md): The tells catalogue: named regular-expression patterns, tiered by confidence.
 - [ductus.tools](_autosummary/ductus.tools.html.md): The verb SSOT: plain functions, JSON-ready in, JSON-ready out.
 - [For AI agents](ai-agents.html.md): `ductus` ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on **2026-09-17 15:55 UTC** from commit <a href="https://github.com/tho...
+- [About this build](about-this-build.html.md): This documentation was built on **2026-09-18 13:01 UTC** from commit <a href="https://github.com/tho...
 
 ---
 

@@ -1,4 +1,4 @@
-> built 2026-09-17 15:55 UTC from d09cd67 (main) · ductus 0.0.6. Details: build_info.json
+> built 2026-09-18 13:01 UTC from e68b6ca (main) · ductus 0.0.7. Details: build_info.json
 
 # index.html.md
 
@@ -46,10 +46,12 @@ It would be cheap to quote other people’s numbers and not measure our own. Acr
 
 |                  | beginner   | intermediate   | advanced   | native control   |
 |------------------|------------|----------------|------------|------------------|
-| **per document** | 14.6%      | 23.0%          | 25.7%      | 24.0%            |
-| per sentence     | 2.1%       | 3.0%           | 3.1%       | 2.9%             |
+| **per document** | 2.3%       | 10.0%          | 10.0%      | 2.0%             |
+| per sentence     | 0.4%       | 1.6%           | 2.0%       | 0.4%             |
 
-Two things to take from that. **A single flagged sentence is much better evidence than a flagged document**, because a long document accumulates chances to trip one rule. And the bias here does **not** run the way the literature predicts: it tracks *formal, fluent, essayistic* writing rather than simple writing, because the deterministic detectors look for rhetorical constructions that good writers also use. The full measurement, including how much worse this was before Phase 2, is in [`phase-2-results.md`]().
+That is down from 20.6% overall, and the way it came down is worth knowing. Three rules were found to be matching **nothing** in machine-written text while implicating 86 human documents between them — two of them were simply broken, catching ordinary negation (“I did not eat from the tree but from the bush”) and the everyday correlative (“not only fast, but also simple”). And the document-level verdict was rebuilt so that it stops treating *accumulation* as *corroboration*: a long document used to be more likely to be accused for being long. [`reducing-false-accusations.md`]() has the per-rule table and what it cost (nothing: not one correctly-flagged machine segment was lost).
+
+Two things still to take from it. **A single flagged sentence is much better evidence than a flagged document.** And the bias does **not** run the way the literature predicts: it tracks *formal, fluent, essayistic* writing rather than simple writing, because the deterministic detectors look for rhetorical constructions that good writers also use. What remains is concentrated in intermediate and advanced non-native writers, at 10%.
 
 ## What it looks at
 
@@ -381,9 +383,17 @@ contains it. It is how the shipped skills feed a model’s reading back in.
 
 Score `text` and roll the segments up into a report.
 
-The document-level lean is computed over *all* signals in the document, not
-by averaging the segment leans – averaging would let two short, heavily
-flagged paragraphs outvote a long clean one.
+The document-level verdict is computed from the **segment verdicts**, by
+[`ductus.score.roll_up()`](_autosummary/ductus.score.html.md#ductus.score.roll_up), not from the pooled signals. Pooling every signal in
+the document and scoring the heap is what made a long human document more likely
+to be accused for being long: with a ~3% per-segment false-flag rate, the chance
+that something fires grows with the segment count. What is asked instead is what
+*fraction* of the segments carry directional evidence and which way they point –
+length-normalised by construction. `misc/docs/document-verdict-decision.md` has
+the argument and what it cost.
+
+The segments themselves are untouched by this, and remain the better evidence: a
+flagged sentence says much more than a flagged document.
 
 * **Return type:**
   [`Report`](_autosummary/ductus.base.html.md#ductus.base.Report)
@@ -810,7 +820,7 @@ flagged *sentence* is much better evidence than a flagged *document*. See
 | [`Signal`](_autosummary/ductus.html.md#ductus.Signal)(name, direction, weight, detector[, ...]) | One piece of evidence about one span.                                     |
 | [`Span`](_autosummary/ductus.html.md#ductus.Span)(start, end, quote[, prefix, suffix, level]) | A character range, with redundant selectors so it survives an edit.       |
 | [`TellMatch`](_autosummary/ductus.html.md#ductus.TellMatch)(rule_id, tier, message, start, ...)    | Where a rule fired, and on what text.                                     |
-| [`TellRule`](_autosummary/ductus.html.md#ductus.TellRule)(id, tier, message, patterns)            | One named rule: a tier, a message, and the patterns that trigger it.      |
+| [`TellRule`](_autosummary/ductus.html.md#ductus.TellRule)(id, tier, message, patterns[, ...])     | One named rule: a tier, a message, and the patterns that trigger it.      |
 
 ### *class* ductus.Report(text_sha256, n_chars, document, segments, detectors, segmenter, schema_version='1', calibration='uncalibrated', meta=<factory>)
 
@@ -890,17 +900,50 @@ Build a span over `text`, capturing its re-anchoring context.
 'ef'
 ```
 
-### *class* ductus.TellMatch(rule_id, tier, message, start, end, matched)
+### *class* ductus.TellMatch(rule_id, tier, message, start, end, matched, weight=0.0)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Where a rule fired, and on what text.
 
-### *class* ductus.TellRule(id, tier, message, patterns)
+#### weight *: [float](https://docs.python.org/3/builtins/functions.html#float)* *= 0.0*
+
+The rule’s evidential weight – its per-rule override when it has one, else its
+tier’s. Carried here so a consumer never has to re-derive it from `tier`, which
+would silently discard the override. Defaulted so existing constructions still
+work; [`iter_tell_matches()`](_autosummary/ductus.html.md#ductus.iter_tell_matches) always fills it in.
+
+### *class* ductus.TellRule(id, tier, message, patterns, weight_override=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 One named rule: a tier, a message, and the patterns that trigger it.
+
+#### *property* weight *: [float](https://docs.python.org/3/builtins/functions.html#float)*
+
+the per-rule override when set, else the tier’s.
+
+```pycon
+>>> TellRule("x", "E", "m", (), weight_override=0.15).weight
+0.15
+>>> TellRule("x", "E", "m", ()).weight
+0.5
+```
+
+* **Type:**
+  Evidential weight
+
+#### weight_override *: [float](https://docs.python.org/3/builtins/functions.html#float) | [None](https://docs.python.org/3/builtins/constants.html#None)* *= None*
+
+An optional per-rule override of the tier’s weight, read from `weight:` in
+the catalogue. It exists because a rule’s **tier** and its \*\*evidential
+weight\*\* answer different questions, and a rule can be right about one and
+wrong about the other: `summary-closer` catches “In conclusion,” which is
+reasonable style advice (`acquaint` enforces tiers) and almost worthless as
+evidence about *who wrote the text* (`ductus` uses weights). Overriding the
+weight changes this package only – `acquaint` reads `tier` and never
+`weight`. Changing a tier is a two-package decision; see
+`misc/docs/document-verdict-decision.md`.
 
 ### ductus.aggregate(signals, , n_chars=None)
 
@@ -962,9 +1005,17 @@ True
 
 Score `text` and roll the segments up into a report.
 
-The document-level lean is computed over *all* signals in the document, not
-by averaging the segment leans – averaging would let two short, heavily
-flagged paragraphs outvote a long clean one.
+The document-level verdict is computed from the **segment verdicts**, by
+[`ductus.score.roll_up()`](_autosummary/ductus.score.html.md#ductus.score.roll_up), not from the pooled signals. Pooling every signal in
+the document and scoring the heap is what made a long human document more likely
+to be accused for being long: with a ~3% per-segment false-flag rate, the chance
+that something fires grows with the segment count. What is asked instead is what
+*fraction* of the segments carry directional evidence and which way they point –
+length-normalised by construction. `misc/docs/document-verdict-decision.md` has
+the argument and what it cost.
+
+The segments themselves are untouched by this, and remain the better evidence: a
+flagged sentence says much more than a flagged document.
 
 * **Return type:**
   [`Report`](_autosummary/ductus.base.html.md#ductus.base.Report)
@@ -1287,17 +1338,19 @@ argument; see `misc/docs/roadmap.md`.
 
 ### Module Attributes
 
-| [`LEAN_THRESHOLD`](_autosummary/ductus.score.html.md#ductus.score.LEAN_THRESHOLD)   | Beyond this, a segment is called as leaning one way.                                                                |
-|-------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| [`STRENGTH_FLOOR`](_autosummary/ductus.score.html.md#ductus.score.STRENGTH_FLOOR)   | Below this much total evidence, no label is claimed at all.                                                         |
-| [`EVIDENCE_FULL`](_autosummary/ductus.score.html.md#ductus.score.EVIDENCE_FULL)    | The total signal weight at which `strength` saturates at 1.0.                                                       |
-| [`REFERENCE_CHARS`](_autosummary/ductus.score.html.md#ductus.score.REFERENCE_CHARS)  | How much text [`density_aggregate()`](_autosummary/ductus.score.html.md#ductus.score.density_aggregate) treats as one "unit" of reading. |
+| [`LEAN_THRESHOLD`](_autosummary/ductus.score.html.md#ductus.score.LEAN_THRESHOLD)    | Beyond this, a segment is called as leaning one way.                                                                                                                               |
+|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`STRENGTH_FLOOR`](_autosummary/ductus.score.html.md#ductus.score.STRENGTH_FLOOR)    | Below this much total evidence, no label is claimed at all.                                                                                                                        |
+| [`EVIDENCE_FULL`](_autosummary/ductus.score.html.md#ductus.score.EVIDENCE_FULL)     | The total signal weight at which `strength` saturates at 1.0.                                                                                                                      |
+| [`REFERENCE_CHARS`](_autosummary/ductus.score.html.md#ductus.score.REFERENCE_CHARS)   | How much text [`density_aggregate()`](_autosummary/ductus.score.html.md#ductus.score.density_aggregate) treats as one "unit" of reading.                                                                |
+| [`SEGMENT_RATE_FULL`](_autosummary/ductus.score.html.md#ductus.score.SEGMENT_RATE_FULL) | The fraction of a document's segments that must carry directional evidence before [`roll_up()`](_autosummary/ductus.score.html.md#ductus.score.roll_up) calls the document's `strength` full. |
 
 ### Functions
 
 | [`aggregate`](_autosummary/ductus.score.html.md#ductus.score.aggregate)(signals, \*[, n_chars])         | Reduce evidence to `(lean, strength, label)`.                                                                         |
 |--------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
 | [`density_aggregate`](_autosummary/ductus.score.html.md#ductus.score.density_aggregate)(signals, \*[, n_chars]) | Like [`aggregate()`](_autosummary/ductus.score.html.md#ductus.score.aggregate), but `strength` is an evidence *rate*, not a total. |
+| [`roll_up`](_autosummary/ductus.score.html.md#ductus.score.roll_up)(segments, \*[, n_chars])          | A document verdict computed from the **segment verdicts**, not the signal pool.                                       |
 
 ### ductus.score.EVIDENCE_FULL *= 1.5*
 
@@ -1313,6 +1366,12 @@ Beyond this, a segment is called as leaning one way.
 How much text [`density_aggregate()`](_autosummary/ductus.score.html.md#ductus.score.density_aggregate) treats as one “unit” of reading. Above this
 length a passage must produce proportionally more evidence to reach the same
 `strength`. Selected on human-written text; see `misc/docs/phase-2-results.md`.
+
+### ductus.score.SEGMENT_RATE_FULL *= 0.35*
+
+The fraction of a document’s segments that must carry directional evidence before
+[`roll_up()`](_autosummary/ductus.score.html.md#ductus.score.roll_up) calls the document’s `strength` full. A *rate*, not a count, which
+is what makes the roll-up length-normalised by construction.
 
 ### ductus.score.STRENGTH_FLOOR *= 0.2*
 
@@ -1372,6 +1431,74 @@ accusations, never add one. Short passages behave exactly as before.
 (1.0, 0.067, 'no-evidence')
 >>> density_aggregate(evidence) == aggregate(evidence)  # no length, no opinion
 True
+```
+
+### ductus.score.roll_up(segments, , n_chars=None)
+
+A document verdict computed from the **segment verdicts**, not the signal pool.
+
+Pooling every signal in a document and scoring the heap is why length hurt: with a
+per-segment false-flag rate of about 3%, the chance that *something* fires grows
+with the number of segments, and by thirty segments it is a coin toss. Pooling
+treats accumulation as though it were corroboration.
+
+This asks a different question – \*what fraction of this document’s segments carry
+directional evidence, and which way do they point\* – and it is length-normalised
+by construction rather than by a fitted constant. One flagged segment in twenty is
+the same claim whether the document has twenty segments or two hundred.
+
+The two axes keep exactly the meanings they have one level down, which is what
+stops “what proportion of segments lean machine” from becoming “what percentage is
+AI”:
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+`lean`
+: unchanged: the *direction ratio* over the document’s signal weights, exactly as
+  [`aggregate()`](_autosummary/ductus.score.html.md#ductus.score.aggregate) computes it. Counting segment *labels* instead was tried and
+  reverted – it silently discards evidence in segments that did not reach a
+  label, and that evidence is disproportionately human-leaning, which this
+  package treats as first-class. It still reaches ±1.0 off a single signal.
+
+`strength`
+: how much evidence there is, judged **two ways, and believed at its weakest**:
+  the *rate* of directional segments relative to [`SEGMENT_RATE_FULL`](_autosummary/ductus.score.html.md#ductus.score.SEGMENT_RATE_FULL), and
+  the evidence *density* per unit text that [`density_aggregate()`](_autosummary/ductus.score.html.md#ductus.score.density_aggregate) uses. Each
+  guards a failure the other misses – the rate view catches a long document with
+  many segments and one stray flag, the density view catches a long document cut
+  into two paragraphs where one stray flag is half of them. A document has to
+  satisfy both to be called, which is the conservative direction and the one this
+  package’s asymmetry asks for.
+
+Neither axis alone, nor the pair, can be inverted into “how much of this is
+machine-written”. See `misc/docs/document-verdict-decision.md`.
+
+```pycon
+>>> from ductus.base import Segment, Signal, Span
+>>> def seg(label, lean):
+...     found = () if label == "no-evidence" else (Signal("t", "machine", 0.5, "d"),)
+...     return Segment(span=Span(0, 1, "x"), signals=found, lean=lean,
+...                    strength=1.0, label=label)
+>>> many = [seg("no-evidence", 0.0)] * 19 + [seg("leans-machine", 1.0)]
+>>> roll_up(many)              # one flagged sentence in twenty: a rate of 5%
+(1.0, 0.143, 'no-evidence')
+>>> few = [seg("leans-machine", 1.0)] * 8 + [seg("no-evidence", 0.0)] * 12
+>>> roll_up(few)               # eight in twenty, all pointing the same way
+(1.0, 1.0, 'leans-machine')
+>>> roll_up([])
+(0.0, 0.0, 'no-evidence')
+```
+
+One flagged paragraph out of two is a rate of 50% – but not if those two
+paragraphs are four thousand characters of text carrying one weak signal:
+
+```pycon
+>>> pair = [seg("leans-machine", 1.0), seg("no-evidence", 0.0)]
+>>> roll_up(pair)[2]
+'leans-machine'
+>>> roll_up(pair, n_chars=4000)[2]
+'no-evidence'
 ```
 
 
@@ -1495,7 +1622,7 @@ half of its `deslop` check, and layers recipient calibration on top.
 
 | [`TellMatch`](_autosummary/ductus.tells.html.md#ductus.tells.TellMatch)(rule_id, tier, message, start, ...)   | Where a rule fired, and on what text.                                |
 |--------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| [`TellRule`](_autosummary/ductus.tells.html.md#ductus.tells.TellRule)(id, tier, message, patterns)           | One named rule: a tier, a message, and the patterns that trigger it. |
+| [`TellRule`](_autosummary/ductus.tells.html.md#ductus.tells.TellRule)(id, tier, message, patterns[, ...])    | One named rule: a tier, a message, and the patterns that trigger it. |
 
 ### ductus.tells.TIER_WEIGHT *= {'E': 0.5, 'S': 0.15, 'W': 0.3}*
 
@@ -1503,17 +1630,50 @@ How much each tier is worth as evidence, on the 0..1 Signal scale.
 E is near-certain but still not 1.0 – a quoted model output is not a
 model-written document, and nothing in this package claims certainty.
 
-### *class* ductus.tells.TellMatch(rule_id, tier, message, start, end, matched)
+### *class* ductus.tells.TellMatch(rule_id, tier, message, start, end, matched, weight=0.0)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Where a rule fired, and on what text.
 
-### *class* ductus.tells.TellRule(id, tier, message, patterns)
+#### weight *: [float](https://docs.python.org/3/builtins/functions.html#float)* *= 0.0*
+
+The rule’s evidential weight – its per-rule override when it has one, else its
+tier’s. Carried here so a consumer never has to re-derive it from `tier`, which
+would silently discard the override. Defaulted so existing constructions still
+work; [`iter_tell_matches()`](_autosummary/ductus.tells.html.md#ductus.tells.iter_tell_matches) always fills it in.
+
+### *class* ductus.tells.TellRule(id, tier, message, patterns, weight_override=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 One named rule: a tier, a message, and the patterns that trigger it.
+
+#### *property* weight *: [float](https://docs.python.org/3/builtins/functions.html#float)*
+
+the per-rule override when set, else the tier’s.
+
+```pycon
+>>> TellRule("x", "E", "m", (), weight_override=0.15).weight
+0.15
+>>> TellRule("x", "E", "m", ()).weight
+0.5
+```
+
+* **Type:**
+  Evidential weight
+
+#### weight_override *: [float](https://docs.python.org/3/builtins/functions.html#float) | [None](https://docs.python.org/3/builtins/constants.html#None)* *= None*
+
+An optional per-rule override of the tier’s weight, read from `weight:` in
+the catalogue. It exists because a rule’s **tier** and its \*\*evidential
+weight\*\* answer different questions, and a rule can be right about one and
+wrong about the other: `summary-closer` catches “In conclusion,” which is
+reasonable style advice (`acquaint` enforces tiers) and almost worthless as
+evidence about *who wrote the text* (`ductus` uses weights). Overriding the
+weight changes this package only – `acquaint` reads `tier` and never
+`weight`. Changing a tier is a two-package decision; see
+`misc/docs/document-verdict-decision.md`.
 
 ### ductus.tells.iter_tell_matches(text, , rules=None, tiers=None, offset=0)
 
@@ -1697,18 +1857,16 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-17 15:55 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27"><code>d09cd67</code></a> on branch <code>main</code>, for **ductus 0.0.6** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-18 13:01 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/e68b6ca4ea61742e33343318549253f054903508"><code>e68b6ca</code></a> on branch <code>main</code>, for **ductus 0.0.7** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.6) is behind the latest release on PyPI (0.0.7): `pip install ductus` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27"><code>d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/e68b6ca4ea61742e33343318549253f054903508"><code>e68b6ca4ea61742e33343318549253f054903508</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -1719,9 +1877,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35243186397">35243186397</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35347666837">35347666837</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27</code> (in the history of the built commit) |
+| Event commit | <code>e68b6ca4ea61742e33343318549253f054903508</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1746,13 +1904,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.7/">0.0.7</a>, newer than the documented version (0.0.6).
+Latest release: <a href="https://pypi.org/project/ductus/0.0.7/">0.0.7</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27
+git checkout e68b6ca4ea61742e33343318549253f054903508
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

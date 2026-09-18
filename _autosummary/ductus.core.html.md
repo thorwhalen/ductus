@@ -46,9 +46,17 @@ contains it. It is how the shipped skills feed a model’s reading back in.
 
 Score `text` and roll the segments up into a report.
 
-The document-level lean is computed over *all* signals in the document, not
-by averaging the segment leans – averaging would let two short, heavily
-flagged paragraphs outvote a long clean one.
+The document-level verdict is computed from the **segment verdicts**, by
+[`ductus.score.roll_up()`](ductus.score.html.md#ductus.score.roll_up), not from the pooled signals. Pooling every signal in
+the document and scoring the heap is what made a long human document more likely
+to be accused for being long: with a ~3% per-segment false-flag rate, the chance
+that something fires grows with the segment count. What is asked instead is what
+*fraction* of the segments carry directional evidence and which way they point –
+length-normalised by construction. `misc/docs/document-verdict-decision.md` has
+the argument and what it cost.
+
+The segments themselves are untouched by this, and remain the better evidence: a
+flagged sentence says much more than a flagged document.
 
 * **Return type:**
   [`Report`](ductus.base.html.md#ductus.base.Report)

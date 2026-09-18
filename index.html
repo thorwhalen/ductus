@@ -154,20 +154,21 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p><strong>per document</strong></p></td>
-<td><p>14.6%</p></td>
-<td><p>23.0%</p></td>
-<td><p>25.7%</p></td>
-<td><p>24.0%</p></td>
+<td><p>2.3%</p></td>
+<td><p>10.0%</p></td>
+<td><p>10.0%</p></td>
+<td><p>2.0%</p></td>
 </tr>
 <tr class="row-odd"><td><p>per sentence</p></td>
-<td><p>2.1%</p></td>
-<td><p>3.0%</p></td>
-<td><p>3.1%</p></td>
-<td><p>2.9%</p></td>
+<td><p>0.4%</p></td>
+<td><p>1.6%</p></td>
+<td><p>2.0%</p></td>
+<td><p>0.4%</p></td>
 </tr>
 </tbody>
 </table>
-<p>Two things to take from that. <strong>A single flagged sentence is much better evidence than a flagged document</strong>, because a long document accumulates chances to trip one rule. And the bias here does <strong>not</strong> run the way the literature predicts: it tracks <em>formal, fluent, essayistic</em> writing rather than simple writing, because the deterministic detectors look for rhetorical constructions that good writers also use. The full measurement, including how much worse this was before Phase 2, is in <a class="reference internal" href="#misc/docs/phase-2-results.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">phase-2-results.md</span></code></span></a>.</p>
+<p>That is down from 20.6% overall, and the way it came down is worth knowing. Three rules were found to be matching <strong>nothing</strong> in machine-written text while implicating 86 human documents between them — two of them were simply broken, catching ordinary negation (“I did not eat from the tree but from the bush”) and the everyday correlative (“not only fast, but also simple”). And the document-level verdict was rebuilt so that it stops treating <em>accumulation</em> as <em>corroboration</em>: a long document used to be more likely to be accused for being long. <a class="reference internal" href="#misc/docs/reducing-false-accusations.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">reducing-false-accusations.md</span></code></span></a> has the per-rule table and what it cost (nothing: not one correctly-flagged machine segment was lost).</p>
+<p>Two things still to take from it. <strong>A single flagged sentence is much better evidence than a flagged document.</strong> And the bias does <strong>not</strong> run the way the literature predicts: it tracks <em>formal, fluent, essayistic</em> writing rather than simple writing, because the deterministic detectors look for rhetorical constructions that good writers also use. What remains is concentrated in intermediate and advanced non-native writers, at 10%.</p>
 </section>
 </section>
 <section id="what-it-looks-at">
@@ -361,7 +362,7 @@
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-17 15:55 UTC from <a href="https://github.com/thorwhalen/ductus/commit/d09cd67cb5fdcc946e4dcce0f9bfd22fa0f4ec27">d09cd67</a> (main) · ductus 0.0.6 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-18 13:01 UTC from <a href="https://github.com/thorwhalen/ductus/commit/e68b6ca4ea61742e33343318549253f054903508">e68b6ca</a> (main) · ductus 0.0.7 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -395,7 +396,7 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=1fd71caa"></script>
+<script src="_static/documentation_options.js?v=bbaf98b3"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

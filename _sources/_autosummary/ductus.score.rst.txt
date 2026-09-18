@@ -12,6 +12,7 @@ ductus.score
       STRENGTH_FLOOR
       EVIDENCE_FULL
       REFERENCE_CHARS
+      SEGMENT_RATE_FULL
    
    .. rubric:: Functions
 
@@ -19,4 +20,5 @@ ductus.score
    
       aggregate
       density_aggregate
+      roll_up
    
