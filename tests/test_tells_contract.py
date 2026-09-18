@@ -92,3 +92,80 @@ def test_a_caller_can_supply_its_own_catalogue():
         "mine"
     }
     assert list(iter_tell_matches("Let's delve in.", rules=custom)) == []
+
+
+# --------------------------------------------- tier and weight answer different questions
+
+
+def test_a_rule_may_override_its_tier_weight_without_changing_its_tier():
+    """`acquaint` enforces by **tier**; `ductus` weighs by **weight**.
+
+    A rule can be right about one and wrong about the other. `summary-closer` catches
+    "In conclusion," -- worth flagging as style advice even for a reader who tolerates
+    AI-sounding prose, and worth almost nothing as evidence about *who wrote the text*
+    (25 of 350 human-written documents implicated, zero machine-written spans matched).
+
+    So its tier stays E, which is what `acquaint` reads, and its weight drops to the
+    floor, which is what `ductus` reads. This test pins both halves, because changing
+    the tier instead would silently alter what every `acquaint` user's linter enforces.
+    """
+    rules = {r.id: r for r in load_rules()}
+    closer = rules["summary-closer"]
+    assert closer.tier == "E", "acquaint enforces tier E even for tolerant readers"
+    assert closer.weight == 0.15
+    assert closer.weight < TIER_WEIGHT["E"]
+
+
+def test_matches_carry_the_rules_own_weight_not_the_tiers():
+    """A consumer that re-derived weight from tier would discard the override."""
+    match = next(
+        m
+        for m in iter_tell_matches("In conclusion, we shipped it.")
+        if m.rule_id == "summary-closer"
+    )
+    assert match.tier == "E"
+    assert match.weight == 0.15
+
+
+def test_rules_without_an_override_still_take_their_tier_weight():
+    rules = {r.id: r for r in load_rules()}
+    assert rules["chat-leftover"].weight == TIER_WEIGHT["E"]
+    assert rules["ai-vocabulary"].weight == TIER_WEIGHT["W"]
+
+
+# ------------------------------------- the "not only X but also Y" correlative
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "It is not only fast, but also simple.",
+        "Not only me but also my sister went.",
+        "She was not only the first to arrive but the last to leave.",
+        "I did not eat from the tree but from the bush.",
+        "We do not have to go to New Zealand but we could.",
+    ],
+)
+def test_ordinary_negation_and_the_correlative_are_not_tells(text):
+    """Measured, not assumed: these matched 61 human documents and zero machine spans.
+
+    `not only X but also Y` is a correlative conjunction and `not <verb> ... but` is
+    ordinary negation. Both were caught by the old patterns, neither is a model habit,
+    and advising a writer to remove them would have been bad advice -- which is why the
+    narrowing landed in the catalogue rather than only in this package's weights.
+    """
+    fired = {m.rule_id for m in iter_tell_matches(text)}
+    assert "contrastive-negation" not in fired, fired
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "It is not merely useful, but transformative.",
+        "This isn't just a tool, it's a new way of working.",
+        "The result was not simply good, but remarkable.",
+    ],
+)
+def test_the_antithesis_habit_is_still_caught(text):
+    """The narrowing removed false positives; it must not have removed the rule."""
+    assert "contrastive-negation" in {m.rule_id for m in iter_tell_matches(text)}

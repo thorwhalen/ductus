@@ -82,7 +82,7 @@ Then, in order:
 1. The strongest **mechanical** evidence (artifacts, seams, slips). It is the hardest to fake in either direction and should be weighted accordingly.
 2. The strongest **rhetorical** evidence, quoted.
 3. What is **ambiguous**, said plainly. Consistent curly apostrophes mean the text was composed outside the channel it was sent in; they say nothing about who composed it.
-4. The **limits** from the `ductus` skill — at least the editing confound and this tool's own measured false-positive rate (20.6% of human-written documents; 2–3% per sentence), including that its bias runs toward *formal, fluent* writing rather than simple writing.
+4. The **limits** from the `ductus` skill — at least the editing confound and this tool's own measured false-positive rate (6% of human-written documents; 0.4–2% per sentence, and about 10% for intermediate and advanced non-native writers), including that its bias runs toward *formal, fluent* writing rather than simple writing.
 5. **What would actually settle it**, which is almost never more detection. Usually: a sample of the same author's earlier writing to compare against, or asking them.
 
 ## If the text is private

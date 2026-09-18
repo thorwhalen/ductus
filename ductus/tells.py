@@ -57,9 +57,28 @@ class TellRule:
     tier: str
     message: str
     patterns: tuple[re.Pattern[str], ...]
+    #: An optional per-rule override of the tier's weight, read from ``weight:`` in
+    #: the catalogue. It exists because a rule's **tier** and its **evidential
+    #: weight** answer different questions, and a rule can be right about one and
+    #: wrong about the other: ``summary-closer`` catches "In conclusion," which is
+    #: reasonable style advice (``acquaint`` enforces tiers) and almost worthless as
+    #: evidence about *who wrote the text* (``ductus`` uses weights). Overriding the
+    #: weight changes this package only -- ``acquaint`` reads ``tier`` and never
+    #: ``weight``. Changing a tier is a two-package decision; see
+    #: ``misc/docs/document-verdict-decision.md``.
+    weight_override: float | None = None
 
     @property
     def weight(self) -> float:
+        """Evidential weight: the per-rule override when set, else the tier's.
+
+        >>> TellRule("x", "E", "m", (), weight_override=0.15).weight
+        0.15
+        >>> TellRule("x", "E", "m", ()).weight
+        0.5
+        """
+        if self.weight_override is not None:
+            return self.weight_override
         return TIER_WEIGHT.get(self.tier, 0.15)
 
 
@@ -73,6 +92,11 @@ class TellMatch:
     start: int
     end: int
     matched: str
+    #: The rule's evidential weight -- its per-rule override when it has one, else its
+    #: tier's. Carried here so a consumer never has to re-derive it from ``tier``, which
+    #: would silently discard the override. Defaulted so existing constructions still
+    #: work; :func:`iter_tell_matches` always fills it in.
+    weight: float = 0.0
 
 
 def _compile(pattern: str) -> re.Pattern[str]:
@@ -122,6 +146,7 @@ def load_rules(path: str | None = None) -> tuple[TellRule, ...]:
         TellRule(
             id=r["id"],
             tier=r["tier"],
+            weight_override=(float(r["weight"]) if r.get("weight") is not None else None),
             message=r["message"],
             patterns=tuple(_compile(p) for p in r["patterns"]),
         )
@@ -172,6 +197,7 @@ def iter_tell_matches(
                         start=offset + m.start(),
                         end=offset + m.end(),
                         matched=m.group(0),
+                        weight=rule.weight,
                     )
                 )
     found.sort(key=lambda m: (m.start, -(m.end - m.start)))

@@ -59,6 +59,13 @@ rules:
 
   - id: summary-closer
     tier: E
+    # Tier E for `acquaint`: as style advice, "In conclusion," is worth flagging even
+    # for a reader who tolerates AI-sounding prose. Weight 0.15 for `ductus`: measured
+    # against 350 human-written texts it implicated 25 of them and matched machine
+    # ground truth zero times, so as evidence about *authorship* it is worth almost
+    # nothing. Tier and weight answer different questions. See
+    # misc/docs/reducing-false-accusations.md.
+    weight: 0.15
     message: a closer that restates the message; end on the last real point
     patterns:
       - '\b(in conclusion|to sum up|in summary),'
@@ -96,8 +103,12 @@ rules:
     count_against: contrastive_max
     message: the "not X, but Y" construction; state Y
     patterns:
-      - '\b(is|are|was|were|it.s|this is|that.s)(n.t| not) (just|only|merely|simply|about)\b[^.!?\n]{0,80}?(\bit.s\b|\bbut\b|—)'
-      - '\bnot (just|only|merely) [^.!?\n]{1,60}?,? but\b'
+      # `only` was removed from both patterns: "not only X but (also) Y" is the
+      # ordinary English correlative, not the model's antithesis habit. It matched 19
+      # human-written documents and zero machine-written spans. Telling a writer to
+      # remove it is bad advice too, so this narrowing is right for `acquaint` as well.
+      - '\b(is|are|was|were|it.s|this is|that.s)(n.t| not) (just|merely|simply|about)\b[^.!?\n]{0,80}?(\bit.s\b|\bbut\b|—)'
+      - '\bnot (just|merely|simply) [^.!?\n]{1,60}?,? but\b'
 
   - id: ing-trailer
     tier: W
