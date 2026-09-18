@@ -40,10 +40,12 @@ It would be cheap to quote other people's numbers and not measure our own. Acros
 
 | | beginner | intermediate | advanced | native control |
 |---|---|---|---|---|
-| **per document** | 14.6% | 23.0% | 25.7% | 24.0% |
-| per sentence | 2.1% | 3.0% | 3.1% | 2.9% |
+| **per document** | 2.3% | 10.0% | 10.0% | 2.0% |
+| per sentence | 0.4% | 1.6% | 2.0% | 0.4% |
 
-Two things to take from that. **A single flagged sentence is much better evidence than a flagged document**, because a long document accumulates chances to trip one rule. And the bias here does **not** run the way the literature predicts: it tracks *formal, fluent, essayistic* writing rather than simple writing, because the deterministic detectors look for rhetorical constructions that good writers also use. The full measurement, including how much worse this was before Phase 2, is in [`phase-2-results.md`](misc/docs/phase-2-results.md).
+That is down from 20.6% overall, and the way it came down is worth knowing. Three rules were found to be matching **nothing** in machine-written text while implicating 86 human documents between them — two of them were simply broken, catching ordinary negation ("I did not eat from the tree but from the bush") and the everyday correlative ("not only fast, but also simple"). And the document-level verdict was rebuilt so that it stops treating *accumulation* as *corroboration*: a long document used to be more likely to be accused for being long. [`reducing-false-accusations.md`](misc/docs/reducing-false-accusations.md) has the per-rule table and what it cost (nothing: not one correctly-flagged machine segment was lost).
+
+Two things still to take from it. **A single flagged sentence is much better evidence than a flagged document.** And the bias does **not** run the way the literature predicts: it tracks *formal, fluent, essayistic* writing rather than simple writing, because the deterministic detectors look for rhetorical constructions that good writers also use. What remains is concentrated in intermediate and advanced non-native writers, at 10%.
 
 ## What it looks at
 

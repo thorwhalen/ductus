@@ -43,6 +43,7 @@ from collections.abc import Callable, Iterable, Iterator, Sequence
 from ductus.base import Report, Segment, Signal, Span
 from ductus.detect import detectors_from
 from ductus.score import density_aggregate as default_aggregate
+from ductus.score import roll_up
 from ductus.segment import spans_of
 
 __all__ = ["gauge", "iter_segments"]
@@ -93,9 +94,17 @@ def gauge(
 ) -> Report:
     """Score ``text`` and roll the segments up into a report.
 
-    The document-level lean is computed over *all* signals in the document, not
-    by averaging the segment leans -- averaging would let two short, heavily
-    flagged paragraphs outvote a long clean one.
+    The document-level verdict is computed from the **segment verdicts**, by
+    :func:`ductus.score.roll_up`, not from the pooled signals. Pooling every signal in
+    the document and scoring the heap is what made a long human document more likely
+    to be accused for being long: with a ~3% per-segment false-flag rate, the chance
+    that something fires grows with the segment count. What is asked instead is what
+    *fraction* of the segments carry directional evidence and which way they point --
+    length-normalised by construction. ``misc/docs/document-verdict-decision.md`` has
+    the argument and what it cost.
+
+    The segments themselves are untouched by this, and remain the better evidence: a
+    flagged sentence says much more than a flagged document.
 
     >>> r = gauge("It is important to note that this is a robust tapestry.")
     >>> r.document.lean > 0 and r.n_chars == 55
@@ -113,8 +122,10 @@ def gauge(
             extra_signals=extra_signals,
         )
     )
-    all_signals = tuple(s for seg in segments for s in seg.signals)
-    lean, strength, label = aggregate(all_signals, n_chars=len(text))
+    # The document verdict is a function of the SEGMENT verdicts, not of the pooled
+    # signals. Pooling is what made a long human document more likely to be accused
+    # for being long; see misc/docs/document-verdict-decision.md.
+    lean, strength, label = roll_up(segments, n_chars=len(text))
     document = Segment(
         span=Span.of(text, 0, len(text), level="document"),
         signals=(),

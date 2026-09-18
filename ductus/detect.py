@@ -140,8 +140,6 @@ def tells(text: str, span: Span) -> Iterator[Signal]:
     >>> list(tells(q, Span.of(q, 0, len(q))))
     []
     """
-    from ductus.tells import TIER_WEIGHT
-
     quoted = _quoted_ranges(span.quote)
 
     for m in iter_tell_matches(span.quote, offset=span.start):
@@ -151,7 +149,9 @@ def tells(text: str, span: Span) -> Iterator[Signal]:
         yield Signal(
             name=m.rule_id,
             direction="machine",
-            weight=TIER_WEIGHT.get(m.tier, 0.15),
+            # m.weight, not the tier's: a rule may override it, because a rule's tier
+            # and its evidential weight answer different questions. See tells.TellRule.
+            weight=m.weight,
             detector="tells",
             value=m.matched,
             note=f"tier {m.tier}: {m.message}",
@@ -267,8 +267,12 @@ def rhetoric(text: str, span: Span) -> Iterator[Signal]:
     s = span.quote
     low = s.lower()
 
+    # The intensifier is required. Without it this matched ordinary negation -- "not
+    # eat from the tree but", "not have to go to New Zealand but" -- on 42 human-written
+    # documents and zero machine-written spans. `only` is excluded for the same reason
+    # `contrastive-negation` excludes it: "not only X but Y" is the everyday correlative.
     for m in re.finditer(
-        r"\bnot (?:just |only |merely |simply )?[^,.;:]{2,45},? but\b", s, re.IGNORECASE
+        r"\bnot (?:just|merely|simply) [^,.;:]{2,45},? but\b", s, re.IGNORECASE
     ):
         yield Signal(
             "not-x-but-y",
