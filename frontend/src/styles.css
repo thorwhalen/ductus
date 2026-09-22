@@ -159,6 +159,14 @@ main {
   font-size: 13px;
   color: var(--warn);
 }
+.notice-banner {
+  max-width: 1280px;
+  margin: 0 auto 4px;
+  padding: 8px 20px;
+  font-size: 13px;
+  color: var(--warn);
+}
+
 
 /* -------------------------------------------------------------- the sidebar */
 
