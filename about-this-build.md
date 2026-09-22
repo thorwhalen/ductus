@@ -24,9 +24,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35731303853">35731303853</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35731315167">35731315167</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>2125488c5f9c47eb970a6832bccbac6f99603cb8</code> (in the history of the built commit) |
+| Event commit | <code>82f2a403d356da17268dcaaba2d73bd7864bce93</code> (in the history of the built commit) |
 
 ## Tools
 

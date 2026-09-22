@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "built_at": "2026-09-22T13:07:53Z",
+  "built_at": "2026-09-22T13:07:59Z",
   "package": {
     "name": "ductus",
     "version": "0.0.10",
@@ -21,12 +21,12 @@
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/ductus",
-    "sha": "2125488c5f9c47eb970a6832bccbac6f99603cb8",
+    "sha": "82f2a403d356da17268dcaaba2d73bd7864bce93",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "35731303853",
-    "run_url": "https://github.com/thorwhalen/ductus/actions/runs/35731303853",
+    "run_id": "35731315167",
+    "run_url": "https://github.com/thorwhalen/ductus/actions/runs/35731315167",
     "server_url": "https://github.com"
   },
   "tools": {
