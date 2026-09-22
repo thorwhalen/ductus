@@ -14,6 +14,7 @@ import { decorationsFor } from './decorations'
 import { changedRanges, mountEditor, toPos } from './editor'
 import { findingsPanel, limitsPanel, staleBanner, verdictPanel } from './panels'
 import { applyEdit, initialState, track, type State } from './state'
+import { ACCEPT, openTextFile, type FileLike } from './upload'
 
 // Empty base URL: every request is relative, which is correct both when uvicorn serves
 // the built assets itself and when Vite proxies them in development.
@@ -36,6 +37,8 @@ const editorHost = document.getElementById('editor')!
 const sidebar = document.getElementById('sidebar')!
 const readButton = document.getElementById('read') as HTMLButtonElement
 const sampleButton = document.getElementById('sample') as HTMLButtonElement
+const openButton = document.getElementById('open') as HTMLButtonElement
+const fileInput = document.getElementById('file') as HTMLInputElement
 const bannerHost = document.getElementById('banner')!
 const editorPane = document.getElementById('editor-pane')!
 
@@ -120,15 +123,58 @@ async function read() {
 }
 
 readButton.addEventListener('click', read)
-sampleButton.addEventListener('click', () => {
-  editor.setText(SAMPLE)
+/** Replace the whole text: the sample, or an opened file. */
+function loadText(text: string) {
+  editor.setText(text)
   // A wholesale replacement is not an edit: there is no correspondence between the old
   // findings and the new text, so there is nothing to map and nothing to mark stale.
   // Anything less than a full reset would leave findings pointing into a document they
   // were never computed against.
-  setState({ ...initialState, text: SAMPLE })
+  setState({ ...initialState, text })
   editor.focus()
+}
+
+sampleButton.addEventListener('click', () => loadText(SAMPLE))
+
+/**
+ * Opening a file is a paste you did not have to copy: read in the browser, put in the
+ * editor, sent nowhere until "Read". The byte-level rules live in upload.ts.
+ */
+async function openFile(file: FileLike) {
+  const opened = await openTextFile(file)
+  if (opened.ok) loadText(opened.text)
+  // A refused file leaves the current text alone; losing someone's edits because they
+  // picked the wrong file would be the worse surprise.
+  else setState({ ...state, status: 'error', error: opened.reason })
+}
+
+fileInput.accept = ACCEPT
+openButton.addEventListener('click', () => fileInput.click())
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files?.[0]
+  // Reset so picking the same file again still fires `change`.
+  fileInput.value = ''
+  if (file) void openFile(file)
 })
+
+// Dropping a file on the editor opens it. Only files are intercepted: dragging text
+// within or into the editor is ProseMirror's, and stays an ordinary edit.
+const carriesFiles = (event: DragEvent) =>
+  Array.from(event.dataTransfer?.types ?? []).includes('Files')
+editorPane.addEventListener('dragover', (event) => {
+  if (carriesFiles(event)) event.preventDefault()
+})
+editorPane.addEventListener(
+  'drop',
+  (event) => {
+    if (!carriesFiles(event)) return
+    event.preventDefault()
+    event.stopPropagation()
+    const file = event.dataTransfer?.files[0]
+    if (file) void openFile(file)
+  },
+  { capture: true },
+)
 
 // Ctrl/Cmd-Enter reads, because that is what every editor-with-a-run-button does.
 document.addEventListener('keydown', (event) => {
