@@ -1,4 +1,4 @@
-> built 2026-09-22 10:45 UTC from 1097e71 (main) · ductus 0.0.9. Details: build_info.json
+> built 2026-09-22 13:07 UTC from 82f2a40 (main) · ductus 0.0.10. Details: build_info.json
 
 # index.html.md
 
@@ -606,6 +606,8 @@ dead zone and so emits nothing.
 
 # ductus.data
 
+Bundled non-code data: the tells catalogue, agent skills, and the reader subagent.
+
 
 # _autosummary/ductus.detect.html.md
 
@@ -1158,19 +1160,19 @@ True
 
 ### Modules
 
-| [`base`](_autosummary/ductus.base.html.md#module-ductus.base)           | The data model: where a finding lives, what it claims, and how much it weighs.   |
-|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| [`core`](_autosummary/ductus.core.html.md#module-ductus.core)           | The core: stream segments, or take the whole report.                             |
-| [`curvature`](_autosummary/ductus.curvature.html.md#module-ductus.curvature) | Model-based detectors -- the `[local]` extra.                                    |
-| [`data`](_autosummary/ductus.data.html.md#module-ductus.data)           |                                                                                  |
-| [`detect`](_autosummary/ductus.detect.html.md#module-ductus.detect)       | The detectors -- the `detectors=` seam.                                          |
-| [`http`](_autosummary/ductus.http.html.md#module-ductus.http)           | The HTTP surface: the same verbs the CLI dispatches, served over HTTP.           |
-| [`mcp`](_autosummary/ductus.mcp.html.md#module-ductus.mcp)             | The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.        |
-| [`render`](_autosummary/ductus.render.html.md#module-ductus.render)       | Turning a report into something a person reads: JSON, Markdown, or HTML.         |
-| [`score`](_autosummary/ductus.score.html.md#module-ductus.score)         | Turning evidence into a lean -- the `aggregate=` seam.                           |
-| [`segment`](_autosummary/ductus.segment.html.md#module-ductus.segment)     | Cutting a text into the units that get scored -- the `segmenter=` seam.          |
-| [`tells`](_autosummary/ductus.tells.html.md#module-ductus.tells)         | The tells catalogue: named regular-expression patterns, tiered by confidence.    |
-| [`tools`](_autosummary/ductus.tools.html.md#module-ductus.tools)         | The verb SSOT: plain functions, JSON-ready in, JSON-ready out.                   |
+| [`base`](_autosummary/ductus.base.html.md#module-ductus.base)           | The data model: where a finding lives, what it claims, and how much it weighs.     |
+|------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| [`core`](_autosummary/ductus.core.html.md#module-ductus.core)           | The core: stream segments, or take the whole report.                               |
+| [`curvature`](_autosummary/ductus.curvature.html.md#module-ductus.curvature) | Model-based detectors -- the `[local]` extra.                                      |
+| [`data`](_autosummary/ductus.data.html.md#module-ductus.data)           | Bundled non-code data: the tells catalogue, agent skills, and the reader subagent. |
+| [`detect`](_autosummary/ductus.detect.html.md#module-ductus.detect)       | The detectors -- the `detectors=` seam.                                            |
+| [`http`](_autosummary/ductus.http.html.md#module-ductus.http)           | The HTTP surface: the same verbs the CLI dispatches, served over HTTP.             |
+| [`mcp`](_autosummary/ductus.mcp.html.md#module-ductus.mcp)             | The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.          |
+| [`render`](_autosummary/ductus.render.html.md#module-ductus.render)       | Turning a report into something a person reads: JSON, Markdown, or HTML.           |
+| [`score`](_autosummary/ductus.score.html.md#module-ductus.score)         | Turning evidence into a lean -- the `aggregate=` seam.                             |
+| [`segment`](_autosummary/ductus.segment.html.md#module-ductus.segment)     | Cutting a text into the units that get scored -- the `segmenter=` seam.            |
+| [`tells`](_autosummary/ductus.tells.html.md#module-ductus.tells)         | The tells catalogue: named regular-expression patterns, tiered by confidence.      |
+| [`tools`](_autosummary/ductus.tools.html.md#module-ductus.tools)         | The verb SSOT: plain functions, JSON-ready in, JSON-ready out.                     |
 
 
 # _autosummary/ductus.http.html.md
@@ -2056,18 +2058,18 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-22 10:45 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/1097e714321a2096f343441e0f97fb922565696b"><code>1097e71</code></a> on branch <code>main</code>, for **ductus 0.0.9** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-22 13:07 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/82f2a403d356da17268dcaaba2d73bd7864bce93"><code>82f2a40</code></a> on branch <code>main</code>, for **ductus 0.0.10** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.9) is behind the latest release on PyPI (0.0.10): `pip install ductus` gives newer code than these docs describe.
+- The documented version (0.0.10) is behind the latest release on PyPI (0.0.11): `pip install ductus` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/1097e714321a2096f343441e0f97fb922565696b"><code>1097e714321a2096f343441e0f97fb922565696b</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/82f2a403d356da17268dcaaba2d73bd7864bce93"><code>82f2a403d356da17268dcaaba2d73bd7864bce93</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -2078,9 +2080,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35717526304">35717526304</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35731303853">35731303853</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>1097e714321a2096f343441e0f97fb922565696b</code> (in the history of the built commit) |
+| Event commit | <code>2125488c5f9c47eb970a6832bccbac6f99603cb8</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -2105,13 +2107,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.10/">0.0.10</a>, newer than the documented version (0.0.9).
+Latest release: <a href="https://pypi.org/project/ductus/0.0.11/">0.0.11</a>, newer than the documented version (0.0.10).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout 1097e714321a2096f343441e0f97fb922565696b
+git checkout 82f2a403d356da17268dcaaba2d73bd7864bce93
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

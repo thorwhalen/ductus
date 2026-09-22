@@ -11,7 +11,7 @@
 - [ductus.base](_autosummary/ductus.base.html.md): The data model: where a finding lives, what it claims, and how much it weighs.
 - [ductus.core](_autosummary/ductus.core.html.md): The core: stream segments, or take the whole report. Everything else is a surface.
 - [ductus.curvature](_autosummary/ductus.curvature.html.md): Model-based detectors – the &#96;&#91;local&#93;&#96; extra. Two more functions of the same shape.
-- [ductus.data](_autosummary/ductus.data.html.md): Page content
+- [ductus.data](_autosummary/ductus.data.html.md): Bundled non-code data: the tells catalogue, agent skills, and the reader subagent.
 - [ductus.detect](_autosummary/ductus.detect.html.md): The detectors – the &#96;detectors=&#96; seam. Each one turns a span into evidence.
 - [ductus.http](_autosummary/ductus.http.html.md): The HTTP surface: the same verbs the CLI dispatches, served over HTTP.
 - [ductus.mcp](_autosummary/ductus.mcp.html.md): The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.
@@ -21,7 +21,7 @@
 - [ductus.tells](_autosummary/ductus.tells.html.md): The tells catalogue: named regular-expression patterns, tiered by confidence.
 - [ductus.tools](_autosummary/ductus.tools.html.md): The verb SSOT: plain functions, JSON-ready in, JSON-ready out.
 - [For AI agents](ai-agents.html.md): &#96;ductus&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-09-22 10:45 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-09-22 13:07 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
 
 ## Optional
 

@@ -355,16 +355,16 @@ True
 
 ### Modules
 
-| [`base`](ductus.base.md#module-ductus.base)           | The data model: where a finding lives, what it claims, and how much it weighs.   |
-|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| [`core`](ductus.core.md#module-ductus.core)           | The core: stream segments, or take the whole report.                             |
-| [`curvature`](ductus.curvature.md#module-ductus.curvature) | Model-based detectors -- the `[local]` extra.                                    |
-| [`data`](ductus.data.md#module-ductus.data)           |                                                                                  |
-| [`detect`](ductus.detect.md#module-ductus.detect)       | The detectors -- the `detectors=` seam.                                          |
-| [`http`](ductus.http.md#module-ductus.http)           | The HTTP surface: the same verbs the CLI dispatches, served over HTTP.           |
-| [`mcp`](ductus.mcp.md#module-ductus.mcp)             | The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.        |
-| [`render`](ductus.render.md#module-ductus.render)       | Turning a report into something a person reads: JSON, Markdown, or HTML.         |
-| [`score`](ductus.score.md#module-ductus.score)         | Turning evidence into a lean -- the `aggregate=` seam.                           |
-| [`segment`](ductus.segment.md#module-ductus.segment)     | Cutting a text into the units that get scored -- the `segmenter=` seam.          |
-| [`tells`](ductus.tells.md#module-ductus.tells)         | The tells catalogue: named regular-expression patterns, tiered by confidence.    |
-| [`tools`](ductus.tools.md#module-ductus.tools)         | The verb SSOT: plain functions, JSON-ready in, JSON-ready out.                   |
+| [`base`](ductus.base.md#module-ductus.base)           | The data model: where a finding lives, what it claims, and how much it weighs.     |
+|------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| [`core`](ductus.core.md#module-ductus.core)           | The core: stream segments, or take the whole report.                               |
+| [`curvature`](ductus.curvature.md#module-ductus.curvature) | Model-based detectors -- the `[local]` extra.                                      |
+| [`data`](ductus.data.md#module-ductus.data)           | Bundled non-code data: the tells catalogue, agent skills, and the reader subagent. |
+| [`detect`](ductus.detect.md#module-ductus.detect)       | The detectors -- the `detectors=` seam.                                            |
+| [`http`](ductus.http.md#module-ductus.http)           | The HTTP surface: the same verbs the CLI dispatches, served over HTTP.             |
+| [`mcp`](ductus.mcp.md#module-ductus.mcp)             | The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.          |
+| [`render`](ductus.render.md#module-ductus.render)       | Turning a report into something a person reads: JSON, Markdown, or HTML.           |
+| [`score`](ductus.score.md#module-ductus.score)         | Turning evidence into a lean -- the `aggregate=` seam.                             |
+| [`segment`](ductus.segment.md#module-ductus.segment)     | Cutting a text into the units that get scored -- the `segmenter=` seam.            |
+| [`tells`](ductus.tells.md#module-ductus.tells)         | The tells catalogue: named regular-expression patterns, tiered by confidence.      |
+| [`tools`](ductus.tools.md#module-ductus.tools)         | The verb SSOT: plain functions, JSON-ready in, JSON-ready out.                     |
