@@ -89,6 +89,9 @@ def test_every_offset_indexes_the_text_even_when_lowercasing_changes_its_length(
     for span in spans:
         assert text[span.start : span.end] == span.quote
     pivots = [
-        sig for seg in report.segments for sig in seg.signals if sig.name == "concede-pivot"
+        sig
+        for seg in report.segments
+        for sig in seg.signals
+        if sig.name == "concede-pivot"
     ]
     assert all(p.span.quote.lower().startswith("i ") for p in pivots)
