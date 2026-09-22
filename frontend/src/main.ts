@@ -11,7 +11,8 @@ import './styles.css'
 import { DuctusClient } from './generated/client'
 import type { Report } from './generated/report'
 import { decorationsFor } from './decorations'
-import { changedRanges, mountEditor, toPos } from './editor'
+import { changedRanges, mountEditor } from './editor'
+import { positionsIn } from './offsets'
 import { findingsPanel, limitsPanel, staleBanner, verdictPanel } from './panels'
 import { applyEdit, initialState, track, type State } from './state'
 import { ACCEPT, openTextFile, type FileLike } from './upload'
@@ -135,7 +136,8 @@ async function read() {
       setState({ ...state, status: state.report ? 'scored' : 'empty' })
       return
     }
-    setState(track(report, text, toPos))
+    // Server offsets are Python code points; the editor counts UTF-16 units (#11).
+    setState(track(report, text, positionsIn(text)))
   } catch (error) {
     setState({
       ...state,

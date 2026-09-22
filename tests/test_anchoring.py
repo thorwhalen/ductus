@@ -71,3 +71,24 @@ def test_segments_tile_the_text_without_overlapping():
     spans = [s.span for s in report.segments]
     for a, b in zip(spans, spans[1:]):
         assert a.end <= b.start
+
+
+def test_every_offset_indexes_the_text_even_when_lowercasing_changes_its_length():
+    """Found while fixing ductus#11: a detector that matched against ``s.lower()``
+    reported offsets into the lowered string. ``'İ'.lower()`` is two code points, so
+    every finding after one was shifted -- the same symptom as #11, server-side."""
+    text = (
+        "İİİİ I really do appreciate the effort here. However, we need changes.\n\n"
+        "İstanbul office: I value the draft. That said, it is late."
+    )
+    report = gauge(text)
+    spans = [sig.span for seg in report.segments for sig in seg.signals if sig.span]
+    assert any(
+        sig.name == "concede-pivot" for seg in report.segments for sig in seg.signals
+    ), "the fixture must exercise the detector it pins"
+    for span in spans:
+        assert text[span.start : span.end] == span.quote
+    pivots = [
+        sig for seg in report.segments for sig in seg.signals if sig.name == "concede-pivot"
+    ]
+    assert all(p.span.quote.lower().startswith("i ") for p in pivots)

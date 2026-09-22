@@ -311,17 +311,21 @@ def rhetoric(text: str, span: Span) -> Iterator[Signal]:
             )
             break
 
+    # Matched against the original text, case-insensitively -- never against
+    # ``low``: ``str.lower()`` can change length ('İ' becomes two code points), and
+    # an offset found in ``low`` then points at the wrong characters of ``text``.
     for m in re.finditer(
         r"\bi (?:do |really do |genuinely )?(?:value|appreciate|respect|understand)\b[^.]{0,80}\.\s*"
         r"(?:at the same time|that said|however|but)\b",
-        low,
+        s,
+        re.IGNORECASE,
     ):
         yield Signal(
             "concede-pivot",
             "machine",
             0.35,
             "rhetoric",
-            m.group()[:70],
+            m.group().lower()[:70],
             "concession immediately followed by a pivot -- the diplomatic-feedback move",
             _sub(text, span, m.start(), m.end()),
         )
