@@ -67,8 +67,20 @@ def test_hue_carries_score_and_the_lane_carries_overlap(html):
 
 
 def test_the_page_states_its_own_limits(html):
-    for phrase in ("not a verdict", "non-native English", "Do not use this to accuse"):
+    # "non-native English" used to be in this list. Phase 2 measured the opposite --
+    # the bias runs toward formal, fluent prose and the native-speaker control was the
+    # most-accused group -- and the page now says so. Repeating the field's warning
+    # about a bias this package does not have is not honesty, it is borrowed caution.
+    for phrase in (
+        "not a verdict",
+        "one in sixteen",
+        "formal, fluent prose",
+        "Do not use this to accuse",
+    ):
         assert phrase in html
+    assert "non-native" not in html, "the corrected claim must not creep back"
+    # Still no percentage anywhere near a verdict about one document: the measured
+    # error rate is stated as a natural frequency instead.
     assert "%" not in re.search(r"<footer>(.*?)</footer>", html, re.S).group(1)
 
 
