@@ -336,6 +336,23 @@
 <p>Same rule as MCP, one layer further: <code class="docutils literal notranslate"><span class="pre">ductus.http.ROUTED_FUNCS</span></code> is <em>derived</em> from the CLI’s list, so a third surface still means no second implementation and no parity test. The typed TypeScript client the frontend imports is generated from this app’s own OpenAPI (<code class="docutils literal notranslate"><span class="pre">ductus.http.export_client()</span></code>), so a changed Python signature becomes a TypeScript type error rather than a runtime surprise.</p>
 <p><strong>This surface found something the other two could not.</strong> <code class="docutils literal notranslate"><span class="pre">gauge(source=...)</span></code> reads a file when the string names one, and <code class="docutils literal notranslate"><span class="pre">gauge(out=...)</span></code> writes one. That is exactly right when you typed the command yourself — and an arbitrary file read and an arbitrary file write when the caller is a stranger. Neither the CLI nor a local stdio MCP host can see it, because on those surfaces it is not a bug. The verbs now declare which of their parameters address the filesystem (<code class="docutils literal notranslate"><span class="pre">@host_paths(source="read",</span> <span class="pre">out="write")</span></code>, a sibling of the existing <code class="docutils literal notranslate"><span class="pre">@host_mutating</span></code>), and the HTTP adapter refuses them by reading that declaration rather than by knowing anything about <code class="docutils literal notranslate"><span class="pre">gauge</span></code>. <code class="docutils literal notranslate"><span class="pre">mk_app(guard_host_paths=False)</span></code> turns it off for a loopback service you run for yourself.</p>
 </section>
+<section id="the-editor-score-edit-score-again">
+<h2>The editor: score, edit, score again<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#the-editor-score-edit-score-again" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#the-editor-score-edit-score-again'">¶</a></h2>
+<p>An example frontend lives in <a class="reference internal" href="#frontend/"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">frontend/</span></code></span></a> — paste a text, read it, edit it, read it again, with every finding anchored to the characters that carry it.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pip<span class="w"> </span>install<span class="w"> </span><span class="s1">'ductus[http]'</span>
+</span><span id="line-2"><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>install<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>build
+</span><span id="line-3">ductus-http<span class="w">                     </span><span class="c1"># serves the UI and the API from one origin</span>
+</span></code></pre></div>
+</div>
+<p>Three things decide its design, and the first two are correctness rather than taste:</p>
+<ul class="simple">
+<li><p><strong>The editor does not tidy the text.</strong> A normal rich-text editor turns <code class="docutils literal notranslate"><span class="pre">'</span></code> into <code class="docutils literal notranslate"><span class="pre">’</span></code>, trims trailing whitespace and collapses lone newlines. This package reads all three as evidence, and <code class="docutils literal notranslate"><span class="pre">mixed-apostrophes</span></code> and <code class="docutils literal notranslate"><span class="pre">trailing-whitespace</span></code> argue for a <strong>human</strong>. An editor that quietly normalised the text would be deleting the evidence that exonerates people. So the ProseMirror schema is one whitespace-preserving block, which also makes a plain offset <code class="docutils literal notranslate"><span class="pre">o</span></code> exactly position <code class="docutils literal notranslate"><span class="pre">o</span> <span class="pre">+</span> <span class="pre">1</span></code>.</p></li>
+<li><p><strong>An edit invalidates, it never re-anchors.</strong> Positions are kept exact through every keystroke (ProseMirror’s <code class="docutils literal notranslate"><span class="pre">Mapping</span></code>); validity is not inherited. A finding whose text has changed goes hatched and reads “unverified” until you read again — re-attaching an old score to new text is a false claim, not a stale cache. A finding is invalidated when the edit touches its characters <em>or anywhere in its segment</em>, because segment scores are per unit of text; the document verdict is invalidated by any edit at all.</p></li>
+<li><p><strong>The TypeScript is generated from the Python.</strong> <code class="docutils literal notranslate"><span class="pre">frontend/src/generated/client.ts</span></code> from the service’s OpenAPI, <code class="docutils literal notranslate"><span class="pre">report.ts</span></code> from the dataclasses in <code class="docutils literal notranslate"><span class="pre">base.py</span></code>. <code class="docutils literal notranslate"><span class="pre">tests/test_generated_sources.py</span></code> fails if they drift, so a renamed field is a failing <code class="docutils literal notranslate"><span class="pre">pytest</span></code> run rather than an <code class="docutils literal notranslate"><span class="pre">undefined</span></code> in a browser.</p></li>
+</ul>
+<p>The stack is Vite + TypeScript + ProseMirror and deliberately no framework, no state library and no persistence. Why, and what each of those costs, is in <a class="reference internal" href="#misc/docs/frontend-stack-decision.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">misc/docs/frontend-stack-decision.md</span></code></span></a>.</p>
+<p><strong>The interface holds the same line the reports do.</strong> No percentage anywhere. The measured false-positive rate sits beside the verdict rather than in a footer, loudest in the one case where the verdict is a claim about a person — because an interface makes a verdict feel authoritative in a way a paragraph does not, and the person most likely to be wronged by this page is the careful essayist whose prose it just lit up.</p>
+</section>
 <section id="seams">
 <h2>Seams<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#seams" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#seams'">¶</a></h2>
 <p>Three, each one keyword argument, each defaulting to something that genuinely works:</p>
@@ -380,7 +397,7 @@
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-22 10:25 UTC from <a href="https://github.com/thorwhalen/ductus/commit/5b4381f92db0936adad62ca78a29cb33635467fc">5b4381f</a> (main) · ductus 0.0.8 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-22 10:45 UTC from <a href="https://github.com/thorwhalen/ductus/commit/1097e714321a2096f343441e0f97fb922565696b">1097e71</a> (main) · ductus 0.0.9 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -397,6 +414,7 @@
 <li><a :data-current="activeSection === '#agent-skills'" class="reference internal" href="#agent-skills">Agent skills</a></li>
 <li><a :data-current="activeSection === '#mcp'" class="reference internal" href="#mcp">MCP</a></li>
 <li><a :data-current="activeSection === '#http'" class="reference internal" href="#http">HTTP</a></li>
+<li><a :data-current="activeSection === '#the-editor-score-edit-score-again'" class="reference internal" href="#the-editor-score-edit-score-again">The editor: score, edit, score again</a></li>
 <li><a :data-current="activeSection === '#seams'" class="reference internal" href="#seams">Seams</a></li>
 <li><a :data-current="activeSection === '#spans-survive-editing'" class="reference internal" href="#spans-survive-editing">Spans survive editing</a></li>
 <li><a :data-current="activeSection === '#relationship-to-deslop'" class="reference internal" href="#relationship-to-deslop">Relationship to <code class="docutils literal notranslate"><span class="pre">deslop</span></code></a></li>
@@ -415,7 +433,7 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=53b53b71"></script>
+<script src="_static/documentation_options.js?v=f7cdbf68"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

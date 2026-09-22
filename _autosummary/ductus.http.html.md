@@ -45,6 +45,7 @@ False
 
 | [`export_client`](#ductus.http.export_client)(\*[, class_name, base_url, app])   | The TypeScript client for this surface, generated from its own OpenAPI.   |
 |---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| [`export_types`](#ductus.http.export_types)()                                   | TypeScript interfaces for the report shape, read off the dataclasses.     |
 | [`main`](#ductus.http.main)()                                           | Serve on `127.0.0.1:8000`.                                                |
 | [`mk_app`](#ductus.http.mk_app)(\*[, funcs, title, description, ...])     | Build a FastAPI app serving `funcs`, one POST endpoint per verb.          |
 
@@ -74,6 +75,29 @@ correct when the app and the UI are served from the same origin, as
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
+### ductus.http.export_types()
+
+TypeScript interfaces for the report shape, read off the dataclasses.
+
+`gauge(format="json")` serialises a [`Report`](ductus.base.html.md#ductus.base.Report) with
+`dataclasses.asdict`, so the wire shape *is* the dataclass shape. Generating the
+TypeScript from the same definitions is what stops a renamed field from becoming a
+silent `undefined` in a browser rather than a failing test.
+
+The generated client types `gauge` as returning `string`, because it does –
+a JSON document. [`export_types()`](#ductus.http.export_types) supplies what is inside it.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+```pycon
+>>> ts = export_types()
+>>> "export interface Report {" in ts and "text_sha256: string;" in ts
+True
+>>> "signals: Signal[];" in ts
+True
+```
+
 ### ductus.http.main()
 
 Serve on `127.0.0.1:8000`. The `ductus-http` console script.
@@ -96,9 +120,11 @@ convenience it is at a CLI. It defaults to on, because the safe reading of an
 ambiguous deployment is the one that does not hand out the filesystem.
 
 `ui` is a directory of built frontend assets to serve at `/`. When it is
-`None` the default location is used if it exists and is skipped if it does not,
-so the API works with no frontend built and the two are served same-origin when
-one is – which is also what lets a browser test drive it without CORS.
+`None`, `DUCTUS_UI_DIR` or `frontend/dist` beside the package is used if it
+exists and skipped if it does not – so the API works with no frontend built, and
+the two are served same-origin when one is, which is also what lets a browser test
+drive the whole thing without CORS. A directory named explicitly and not found is
+an error; only the *default* is allowed to be silently absent.
 
 Extra keyword arguments pass straight through to `qh.mk_app`.
 

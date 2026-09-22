@@ -16,6 +16,7 @@ ductus.http
    .. autosummary::
    
       export_client
+      export_types
       main
       mk_app
    

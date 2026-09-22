@@ -171,10 +171,13 @@ the verb itself rather than by this module knowing anything about <code class="d
 <tr class="row-odd"><td><p><a class="reference internal" href="#ductus.http.export_client" title="ductus.http.export_client"><code class="xref py py-obj docutils literal notranslate"><span class="pre">export_client</span></code></a>(*[, class_name, base_url, app])</p></td>
 <td><p>The TypeScript client for this surface, generated from its own OpenAPI.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#ductus.http.main" title="ductus.http.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#ductus.http.export_types" title="ductus.http.export_types"><code class="xref py py-obj docutils literal notranslate"><span class="pre">export_types</span></code></a>()</p></td>
+<td><p>TypeScript interfaces for the report shape, read off the dataclasses.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.http.main" title="ductus.http.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
 <td><p>Serve on <code class="docutils literal notranslate"><span class="pre">127.0.0.1:8000</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.http.mk_app" title="ductus.http.mk_app"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mk_app</span></code></a>(*[, funcs, title, description, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#ductus.http.mk_app" title="ductus.http.mk_app"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mk_app</span></code></a>(*[, funcs, title, description, ...])</p></td>
 <td><p>Build a FastAPI app serving <code class="docutils literal notranslate"><span class="pre">funcs</span></code>, one POST endpoint per verb.</p></td>
 </tr>
 </tbody>
@@ -210,6 +213,29 @@ correct when the app and the UI are served from the same origin, as
 </dl>
 </dd></dl>
 <dl class="py function">
+<dt class="sig sig-object py" id="ductus.http.export_types">
+<span class="sig-prename descclassname"><span class="pre">ductus.http.</span></span><span class="sig-name descname"><span class="pre">export_types</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/http.html#export_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.http.export_types" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.http.export_types'">¶</a></dt>
+<dd><p>TypeScript interfaces for the report shape, read off the dataclasses.</p>
+<p><code class="docutils literal notranslate"><span class="pre">gauge(format="json")</span></code> serialises a <a class="reference internal" href="ductus.base.html#ductus.base.Report" title="ductus.base.Report"><code class="xref py py-class docutils literal notranslate"><span class="pre">Report</span></code></a> with
+<code class="docutils literal notranslate"><span class="pre">dataclasses.asdict</span></code>, so the wire shape <em>is</em> the dataclass shape. Generating the
+TypeScript from the same definitions is what stops a renamed field from becoming a
+silent <code class="docutils literal notranslate"><span class="pre">undefined</span></code> in a browser rather than a failing test.</p>
+<p>The generated client types <code class="docutils literal notranslate"><span class="pre">gauge</span></code> as returning <code class="docutils literal notranslate"><span class="pre">string</span></code>, because it does –
+a JSON document. <a class="reference internal" href="#ductus.http.export_types" title="ductus.http.export_types"><code class="xref py py-func docutils literal notranslate"><span class="pre">export_types()</span></code></a> supplies what is inside it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span></p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">export_types</span><span class="p">()</span>
+</span><span id="line-2"><span class="gp">&gt;&gt;&gt; </span><span class="s2">"export interface Report {"</span> <span class="ow">in</span> <span class="n">ts</span> <span class="ow">and</span> <span class="s2">"text_sha256: string;"</span> <span class="ow">in</span> <span class="n">ts</span>
+</span><span id="line-3"><span class="go">True</span>
+</span><span id="line-4"><span class="gp">&gt;&gt;&gt; </span><span class="s2">"signals: Signal[];"</span> <span class="ow">in</span> <span class="n">ts</span>
+</span><span id="line-5"><span class="go">True</span>
+</span></code></pre></div>
+</div>
+</dd></dl>
+<dl class="py function">
 <dt class="sig sig-object py" id="ductus.http.main">
 <span class="sig-prename descclassname"><span class="pre">ductus.http.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/http.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.http.main" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.http.main'">¶</a></dt>
 <dd><p>Serve on <code class="docutils literal notranslate"><span class="pre">127.0.0.1:8000</span></code>. The <code class="docutils literal notranslate"><span class="pre">ductus-http</span></code> console script.</p>
@@ -232,9 +258,11 @@ bound to loopback for your own use, where reading a local file by name is the
 convenience it is at a CLI. It defaults to on, because the safe reading of an
 ambiguous deployment is the one that does not hand out the filesystem.</p>
 <p><code class="docutils literal notranslate"><span class="pre">ui</span></code> is a directory of built frontend assets to serve at <code class="docutils literal notranslate"><span class="pre">/</span></code>. When it is
-<code class="docutils literal notranslate"><span class="pre">None</span></code> the default location is used if it exists and is skipped if it does not,
-so the API works with no frontend built and the two are served same-origin when
-one is – which is also what lets a browser test drive it without CORS.</p>
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">DUCTUS_UI_DIR</span></code> or <code class="docutils literal notranslate"><span class="pre">frontend/dist</span></code> beside the package is used if it
+exists and skipped if it does not – so the API works with no frontend built, and
+the two are served same-origin when one is, which is also what lets a browser test
+drive the whole thing without CORS. A directory named explicitly and not found is
+an error; only the <em>default</em> is allowed to be silently absent.</p>
 <p>Extra keyword arguments pass straight through to <code class="docutils literal notranslate"><span class="pre">qh.mk_app</span></code>.</p>
 <p>Raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ImportError" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImportError</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> with an actionable message when the extra is missing.</p>
 <dl class="field-list simple">
@@ -247,6 +275,7 @@ one is – which is also what lets a browser test drive it without CORS.</p>
 <li><a :data-current="activeSection === '#ductus.http.DESCRIPTION'" class="reference internal" href="#ductus.http.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">DESCRIPTION</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.http.ROUTED_FUNCS'" class="reference internal" href="#ductus.http.ROUTED_FUNCS"><code class="docutils literal notranslate"><span class="pre">ROUTED_FUNCS</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.http.export_client'" class="reference internal" href="#ductus.http.export_client"><code class="docutils literal notranslate"><span class="pre">export_client()</span></code></a></li>
+<li><a :data-current="activeSection === '#ductus.http.export_types'" class="reference internal" href="#ductus.http.export_types"><code class="docutils literal notranslate"><span class="pre">export_types()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.http.main'" class="reference internal" href="#ductus.http.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.http.mk_app'" class="reference internal" href="#ductus.http.mk_app"><code class="docutils literal notranslate"><span class="pre">mk_app()</span></code></a></li>
 </ul>
@@ -262,7 +291,7 @@ one is – which is also what lets a browser test drive it without CORS.</p>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=53b53b71"></script>
+<script src="../_static/documentation_options.js?v=f7cdbf68"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

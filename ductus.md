@@ -1,4 +1,4 @@
-> built 2026-09-22 10:25 UTC from 5b4381f (main) · ductus 0.0.8. Details: build_info.json
+> built 2026-09-22 10:45 UTC from 1097e71 (main) · ductus 0.0.9. Details: build_info.json
 
 # index.html.md
 
@@ -162,6 +162,26 @@ curl -s localhost:8000/gauge -H 'content-type: application/json' \
 Same rule as MCP, one layer further: `ductus.http.ROUTED_FUNCS` is *derived* from the CLI’s list, so a third surface still means no second implementation and no parity test. The typed TypeScript client the frontend imports is generated from this app’s own OpenAPI (`ductus.http.export_client()`), so a changed Python signature becomes a TypeScript type error rather than a runtime surprise.
 
 **This surface found something the other two could not.** `gauge(source=...)` reads a file when the string names one, and `gauge(out=...)` writes one. That is exactly right when you typed the command yourself — and an arbitrary file read and an arbitrary file write when the caller is a stranger. Neither the CLI nor a local stdio MCP host can see it, because on those surfaces it is not a bug. The verbs now declare which of their parameters address the filesystem (`@host_paths(source="read", out="write")`, a sibling of the existing `@host_mutating`), and the HTTP adapter refuses them by reading that declaration rather than by knowing anything about `gauge`. `mk_app(guard_host_paths=False)` turns it off for a loopback service you run for yourself.
+
+## The editor: score, edit, score again
+
+An example frontend lives in [`frontend/`]() — paste a text, read it, edit it, read it again, with every finding anchored to the characters that carry it.
+
+```bash
+pip install 'ductus[http]'
+cd frontend && npm install && npm run build
+ductus-http                     # serves the UI and the API from one origin
+```
+
+Three things decide its design, and the first two are correctness rather than taste:
+
+- **The editor does not tidy the text.** A normal rich-text editor turns `'` into `’`, trims trailing whitespace and collapses lone newlines. This package reads all three as evidence, and `mixed-apostrophes` and `trailing-whitespace` argue for a **human**. An editor that quietly normalised the text would be deleting the evidence that exonerates people. So the ProseMirror schema is one whitespace-preserving block, which also makes a plain offset `o` exactly position `o + 1`.
+- **An edit invalidates, it never re-anchors.** Positions are kept exact through every keystroke (ProseMirror’s `Mapping`); validity is not inherited. A finding whose text has changed goes hatched and reads “unverified” until you read again — re-attaching an old score to new text is a false claim, not a stale cache. A finding is invalidated when the edit touches its characters *or anywhere in its segment*, because segment scores are per unit of text; the document verdict is invalidated by any edit at all.
+- **The TypeScript is generated from the Python.** `frontend/src/generated/client.ts` from the service’s OpenAPI, `report.ts` from the dataclasses in `base.py`. `tests/test_generated_sources.py` fails if they drift, so a renamed field is a failing `pytest` run rather than an `undefined` in a browser.
+
+The stack is Vite + TypeScript + ProseMirror and deliberately no framework, no state library and no persistence. Why, and what each of those costs, is in [`misc/docs/frontend-stack-decision.md`]().
+
+**The interface holds the same line the reports do.** No percentage anywhere. The measured false-positive rate sits beside the verdict rather than in a footer, loudest in the one case where the verdict is a claim about a person — because an interface makes a verdict feel authoritative in a way a paragraph does not, and the person most likely to be wronged by this page is the careful essayist whose prose it just lit up.
 
 ## Seams
 
@@ -1202,6 +1222,7 @@ False
 
 | [`export_client`](_autosummary/ductus.http.html.md#ductus.http.export_client)(\*[, class_name, base_url, app])   | The TypeScript client for this surface, generated from its own OpenAPI.   |
 |---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| [`export_types`](_autosummary/ductus.http.html.md#ductus.http.export_types)()                                   | TypeScript interfaces for the report shape, read off the dataclasses.     |
 | [`main`](_autosummary/ductus.http.html.md#ductus.http.main)()                                           | Serve on `127.0.0.1:8000`.                                                |
 | [`mk_app`](_autosummary/ductus.http.html.md#ductus.http.mk_app)(\*[, funcs, title, description, ...])     | Build a FastAPI app serving `funcs`, one POST endpoint per verb.          |
 
@@ -1231,6 +1252,29 @@ correct when the app and the UI are served from the same origin, as
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
+### ductus.http.export_types()
+
+TypeScript interfaces for the report shape, read off the dataclasses.
+
+`gauge(format="json")` serialises a [`Report`](_autosummary/ductus.base.html.md#ductus.base.Report) with
+`dataclasses.asdict`, so the wire shape *is* the dataclass shape. Generating the
+TypeScript from the same definitions is what stops a renamed field from becoming a
+silent `undefined` in a browser rather than a failing test.
+
+The generated client types `gauge` as returning `string`, because it does –
+a JSON document. [`export_types()`](_autosummary/ductus.http.html.md#ductus.http.export_types) supplies what is inside it.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+```pycon
+>>> ts = export_types()
+>>> "export interface Report {" in ts and "text_sha256: string;" in ts
+True
+>>> "signals: Signal[];" in ts
+True
+```
+
 ### ductus.http.main()
 
 Serve on `127.0.0.1:8000`. The `ductus-http` console script.
@@ -1253,9 +1297,11 @@ convenience it is at a CLI. It defaults to on, because the safe reading of an
 ambiguous deployment is the one that does not hand out the filesystem.
 
 `ui` is a directory of built frontend assets to serve at `/`. When it is
-`None` the default location is used if it exists and is skipped if it does not,
-so the API works with no frontend built and the two are served same-origin when
-one is – which is also what lets a browser test drive it without CORS.
+`None`, `DUCTUS_UI_DIR` or `frontend/dist` beside the package is used if it
+exists and skipped if it does not – so the API works with no frontend built, and
+the two are served same-origin when one is, which is also what lets a browser test
+drive the whole thing without CORS. A directory named explicitly and not found is
+an error; only the *default* is allowed to be silently absent.
 
 Extra keyword arguments pass straight through to `qh.mk_app`.
 
@@ -2010,18 +2056,18 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-22 10:25 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/5b4381f92db0936adad62ca78a29cb33635467fc"><code>5b4381f</code></a> on branch <code>main</code>, for **ductus 0.0.8** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-22 10:45 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/1097e714321a2096f343441e0f97fb922565696b"><code>1097e71</code></a> on branch <code>main</code>, for **ductus 0.0.9** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.8) is behind the latest release on PyPI (0.0.9): `pip install ductus` gives newer code than these docs describe.
+- The documented version (0.0.9) is behind the latest release on PyPI (0.0.10): `pip install ductus` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/5b4381f92db0936adad62ca78a29cb33635467fc"><code>5b4381f92db0936adad62ca78a29cb33635467fc</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/1097e714321a2096f343441e0f97fb922565696b"><code>1097e714321a2096f343441e0f97fb922565696b</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -2032,9 +2078,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35715707236">35715707236</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35717526304">35717526304</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>5b4381f92db0936adad62ca78a29cb33635467fc</code> (in the history of the built commit) |
+| Event commit | <code>1097e714321a2096f343441e0f97fb922565696b</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -2059,13 +2105,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.9/">0.0.9</a>, newer than the documented version (0.0.8).
+Latest release: <a href="https://pypi.org/project/ductus/0.0.10/">0.0.10</a>, newer than the documented version (0.0.9).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout 5b4381f92db0936adad62ca78a29cb33635467fc
+git checkout 1097e714321a2096f343441e0f97fb922565696b
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
