@@ -106,7 +106,10 @@ def test_the_instructions_carry_the_limits():
     lowered = INSTRUCTIONS.lower()
     assert "never returns a percentage" in lowered
     assert "false-positive rate" in lowered
-    assert "one document in five" in lowered
+    # Was "one document in five" -- the pre-Phase-2 rate of 20.6%. The measured rate
+    # under the shipped defaults has been 6.0% since thorwhalen/ductus#5.
+    assert "6.0%" in lowered
+    assert "one document in five" not in lowered
     assert "sentence" in lowered and "document" in lowered
     assert "not a clean bill" in lowered
 

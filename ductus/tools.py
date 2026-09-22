@@ -31,6 +31,7 @@ __all__ = [
     "detectors",
     "gauge",
     "host_mutating",
+    "host_paths",
     "install_skills",
     "segmenters",
     "tells",
@@ -53,6 +54,37 @@ def host_mutating(fn):
     """
     fn.mutates_host = True
     return fn
+
+
+def host_paths(**roles: str):
+    """Declare which parameters of a verb address the machine's own filesystem.
+
+    A sibling of :func:`host_mutating`, and the same idea: the fact is stated once,
+    at the verb's own definition, and every surface reads it from there. A surface
+    that never writes a second verb list also never writes a second list of which
+    arguments are dangerous on it.
+
+    ``role`` is ``"read"`` for a parameter the verb may read a file from, and
+    ``"write"`` for one it may write a file to. Both are ordinary, correct behaviour
+    at a CLI, where the caller and the filesystem belong to the same person. They are
+    an arbitrary file read and an arbitrary file write on a surface where they do not
+    -- so :mod:`ductus.http` refuses them, driven by this declaration rather than by
+    knowing anything about ``gauge``.
+
+    >>> sorted(gauge.host_paths.items())
+    [('judgments', 'read'), ('out', 'write'), ('source', 'read')]
+    >>> getattr(segmenters, "host_paths", {})
+    {}
+    """
+    unknown = set(roles.values()) - {"read", "write"}
+    if unknown:
+        raise ValueError(f"role must be 'read' or 'write', got {sorted(unknown)}")
+
+    def decorate(fn):
+        fn.host_paths = dict(roles)
+        return fn
+
+    return decorate
 
 
 def _read_source(source: str) -> str:
@@ -113,6 +145,7 @@ def _signals_from_judgments(text: str, judgments: Any) -> list[Signal]:
     return out
 
 
+@host_paths(source="read", judgments="read", out="write")
 def gauge(
     source: str,
     *,
@@ -205,6 +238,7 @@ def tells(*, tier: str | None = None) -> list[dict[str, Any]]:
 
 
 @host_mutating
+@host_paths(target="write")
 def install_skills(*, target: str | None = None, write: bool = False) -> dict[str, Any]:
     """Link this package's shipped skills into an agent host's skills directory.
 

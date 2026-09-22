@@ -60,10 +60,12 @@ a caller should not synthesise one from what it does return. It gives a lean in
 [-1, +1], an evidence strength, a coarse label, and the signals behind them -- each
 with a quote that can be checked against the text.
 
-Its false-positive rate on human-written text is measured and is not small: with the
-default detectors, about one document in five that a person wrote is called
-leans-machine. A flagged *sentence* is much better evidence than a flagged *document*.
-The bias runs toward formal, fluent, essayistic prose rather than toward simple prose.
+Its false-positive rate on human-written text is measured: with the default detectors,
+6.0% of 350 human-written documents are called leans-machine, and every one of those is
+wrong. A flagged *sentence* is much better evidence than a flagged *document* -- the
+per-sentence rate is 0.4-2%. The bias runs toward formal, fluent, essayistic prose
+rather than toward simple prose; in the measured corpus the native-speaker control was
+the most-accused group.
 
 "No findings" is a weak result, not a clean bill.
 """

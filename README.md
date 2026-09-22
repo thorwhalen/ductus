@@ -159,6 +159,24 @@ ductus-mcp                    # stdio, for a local agent host
 
 There is **no second verb list**. `ductus.mcp.TOOL_REFS` is derived from the one list the CLI already dispatches, so the two surfaces cannot drift — and a verb that changes the host declares that at its own definition rather than by appearing in some other list. `middleware=` and `auth=` pass straight through `mk_mcp()` for a deployed server.
 
+## HTTP
+
+The same verbs again, over HTTP:
+
+```bash
+pip install "ductus[http]"
+ductus-http                   # http://127.0.0.1:8000, and /docs for the OpenAPI UI
+```
+
+```bash
+curl -s localhost:8000/gauge -H 'content-type: application/json' \
+  -d '{"source": "Great question! Let us delve in.", "format": "json"}'
+```
+
+Same rule as MCP, one layer further: `ductus.http.ROUTED_FUNCS` is *derived* from the CLI's list, so a third surface still means no second implementation and no parity test. The typed TypeScript client the frontend imports is generated from this app's own OpenAPI (`ductus.http.export_client()`), so a changed Python signature becomes a TypeScript type error rather than a runtime surprise.
+
+**This surface found something the other two could not.** `gauge(source=...)` reads a file when the string names one, and `gauge(out=...)` writes one. That is exactly right when you typed the command yourself — and an arbitrary file read and an arbitrary file write when the caller is a stranger. Neither the CLI nor a local stdio MCP host can see it, because on those surfaces it is not a bug. The verbs now declare which of their parameters address the filesystem (`@host_paths(source="read", out="write")`, a sibling of the existing `@host_mutating`), and the HTTP adapter refuses them by reading that declaration rather than by knowing anything about `gauge`. `mk_app(guard_host_paths=False)` turns it off for a loopback service you run for yourself.
+
 ## Seams
 
 Three, each one keyword argument, each defaulting to something that genuinely works:
@@ -196,6 +214,7 @@ pip install ductus              # the core: pyyaml and cw, nothing else
 pip install "ductus[local]"     # + Fast-DetectGPT and Binoculars: offline, no API key, opt-in
 pip install "ductus[api]"       # + vendor detector adapters
 pip install "ductus[mcp]"       # + the MCP server (`ductus-mcp`)
+pip install "ductus[http]"      # + the HTTP service (`ductus-http`) and its typed client
 ```
 
 ## References

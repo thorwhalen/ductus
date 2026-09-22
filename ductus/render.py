@@ -37,11 +37,24 @@ from ductus.base import Report, Segment, Signal, Span
 
 __all__ = ["to_html", "to_json", "to_markdown"]
 
+#: Shown on every rendered report. The second sentence used to say that detectors
+#: "over-flag non-native English" -- true of the field, and the opposite of what this
+#: package was then measured to do. Phase 2 found the bias runs toward formal, fluent
+#: prose, with the native-speaker control the most-accused group. The skills and the
+#: MCP instructions were corrected at the time and this string was missed.
+#:
+#: The rate is given as a natural frequency rather than "6.0%" on purpose. This text
+#: sits directly under a verdict about one specific document, and the footer is the
+#: one place the no-percentage rule is load-bearing enough to have its own test.
 _DISCLAIMER = (
     "Evidence, not a verdict. These are signals with weights, not a probability that "
     "anyone used a model. Heavily-edited human writing and model-assisted writing "
-    "produce overlapping signatures, and detectors are documented to over-flag "
-    "non-native English. Do not use this to accuse someone."
+    "produce overlapping signatures. Measured on 350 human-written documents, about "
+    "one in sixteen is called leans-machine by these defaults, and every one of those "
+    "is wrong; the bias runs toward formal, fluent prose, not toward simple prose, so "
+    "a careful essayist is the likeliest person to be wronged by this page. A flagged "
+    "sentence is much better evidence than a flagged document. Do not use this to "
+    "accuse someone."
 )
 
 

@@ -33,6 +33,7 @@ dependencies = ["pyyaml>=6.0", "cw>=0.1.1,<0.2"]
 [project.scripts]
 ductus = "ductus.__main__:main"
 ductus-mcp = "ductus.mcp:main"
+ductus-http = "ductus.http:main"
 
 [project.urls]
 Homepage = "https://github.com/thorwhalen/ductus"
@@ -51,6 +52,11 @@ api = ["httpx"]
 # The MCP surface. `py2mcp` resolves 'module:function' strings at call time, so the
 # core never imports MCP and `import ductus` is unaffected by installing this.
 mcp = ["py2mcp>=0.1.10"]
+# The HTTP surface, and the frontend that consumes it. `qh` builds a FastAPI app from
+# the same callables the CLI dispatches, and generates the frontend's typed client
+# from that app's own OpenAPI, so there is nothing to keep in sync by hand.
+# 0.0.19 is the first release whose generated TypeScript client compiles (i2mint/qh#11).
+http = ["qh>=0.0.19", "uvicorn>=0.23"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["ductus"]
