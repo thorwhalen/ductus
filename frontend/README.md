@@ -43,6 +43,7 @@ npm run typecheck                 # tsc --noEmit
 | `src/state.ts` | The one store, and **the invalidation policy** — the correctness rule of the whole app. |
 | `src/decorations.ts` | Findings → highlights, on two channels: hue for score, a separate lane for overlap. |
 | `src/panels.ts` | The verdict, the findings list, and the limits. Where the honesty requirement is met or quietly dropped. |
+| `src/upload.ts` | Opening a `.txt`/`.md` file (button or drop): bytes → exactly the text `ductus gauge <file>` reads. PDF is refused, with the reason. |
 | `src/main.ts` | The wiring. Read it top to bottom and you have the app. |
 | `src/generated/` | **Generated from Python. Do not edit.** |
 
@@ -64,4 +65,4 @@ python misc/generate_frontend_sources.py
 
 ## Not built
 
-Persistence and reload (and therefore the fuzzy re-anchoring and orphan list that go with it), file upload, and a compare-with-last-scored view. The reasons, and which of them are deliberate rather than merely unfinished, are in the decision doc.
+Persistence and reload (and therefore the fuzzy re-anchoring and orphan list that go with it), PDF upload, and a compare-with-last-scored view. The reasons, and which of them are deliberate rather than merely unfinished, are in the decision doc.

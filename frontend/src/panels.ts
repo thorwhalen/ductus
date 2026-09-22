@@ -88,7 +88,7 @@ export function verdictPanel(state: State): HTMLElement {
   if (!state.report) {
     panel.append(
       el('p', { class: 'muted' },
-        'Paste or type some text, then read it. Nothing is uploaded until you do, ' +
+        'Paste, type or open a .txt/.md file, then read it. Nothing is uploaded until you do, ' +
         'and nothing is stored afterwards.'),
     )
     return panel

@@ -99,7 +99,7 @@ Factoring this out would mean either parsing CSS out of a Python string literal 
 ## What is deliberately not built
 
 - **Persistence, reload and fuzzy re-anchoring.** See invariant 4. The redundant selectors are already on every `Span` and are what this would be built from; the orphan list is the part with real design in it.
-- **Upload (md/txt/pdf).** The roadmap lists it. Paste covers the demonstration; PDF extraction in particular is a different problem wearing the same button.
+- **PDF upload.** Text files (`.txt`, `.md`) open since 2026-09, read in the browser and sent nowhere until "Read" (`frontend/src/upload.ts`). The rule that makes that safe: an opened file yields exactly the text `ductus gauge <file>` would read — invalid UTF-8 refused rather than replaced with `�`, `\r\n`/`\r` folded to `\n` as Python's text mode does, a BOM kept. PDF is refused with a reason: extracted text carries the extractor's line breaks and hyphenation, which `ductus` would score as the writer's — a different problem wearing the same button.
 - **A compare view** ("last-scored vs current"). The research offers it as an optional secondary view. Invalidation is the correctness requirement; the diff is a convenience.
 
 ## The interface must not make the verdict feel more certain than it is
