@@ -177,6 +177,26 @@ Same rule as MCP, one layer further: `ductus.http.ROUTED_FUNCS` is *derived* fro
 
 **This surface found something the other two could not.** `gauge(source=...)` reads a file when the string names one, and `gauge(out=...)` writes one. That is exactly right when you typed the command yourself — and an arbitrary file read and an arbitrary file write when the caller is a stranger. Neither the CLI nor a local stdio MCP host can see it, because on those surfaces it is not a bug. The verbs now declare which of their parameters address the filesystem (`@host_paths(source="read", out="write")`, a sibling of the existing `@host_mutating`), and the HTTP adapter refuses them by reading that declaration rather than by knowing anything about `gauge`. `mk_app(guard_host_paths=False)` turns it off for a loopback service you run for yourself.
 
+## The editor: score, edit, score again
+
+An example frontend lives in [`frontend/`](frontend/) — paste a text, read it, edit it, read it again, with every finding anchored to the characters that carry it.
+
+```bash
+pip install 'ductus[http]'
+cd frontend && npm install && npm run build
+ductus-http                     # serves the UI and the API from one origin
+```
+
+Three things decide its design, and the first two are correctness rather than taste:
+
+- **The editor does not tidy the text.** A normal rich-text editor turns `'` into `’`, trims trailing whitespace and collapses lone newlines. This package reads all three as evidence, and `mixed-apostrophes` and `trailing-whitespace` argue for a **human**. An editor that quietly normalised the text would be deleting the evidence that exonerates people. So the ProseMirror schema is one whitespace-preserving block, which also makes a plain offset `o` exactly position `o + 1`.
+- **An edit invalidates, it never re-anchors.** Positions are kept exact through every keystroke (ProseMirror's `Mapping`); validity is not inherited. A finding whose text has changed goes hatched and reads "unverified" until you read again — re-attaching an old score to new text is a false claim, not a stale cache. A finding is invalidated when the edit touches its characters *or anywhere in its segment*, because segment scores are per unit of text; the document verdict is invalidated by any edit at all.
+- **The TypeScript is generated from the Python.** `frontend/src/generated/client.ts` from the service's OpenAPI, `report.ts` from the dataclasses in `base.py`. `tests/test_generated_sources.py` fails if they drift, so a renamed field is a failing `pytest` run rather than an `undefined` in a browser.
+
+The stack is Vite + TypeScript + ProseMirror and deliberately no framework, no state library and no persistence. Why, and what each of those costs, is in [`misc/docs/frontend-stack-decision.md`](misc/docs/frontend-stack-decision.md).
+
+**The interface holds the same line the reports do.** No percentage anywhere. The measured false-positive rate sits beside the verdict rather than in a footer, loudest in the one case where the verdict is a claim about a person — because an interface makes a verdict feel authoritative in a way a paragraph does not, and the person most likely to be wronged by this page is the careful essayist whose prose it just lit up.
+
 ## Seams
 
 Three, each one keyword argument, each defaulting to something that genuinely works:

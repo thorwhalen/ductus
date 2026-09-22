@@ -81,3 +81,11 @@ project_name = "ductus"
 
 [tool.wads.ci.testing]
 python_versions = ["3.10", "3.12"]
+
+# Install the HTTP extra in CI. Without it `tests/test_http.py` and
+# `tests/test_generated_sources.py` skip themselves, and the second of those is the
+# guard that the committed TypeScript still matches the Python it was generated from --
+# a guard that only runs locally is not a guard. `qh` and FastAPI are pure Python and
+# add a couple of seconds.
+[tool.wads.ci.install]
+extras = "http"

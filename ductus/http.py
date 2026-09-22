@@ -42,6 +42,7 @@ __all__ = [
     "DESCRIPTION",
     "ROUTED_FUNCS",
     "export_client",
+    "export_types",
     "main",
     "mk_app",
 ]
@@ -156,9 +157,11 @@ def mk_app(
     ambiguous deployment is the one that does not hand out the filesystem.
 
     ``ui`` is a directory of built frontend assets to serve at ``/``. When it is
-    ``None`` the default location is used if it exists and is skipped if it does not,
-    so the API works with no frontend built and the two are served same-origin when
-    one is -- which is also what lets a browser test drive it without CORS.
+    ``None``, ``DUCTUS_UI_DIR`` or ``frontend/dist`` beside the package is used if it
+    exists and skipped if it does not -- so the API works with no frontend built, and
+    the two are served same-origin when one is, which is also what lets a browser test
+    drive the whole thing without CORS. A directory named explicitly and not found is
+    an error; only the *default* is allowed to be silently absent.
 
     Extra keyword arguments pass straight through to ``qh.mk_app``.
 
@@ -210,9 +213,22 @@ def _as_http_error(fn: Callable[..., Any]) -> Callable[..., Any]:
 
 
 def _default_ui_dir() -> str:
-    """Where ``npm run build`` in ``frontend/`` leaves its output, if it was run."""
+    """Where to look for a built frontend when none was named.
+
+    ``DUCTUS_UI_DIR`` first, then ``frontend/dist`` beside the package.
+
+    The second only exists **in a git checkout**: the frontend is not carried in the
+    wheel (see ``misc/docs/frontend-stack-decision.md``), so a pip-installed ``ductus``
+    serves the API and no UI unless it is pointed at one. That is the honest state of
+    it rather than an oversight -- committing a minified bundle into a Python package
+    to make one demo self-installing is a trade this package has not made. The env var
+    is the seam for a deployment that has built the assets somewhere.
+    """
     from pathlib import Path
 
+    from_env = os.environ.get("DUCTUS_UI_DIR")
+    if from_env:
+        return from_env
     return str(Path(__file__).resolve().parent.parent / "frontend" / "dist")
 
 
@@ -254,7 +270,137 @@ def export_client(
     from qh import export_openapi, export_ts_client
 
     spec = export_openapi(app or mk_app(), include_python_metadata=True)
-    return export_ts_client(spec, class_name=class_name, base_url=base_url)
+    header = (
+        "// Generated from this service's own OpenAPI by "
+        "`ductus.http.export_client()`.\n"
+        "// Do not edit by hand: `python misc/generate_frontend_sources.py` rewrites "
+        "it,\n"
+        "// and tests/test_generated_sources.py fails if this file and the Python "
+        "disagree.\n\n"
+    )
+    return header + export_ts_client(spec, class_name=class_name, base_url=base_url)
+
+
+#: The dataclasses whose shape a consumer of ``gauge(format="json")`` has to know.
+#: :func:`export_types` walks these, so the TypeScript the frontend compiles against
+#: is derived from the same definitions the Python produces -- there is no second
+#: description of a ``Report`` anywhere to drift.
+_REPORT_TYPES = ("Span", "Signal", "Segment", "Report")
+
+#: Python annotation -> TypeScript. Deliberately tiny: the four dataclasses use eight
+#: distinct annotations between them, and a general converter would be more code than
+#: the thing it converts. An annotation not in here raises rather than guessing --
+#: silently emitting ``any`` is how a generated type stops being worth compiling.
+#: Fields annotated ``str`` in Python whose values are drawn from a closed vocabulary
+#: the module also exports. Emitting the union instead of ``string`` is what lets the
+#: frontend switch on a label exhaustively and be told when a case is missing. The
+#: vocabularies themselves are still read from ``base``, so adding a label needs no
+#: edit here; only a *renamed field* would quietly fall back to ``string``.
+_TS_NARROWED = {("Signal", "direction"): "Direction", ("Segment", "label"): "Label"}
+
+_TS_SCALARS = {
+    "int": "number",
+    "float": "number",
+    "str": "string",
+    "bool": "boolean",
+    "Any": "unknown",
+}
+
+
+def _ts_type(annotation: Any) -> str:
+    """Render one dataclass field annotation as a TypeScript type.
+
+    >>> _ts_type(int), _ts_type(str)
+    ('number', 'string')
+    >>> _ts_type("tuple[Signal, ...]")
+    'Signal[]'
+    >>> _ts_type("dict[str, Any]")
+    'Record<string, unknown>'
+    >>> _ts_type("Span | None")
+    'Span | null'
+    """
+    import re
+
+    text = (
+        annotation
+        if isinstance(annotation, str)
+        else getattr(annotation, "__name__", str(annotation))
+    )
+    text = text.strip()
+
+    if text.endswith(" | None"):
+        return f"{_ts_type(text[: -len(' | None')])} | null"
+    if text in _TS_SCALARS:
+        return _TS_SCALARS[text]
+    if text in _REPORT_TYPES:
+        return text
+
+    match = re.fullmatch(r"(tuple|list)\[(.+?)(?:,\s*\.\.\.)?\]", text)
+    if match:
+        return f"{_ts_type(match.group(2))}[]"
+    match = re.fullmatch(r"dict\[(.+?),\s*(.+)\]", text)
+    if match:
+        return f"Record<{_ts_type(match.group(1))}, {_ts_type(match.group(2))}>"
+
+    raise ValueError(
+        f"no TypeScript type for {text!r}. Add it to ductus.http._TS_SCALARS or "
+        "teach _ts_type about it -- do not let it fall through to `any`."
+    )
+
+
+def export_types() -> str:
+    """TypeScript interfaces for the report shape, read off the dataclasses.
+
+    ``gauge(format="json")`` serialises a :class:`~ductus.base.Report` with
+    ``dataclasses.asdict``, so the wire shape *is* the dataclass shape. Generating the
+    TypeScript from the same definitions is what stops a renamed field from becoming a
+    silent ``undefined`` in a browser rather than a failing test.
+
+    The generated client types ``gauge`` as returning ``string``, because it does --
+    a JSON document. :func:`export_types` supplies what is inside it.
+
+    >>> ts = export_types()
+    >>> "export interface Report {" in ts and "text_sha256: string;" in ts
+    True
+    >>> "signals: Signal[];" in ts
+    True
+    """
+    import dataclasses
+
+    from ductus import base
+
+    out = [
+        (
+            "// Generated from the dataclasses in ductus/base.py by "
+            "`ductus.http.export_types()`."
+        ),
+        "// Do not edit by hand: `python misc/generate_frontend_sources.py` rewrites it,",
+        (
+            "// and tests/test_generated_sources.py fails if this file and the Python "
+            "disagree."
+        ),
+        "",
+    ]
+    for name in _REPORT_TYPES:
+        cls = getattr(base, name)
+        doc = (cls.__doc__ or "").strip().splitlines()[0]
+        out.append(f"/** {doc} */")
+        out.append(f"export interface {name} {{")
+        for field in dataclasses.fields(cls):
+            ts = _TS_NARROWED.get((name, field.name)) or _ts_type(field.type)
+            out.append(f"  {field.name}: {ts};")
+        out.append("}")
+        out.append("")
+
+    out.append("/** The coarse labels a segment can carry. */")
+    labels = " | ".join(f"'{label}'" for label in base.LABELS)
+    out.append(f"export type Label = {labels};")
+    out.append("")
+    out.append("/** What a signal can argue for. */")
+    directions = " | ".join(f"'{d}'" for d in base.DIRECTIONS)
+    out.append(f"export type Direction = {directions};")
+    out.append("")
+    return "\n".join(out)
 
 
 def main() -> None:  # pragma: no cover - a blocking server loop
