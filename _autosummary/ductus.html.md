@@ -99,6 +99,9 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A character range, with redundant selectors so it survives an edit.
 
+Offsets count **code points** (Python `str` indices), not bytes and not
+UTF-16 units – a JavaScript client must convert after any astral character.
+
 `start`/`end` are a `TextPositionSelector`; `quote` with `prefix`
 and `suffix` is a `TextQuoteSelector`. Keeping both is what lets a
 viewer re-find a finding after the text around it changed.

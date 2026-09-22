@@ -231,132 +231,135 @@
 </span><span id="line-55"><span class="k">class</span><span class="w"> </span><span class="nc">Span</span><span class="p">:</span>
 </span><span id="line-56"><span class="w">    </span><span class="sd">"""A character range, with redundant selectors so it survives an edit.</span>
 </span><span id="line-57">
-</span><span id="line-58"><span class="sd">    ``start``/``end`` are a ``TextPositionSelector``; ``quote`` with ``prefix``</span>
-</span><span id="line-59"><span class="sd">    and ``suffix`` is a ``TextQuoteSelector``. Keeping both is what lets a</span>
-</span><span id="line-60"><span class="sd">    viewer re-find a finding after the text around it changed.</span>
-</span><span id="line-61">
-</span><span id="line-62"><span class="sd">    &gt;&gt;&gt; s = Span.of("one two three", 4, 7, level="sentence")</span>
-</span><span id="line-63"><span class="sd">    &gt;&gt;&gt; (s.start, s.end, s.quote, s.level)</span>
-</span><span id="line-64"><span class="sd">    (4, 7, 'two', 'sentence')</span>
-</span><span id="line-65"><span class="sd">    &gt;&gt;&gt; s.length</span>
-</span><span id="line-66"><span class="sd">    3</span>
-</span><span id="line-67"><span class="sd">    """</span>
-</span><span id="line-68">
-</span><span id="line-69">    <span class="n">start</span><span class="p">:</span> <span class="nb">int</span>
-</span><span id="line-70">    <span class="n">end</span><span class="p">:</span> <span class="nb">int</span>
-</span><span id="line-71">    <span class="n">quote</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="line-72">    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
-</span><span id="line-73">    <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
-</span><span id="line-74">    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"segment"</span>
-</span><span id="line-75">
+</span><span id="line-58"><span class="sd">    Offsets count **code points** (Python ``str`` indices), not bytes and not</span>
+</span><span id="line-59"><span class="sd">    UTF-16 units -- a JavaScript client must convert after any astral character.</span>
+</span><span id="line-60">
+</span><span id="line-61"><span class="sd">    ``start``/``end`` are a ``TextPositionSelector``; ``quote`` with ``prefix``</span>
+</span><span id="line-62"><span class="sd">    and ``suffix`` is a ``TextQuoteSelector``. Keeping both is what lets a</span>
+</span><span id="line-63"><span class="sd">    viewer re-find a finding after the text around it changed.</span>
+</span><span id="line-64">
+</span><span id="line-65"><span class="sd">    &gt;&gt;&gt; s = Span.of("one two three", 4, 7, level="sentence")</span>
+</span><span id="line-66"><span class="sd">    &gt;&gt;&gt; (s.start, s.end, s.quote, s.level)</span>
+</span><span id="line-67"><span class="sd">    (4, 7, 'two', 'sentence')</span>
+</span><span id="line-68"><span class="sd">    &gt;&gt;&gt; s.length</span>
+</span><span id="line-69"><span class="sd">    3</span>
+</span><span id="line-70"><span class="sd">    """</span>
+</span><span id="line-71">
+</span><span id="line-72">    <span class="n">start</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="line-73">    <span class="n">end</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="line-74">    <span class="n">quote</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-75">    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+</span><span id="line-76">    <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+</span><span id="line-77">    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"segment"</span>
+</span><span id="line-78">
 <div class="viewcode-block" id="Span.of">
 <a class="viewcode-back" href="../../_autosummary/ductus.base.html#ductus.Span.of">[docs]</a>
-</span><span id="line-76">    <span class="nd">@classmethod</span>
-</span><span id="line-77">    <span class="k">def</span><span class="w"> </span><span class="nf">of</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"segment"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Span</span><span class="p">:</span>
-</span><span id="line-78"><span class="w">        </span><span class="sd">"""Build a span over ``text``, capturing its re-anchoring context.</span>
-</span><span id="line-79">
-</span><span id="line-80"><span class="sd">        &gt;&gt;&gt; Span.of("abcdef", 2, 4).suffix</span>
-</span><span id="line-81"><span class="sd">        'ef'</span>
-</span><span id="line-82"><span class="sd">        """</span>
-</span><span id="line-83">        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
-</span><span id="line-84">            <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
-</span><span id="line-85">            <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
-</span><span id="line-86">            <span class="n">quote</span><span class="o">=</span><span class="n">text</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span>
-</span><span id="line-87">            <span class="n">prefix</span><span class="o">=</span><span class="n">text</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span> <span class="o">-</span> <span class="n">CONTEXT_CHARS</span><span class="p">)</span> <span class="p">:</span> <span class="n">start</span><span class="p">],</span>
-</span><span id="line-88">            <span class="n">suffix</span><span class="o">=</span><span class="n">text</span><span class="p">[</span><span class="n">end</span> <span class="p">:</span> <span class="n">end</span> <span class="o">+</span> <span class="n">CONTEXT_CHARS</span><span class="p">],</span>
-</span><span id="line-89">            <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span>
-</span><span id="line-90">        <span class="p">)</span></div>
+</span><span id="line-79">    <span class="nd">@classmethod</span>
+</span><span id="line-80">    <span class="k">def</span><span class="w"> </span><span class="nf">of</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"segment"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Span</span><span class="p">:</span>
+</span><span id="line-81"><span class="w">        </span><span class="sd">"""Build a span over ``text``, capturing its re-anchoring context.</span>
+</span><span id="line-82">
+</span><span id="line-83"><span class="sd">        &gt;&gt;&gt; Span.of("abcdef", 2, 4).suffix</span>
+</span><span id="line-84"><span class="sd">        'ef'</span>
+</span><span id="line-85"><span class="sd">        """</span>
+</span><span id="line-86">        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+</span><span id="line-87">            <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+</span><span id="line-88">            <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
+</span><span id="line-89">            <span class="n">quote</span><span class="o">=</span><span class="n">text</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span>
+</span><span id="line-90">            <span class="n">prefix</span><span class="o">=</span><span class="n">text</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span> <span class="o">-</span> <span class="n">CONTEXT_CHARS</span><span class="p">)</span> <span class="p">:</span> <span class="n">start</span><span class="p">],</span>
+</span><span id="line-91">            <span class="n">suffix</span><span class="o">=</span><span class="n">text</span><span class="p">[</span><span class="n">end</span> <span class="p">:</span> <span class="n">end</span> <span class="o">+</span> <span class="n">CONTEXT_CHARS</span><span class="p">],</span>
+</span><span id="line-92">            <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span>
+</span><span id="line-93">        <span class="p">)</span></div>
 
-</span><span id="line-91">
-</span><span id="line-92">    <span class="nd">@property</span>
-</span><span id="line-93">    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="line-94">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
-</span><span id="line-95">
+</span><span id="line-94">
+</span><span id="line-95">    <span class="nd">@property</span>
+</span><span id="line-96">    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-97">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+</span><span id="line-98">
 <div class="viewcode-block" id="Span.contains">
 <a class="viewcode-back" href="../../_autosummary/ductus.base.html#ductus.Span.contains">[docs]</a>
-</span><span id="line-96">    <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="line-97"><span class="w">        </span><span class="sd">"""Whether ``other`` falls entirely inside this span.</span>
-</span><span id="line-98">
-</span><span id="line-99"><span class="sd">        &gt;&gt;&gt; a, b = Span.of("abcdef", 0, 6), Span.of("abcdef", 2, 4)</span>
-</span><span id="line-100"><span class="sd">        &gt;&gt;&gt; a.contains(b), b.contains(a)</span>
-</span><span id="line-101"><span class="sd">        (True, False)</span>
-</span><span id="line-102"><span class="sd">        """</span>
-</span><span id="line-103">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span></div>
+</span><span id="line-99">    <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Span</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="line-100"><span class="w">        </span><span class="sd">"""Whether ``other`` falls entirely inside this span.</span>
+</span><span id="line-101">
+</span><span id="line-102"><span class="sd">        &gt;&gt;&gt; a, b = Span.of("abcdef", 0, 6), Span.of("abcdef", 2, 4)</span>
+</span><span id="line-103"><span class="sd">        &gt;&gt;&gt; a.contains(b), b.contains(a)</span>
+</span><span id="line-104"><span class="sd">        (True, False)</span>
+</span><span id="line-105"><span class="sd">        """</span>
+</span><span id="line-106">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span></div>
 </div>
 
-</span><span id="line-104">
-</span><span id="line-105">
+</span><span id="line-107">
+</span><span id="line-108">
 <div class="viewcode-block" id="Signal">
 <a class="viewcode-back" href="../../_autosummary/ductus.base.html#ductus.Signal">[docs]</a>
-</span><span id="line-106"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-107"><span class="k">class</span><span class="w"> </span><span class="nc">Signal</span><span class="p">:</span>
-</span><span id="line-108"><span class="w">    </span><span class="sd">"""One piece of evidence about one span.</span>
-</span><span id="line-109">
-</span><span id="line-110"><span class="sd">    ``weight`` is how much this moves the needle, in ``0..1``. It is a weight,</span>
-</span><span id="line-111"><span class="sd">    not a probability: two 0.5 signals pointing the same way are stronger than</span>
-</span><span id="line-112"><span class="sd">    one, and nothing here claims to be calibrated.</span>
-</span><span id="line-113">
-</span><span id="line-114"><span class="sd">    &gt;&gt;&gt; Signal("em-dash", "machine", 0.2, "forensic", value=3).name</span>
-</span><span id="line-115"><span class="sd">    'em-dash'</span>
-</span><span id="line-116"><span class="sd">    """</span>
-</span><span id="line-117">
-</span><span id="line-118">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="line-119">    <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="line-120">    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span>
-</span><span id="line-121">    <span class="n">detector</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="line-122">    <span class="n">value</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-123">    <span class="n">note</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
-</span><span id="line-124">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-125">
-</span><span id="line-126">    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-127">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DIRECTIONS</span><span class="p">:</span>
-</span><span id="line-128">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-129">                <span class="sa">f</span><span class="s2">"direction must be one of </span><span class="si">{</span><span class="n">DIRECTIONS</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="si">!r}</span><span class="s2">"</span>
-</span><span id="line-130">            <span class="p">)</span>
-</span><span id="line-131">        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
-</span><span id="line-132">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"weight must be in [0, 1], got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span></div>
+</span><span id="line-109"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-110"><span class="k">class</span><span class="w"> </span><span class="nc">Signal</span><span class="p">:</span>
+</span><span id="line-111"><span class="w">    </span><span class="sd">"""One piece of evidence about one span.</span>
+</span><span id="line-112">
+</span><span id="line-113"><span class="sd">    ``weight`` is how much this moves the needle, in ``0..1``. It is a weight,</span>
+</span><span id="line-114"><span class="sd">    not a probability: two 0.5 signals pointing the same way are stronger than</span>
+</span><span id="line-115"><span class="sd">    one, and nothing here claims to be calibrated.</span>
+</span><span id="line-116">
+</span><span id="line-117"><span class="sd">    &gt;&gt;&gt; Signal("em-dash", "machine", 0.2, "forensic", value=3).name</span>
+</span><span id="line-118"><span class="sd">    'em-dash'</span>
+</span><span id="line-119"><span class="sd">    """</span>
+</span><span id="line-120">
+</span><span id="line-121">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-122">    <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-123">    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span>
+</span><span id="line-124">    <span class="n">detector</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-125">    <span class="n">value</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-126">    <span class="n">note</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+</span><span id="line-127">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-128">
+</span><span id="line-129">    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-130">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DIRECTIONS</span><span class="p">:</span>
+</span><span id="line-131">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-132">                <span class="sa">f</span><span class="s2">"direction must be one of </span><span class="si">{</span><span class="n">DIRECTIONS</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="si">!r}</span><span class="s2">"</span>
+</span><span id="line-133">            <span class="p">)</span>
+</span><span id="line-134">        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+</span><span id="line-135">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"weight must be in [0, 1], got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span></div>
 
-</span><span id="line-133">
-</span><span id="line-134">
+</span><span id="line-136">
+</span><span id="line-137">
 <div class="viewcode-block" id="Segment">
 <a class="viewcode-back" href="../../_autosummary/ductus.base.html#ductus.Segment">[docs]</a>
-</span><span id="line-135"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-136"><span class="k">class</span><span class="w"> </span><span class="nc">Segment</span><span class="p">:</span>
-</span><span id="line-137"><span class="w">    </span><span class="sd">"""A unit of text, the signals on it, and the lean they add up to.</span>
-</span><span id="line-138">
-</span><span id="line-139"><span class="sd">    ``lean`` runs from -1 (every signal argues human) to +1 (every signal argues</span>
-</span><span id="line-140"><span class="sd">    machine). ``strength`` is how much evidence there is at all -- a lean of</span>
-</span><span id="line-141"><span class="sd">    +1.0 from a single weak signal is not the same claim as +1.0 from six.</span>
-</span><span id="line-142"><span class="sd">    """</span>
-</span><span id="line-143">
-</span><span id="line-144">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span>
-</span><span id="line-145">    <span class="n">signals</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Signal</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
-</span><span id="line-146">    <span class="n">lean</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
-</span><span id="line-147">    <span class="n">strength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
-</span><span id="line-148">    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"no-evidence"</span></div>
+</span><span id="line-138"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-139"><span class="k">class</span><span class="w"> </span><span class="nc">Segment</span><span class="p">:</span>
+</span><span id="line-140"><span class="w">    </span><span class="sd">"""A unit of text, the signals on it, and the lean they add up to.</span>
+</span><span id="line-141">
+</span><span id="line-142"><span class="sd">    ``lean`` runs from -1 (every signal argues human) to +1 (every signal argues</span>
+</span><span id="line-143"><span class="sd">    machine). ``strength`` is how much evidence there is at all -- a lean of</span>
+</span><span id="line-144"><span class="sd">    +1.0 from a single weak signal is not the same claim as +1.0 from six.</span>
+</span><span id="line-145"><span class="sd">    """</span>
+</span><span id="line-146">
+</span><span id="line-147">    <span class="n">span</span><span class="p">:</span> <span class="n">Span</span>
+</span><span id="line-148">    <span class="n">signals</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Signal</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+</span><span id="line-149">    <span class="n">lean</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+</span><span id="line-150">    <span class="n">strength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+</span><span id="line-151">    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"no-evidence"</span></div>
 
-</span><span id="line-149">
-</span><span id="line-150">
+</span><span id="line-152">
+</span><span id="line-153">
 <div class="viewcode-block" id="Report">
 <a class="viewcode-back" href="../../_autosummary/ductus.base.html#ductus.Report">[docs]</a>
-</span><span id="line-151"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-152"><span class="k">class</span><span class="w"> </span><span class="nc">Report</span><span class="p">:</span>
-</span><span id="line-153"><span class="w">    </span><span class="sd">"""Everything a downstream consumer needs, and nothing it has to guess at."""</span>
-</span><span id="line-154">
-</span><span id="line-155">    <span class="n">text_sha256</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="line-156">    <span class="n">n_chars</span><span class="p">:</span> <span class="nb">int</span>
-</span><span id="line-157">    <span class="n">document</span><span class="p">:</span> <span class="n">Segment</span>
-</span><span id="line-158">    <span class="n">segments</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Segment</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-</span><span id="line-159">    <span class="n">detectors</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-</span><span id="line-160">    <span class="n">segmenter</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="line-161">    <span class="n">schema_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SCHEMA_VERSION</span>
-</span><span id="line-162">    <span class="n">calibration</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"uncalibrated"</span>
-</span><span id="line-163">    <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span id="line-164">
-</span><span id="line-165">    <span class="nd">@property</span>
-</span><span id="line-166">    <span class="k">def</span><span class="w"> </span><span class="nf">signals</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Signal</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-</span><span id="line-167"><span class="w">        </span><span class="sd">"""Every signal in the report, in document order."""</span>
-</span><span id="line-168">        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">seg</span><span class="o">.</span><span class="n">signals</span><span class="p">)</span></div>
+</span><span id="line-154"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-155"><span class="k">class</span><span class="w"> </span><span class="nc">Report</span><span class="p">:</span>
+</span><span id="line-156"><span class="w">    </span><span class="sd">"""Everything a downstream consumer needs, and nothing it has to guess at."""</span>
+</span><span id="line-157">
+</span><span id="line-158">    <span class="n">text_sha256</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-159">    <span class="n">n_chars</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="line-160">    <span class="n">document</span><span class="p">:</span> <span class="n">Segment</span>
+</span><span id="line-161">    <span class="n">segments</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Segment</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</span><span id="line-162">    <span class="n">detectors</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</span><span id="line-163">    <span class="n">segmenter</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-164">    <span class="n">schema_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SCHEMA_VERSION</span>
+</span><span id="line-165">    <span class="n">calibration</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"uncalibrated"</span>
+</span><span id="line-166">    <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+</span><span id="line-167">
+</span><span id="line-168">    <span class="nd">@property</span>
+</span><span id="line-169">    <span class="k">def</span><span class="w"> </span><span class="nf">signals</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Signal</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+</span><span id="line-170"><span class="w">        </span><span class="sd">"""Every signal in the report, in document order."""</span>
+</span><span id="line-171">        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">seg</span><span class="o">.</span><span class="n">signals</span><span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -371,7 +374,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=0c446633"></script>
+    <script src="../../_static/documentation_options.js?v=3bbcec59"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

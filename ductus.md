@@ -1,4 +1,4 @@
-> built 2026-09-22 14:35 UTC from 5158942 (main) · ductus 0.0.11. Details: build_info.json
+> built 2026-09-22 14:49 UTC from 494e4d6 (main) · ductus 0.0.12. Details: build_info.json
 
 # index.html.md
 
@@ -333,6 +333,9 @@ one, and nothing here claims to be calibrated.
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A character range, with redundant selectors so it survives an edit.
+
+Offsets count **code points** (Python `str` indices), not bytes and not
+UTF-16 units – a JavaScript client must convert after any astral character.
 
 `start`/`end` are a `TextPositionSelector`; `quote` with `prefix`
 and `suffix` is a `TextQuoteSelector`. Keeping both is what lets a
@@ -903,6 +906,9 @@ one, and nothing here claims to be calibrated.
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A character range, with redundant selectors so it survives an edit.
+
+Offsets count **code points** (Python `str` indices), not bytes and not
+UTF-16 units – a JavaScript client must convert after any astral character.
 
 `start`/`end` are a `TextPositionSelector`; `quote` with `prefix`
 and `suffix` is a `TextQuoteSelector`. Keeping both is what lets a
@@ -2058,7 +2064,7 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-22 14:35 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/51589421205117040de1bd1888d8d2e8f5c5ed0c"><code>5158942</code></a> on branch <code>main</code>, for **ductus 0.0.11** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-22 14:49 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/494e4d638ff3b49ebb0cdf9b681a682fe06a5ea4"><code>494e4d6</code></a> on branch <code>main</code>, for **ductus 0.0.12** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -2067,7 +2073,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/51589421205117040de1bd1888d8d2e8f5c5ed0c"><code>51589421205117040de1bd1888d8d2e8f5c5ed0c</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/494e4d638ff3b49ebb0cdf9b681a682fe06a5ea4"><code>494e4d638ff3b49ebb0cdf9b681a682fe06a5ea4</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -2078,9 +2084,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35741095704">35741095704</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35742803710">35742803710</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>51589421205117040de1bd1888d8d2e8f5c5ed0c</code> (in the history of the built commit) |
+| Event commit | <code>494e4d638ff3b49ebb0cdf9b681a682fe06a5ea4</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -2105,13 +2111,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.11/">0.0.11</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ductus/0.0.12/">0.0.12</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout 51589421205117040de1bd1888d8d2e8f5c5ed0c
+git checkout 494e4d638ff3b49ebb0cdf9b681a682fe06a5ea4
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
