@@ -52,7 +52,12 @@ export const schema = new Schema({
   },
 })
 
-/** Plain-text character offset -> ProseMirror position. The one wrapper node costs 1. */
+/**
+ * Plain-text UTF-16 offset -> ProseMirror position. The one wrapper node costs 1.
+ *
+ * Server offsets are Python *code points*, not UTF-16 units: convert those with
+ * `positionsIn(text)` from `offsets.ts`, never with this (#11).
+ */
 export const toPos = (offset: number): number => offset + 1
 
 /** ProseMirror position -> plain-text character offset. */
