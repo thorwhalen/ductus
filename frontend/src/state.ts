@@ -109,7 +109,12 @@ export function isStale(state: State): boolean {
  * carries are for re-anchoring across a *reload*, which this app does not do — see
  * the decision doc.
  */
-export function track(report: Report, text: string, toPos: (offset: number) => number): State {
+export function track(
+  report: Report,
+  text: string,
+  /** Server (code-point) offset -> editor position: `positionsIn(text)` in the app. */
+  toPos: (offset: number) => number,
+): State {
   const segments: TrackedSegment[] = report.segments.map((segment, index) => ({
     index,
     segment,

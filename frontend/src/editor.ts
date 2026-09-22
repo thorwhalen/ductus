@@ -22,10 +22,12 @@
  *
  * So the schema here is one block node that holds text and nothing else, with
  * whitespace preserved. That has a second benefit worth as much: the offset arithmetic
- * becomes trivial. `ductus` reports plain-character offsets; ProseMirror counts
- * positions that include node boundaries. With exactly one wrapper node, a plain
- * offset `o` is ProseMirror position `o + 1` — see {@link toPos} — with nowhere for an
- * off-by-one to hide.
+ * becomes nearly trivial. ProseMirror counts positions that include node boundaries,
+ * and with exactly one wrapper node a UTF-16 index `i` into the text is position
+ * `i + 1`. One conversion remains, and it is not about nodes: `ductus` is Python and
+ * reports offsets in *code points*, which differ from UTF-16 indices after any emoji
+ * or other astral character. That conversion lives in `offsets.ts` (`positionsIn`),
+ * built from the scored text (#11).
  */
 
 import { baseKeymap, newlineInCode } from 'prosemirror-commands'
@@ -51,17 +53,6 @@ export const schema = new Schema({
     text: { group: 'inline' },
   },
 })
-
-/**
- * Plain-text UTF-16 offset -> ProseMirror position. The one wrapper node costs 1.
- *
- * Server offsets are Python *code points*, not UTF-16 units: convert those with
- * `positionsIn(text)` from `offsets.ts`, never with this (#11).
- */
-export const toPos = (offset: number): number => offset + 1
-
-/** ProseMirror position -> plain-text character offset. */
-export const toOffset = (pos: number): number => pos - 1
 
 /** The document's text, exactly as the user has it and exactly as `ductus` will see it. */
 export function textOf(state: EditorState): string {
