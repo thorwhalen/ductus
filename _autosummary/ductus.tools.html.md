@@ -22,6 +22,7 @@ this one list. Adding a surface never means writing a second implementation.
 |----------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
 | [`gauge`](#ductus.tools.gauge)(source, \*[, format, segmenter, ...]) | Gauge how machine-written a text reads, and render the result.             |
 | [`host_mutating`](#ductus.tools.host_mutating)(fn)                           | Mark a verb that changes the machine it runs on, rather than only reading. |
+| [`host_paths`](#ductus.tools.host_paths)(\*\*roles)                       | Declare which parameters of a verb address the machine's own filesystem.   |
 | [`install_skills`](#ductus.tools.install_skills)(\*[, target, write])         | Link this package's shipped skills into an agent host's skills directory.  |
 | [`segmenters`](#ductus.tools.segmenters)()                                | The available ways of cutting the text into scored units.                  |
 | [`tells`](#ductus.tools.tells)(\*[, tier])                           | The tells catalogue, optionally filtered to one tier (E, W or S).          |
@@ -69,6 +70,29 @@ remote MCP caller did not necessarily, so [`ductus.mcp`](ductus.mcp.html.md#modu
 True
 >>> getattr(segmenters, "mutates_host", False)
 False
+```
+
+### ductus.tools.host_paths(\*\*roles)
+
+Declare which parameters of a verb address the machine’s own filesystem.
+
+A sibling of [`host_mutating()`](#ductus.tools.host_mutating), and the same idea: the fact is stated once,
+at the verb’s own definition, and every surface reads it from there. A surface
+that never writes a second verb list also never writes a second list of which
+arguments are dangerous on it.
+
+`role` is `"read"` for a parameter the verb may read a file from, and
+`"write"` for one it may write a file to. Both are ordinary, correct behaviour
+at a CLI, where the caller and the filesystem belong to the same person. They are
+an arbitrary file read and an arbitrary file write on a surface where they do not
+– so [`ductus.http`](ductus.http.html.md#module-ductus.http) refuses them, driven by this declaration rather than by
+knowing anything about `gauge`.
+
+```pycon
+>>> sorted(gauge.host_paths.items())
+[('judgments', 'read'), ('out', 'write'), ('source', 'read')]
+>>> getattr(segmenters, "host_paths", {})
+{}
 ```
 
 ### ductus.tools.install_skills(, target=None, write=False)

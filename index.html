@@ -23,6 +23,8 @@
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link href="index.html.md" rel="alternate" type="text/markdown"/>
 <link href="llms.txt" rel="describedby" type="text/markdown"/>
+<link href="index.html.md" rel="alternate" type="text/markdown"/>
+<link href="llms.txt" rel="describedby"/>
 <title>ductus</title>
 <meta content="ductus" property="og:title"/>
 <meta content="ductus" name="twitter:title"/>
@@ -85,6 +87,7 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.data.html">ductus.data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.detect.html">ductus.detect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.http.html">ductus.http</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.mcp.html">ductus.mcp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.render.html">ductus.render</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.score.html">ductus.score</a></li>
@@ -319,6 +322,20 @@
 <p><code class="docutils literal notranslate"><span class="pre">gauge</span></code>, <code class="docutils literal notranslate"><span class="pre">detectors</span></code>, <code class="docutils literal notranslate"><span class="pre">segmenters</span></code> and <code class="docutils literal notranslate"><span class="pre">tells</span></code>. <code class="docutils literal notranslate"><span class="pre">install_skills</span></code> is deliberately absent: it symlinks into an agent host’s skills directory, and a person typing that at a CLI chose to in a way a remote caller did not.</p>
 <p>There is <strong>no second verb list</strong>. <code class="docutils literal notranslate"><span class="pre">ductus.mcp.TOOL_REFS</span></code> is derived from the one list the CLI already dispatches, so the two surfaces cannot drift — and a verb that changes the host declares that at its own definition rather than by appearing in some other list. <code class="docutils literal notranslate"><span class="pre">middleware=</span></code> and <code class="docutils literal notranslate"><span class="pre">auth=</span></code> pass straight through <code class="docutils literal notranslate"><span class="pre">mk_mcp()</span></code> for a deployed server.</p>
 </section>
+<section id="http">
+<h2>HTTP<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#http" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#http'">¶</a></h2>
+<p>The same verbs again, over HTTP:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[http]"</span>
+</span><span id="line-2">ductus-http<span class="w">                   </span><span class="c1"># http://127.0.0.1:8000, and /docs for the OpenAPI UI</span>
+</span></code></pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">curl<span class="w"> </span>-s<span class="w"> </span>localhost:8000/gauge<span class="w"> </span>-H<span class="w"> </span><span class="s1">'content-type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="line-2"><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"source": "Great question! Let us delve in.", "format": "json"}'</span>
+</span></code></pre></div>
+</div>
+<p>Same rule as MCP, one layer further: <code class="docutils literal notranslate"><span class="pre">ductus.http.ROUTED_FUNCS</span></code> is <em>derived</em> from the CLI’s list, so a third surface still means no second implementation and no parity test. The typed TypeScript client the frontend imports is generated from this app’s own OpenAPI (<code class="docutils literal notranslate"><span class="pre">ductus.http.export_client()</span></code>), so a changed Python signature becomes a TypeScript type error rather than a runtime surprise.</p>
+<p><strong>This surface found something the other two could not.</strong> <code class="docutils literal notranslate"><span class="pre">gauge(source=...)</span></code> reads a file when the string names one, and <code class="docutils literal notranslate"><span class="pre">gauge(out=...)</span></code> writes one. That is exactly right when you typed the command yourself — and an arbitrary file read and an arbitrary file write when the caller is a stranger. Neither the CLI nor a local stdio MCP host can see it, because on those surfaces it is not a bug. The verbs now declare which of their parameters address the filesystem (<code class="docutils literal notranslate"><span class="pre">@host_paths(source="read",</span> <span class="pre">out="write")</span></code>, a sibling of the existing <code class="docutils literal notranslate"><span class="pre">@host_mutating</span></code>), and the HTTP adapter refuses them by reading that declaration rather than by knowing anything about <code class="docutils literal notranslate"><span class="pre">gauge</span></code>. <code class="docutils literal notranslate"><span class="pre">mk_app(guard_host_paths=False)</span></code> turns it off for a loopback service you run for yourself.</p>
+</section>
 <section id="seams">
 <h2>Seams<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#seams" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#seams'">¶</a></h2>
 <p>Three, each one keyword argument, each defaulting to something that genuinely works:</p>
@@ -349,6 +366,7 @@
 </span><span id="line-2">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[local]"</span><span class="w">     </span><span class="c1"># + Fast-DetectGPT and Binoculars: offline, no API key, opt-in</span>
 </span><span id="line-3">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[api]"</span><span class="w">       </span><span class="c1"># + vendor detector adapters</span>
 </span><span id="line-4">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[mcp]"</span><span class="w">       </span><span class="c1"># + the MCP server (`ductus-mcp`)</span>
+</span><span id="line-5">pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"ductus[http]"</span><span class="w">      </span><span class="c1"># + the HTTP service (`ductus-http`) and its typed client</span>
 </span></code></pre></div>
 </div>
 </section>
@@ -362,7 +380,7 @@
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-18 13:01 UTC from <a href="https://github.com/thorwhalen/ductus/commit/e68b6ca4ea61742e33343318549253f054903508">e68b6ca</a> (main) · ductus 0.0.7 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-22 10:25 UTC from <a href="https://github.com/thorwhalen/ductus/commit/5b4381f92db0936adad62ca78a29cb33635467fc">5b4381f</a> (main) · ductus 0.0.8 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -378,6 +396,7 @@
 </li>
 <li><a :data-current="activeSection === '#agent-skills'" class="reference internal" href="#agent-skills">Agent skills</a></li>
 <li><a :data-current="activeSection === '#mcp'" class="reference internal" href="#mcp">MCP</a></li>
+<li><a :data-current="activeSection === '#http'" class="reference internal" href="#http">HTTP</a></li>
 <li><a :data-current="activeSection === '#seams'" class="reference internal" href="#seams">Seams</a></li>
 <li><a :data-current="activeSection === '#spans-survive-editing'" class="reference internal" href="#spans-survive-editing">Spans survive editing</a></li>
 <li><a :data-current="activeSection === '#relationship-to-deslop'" class="reference internal" href="#relationship-to-deslop">Relationship to <code class="docutils literal notranslate"><span class="pre">deslop</span></code></a></li>
@@ -396,7 +415,7 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=bbaf98b3"></script>
+<script src="_static/documentation_options.js?v=53b53b71"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

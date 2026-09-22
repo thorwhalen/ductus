@@ -6,25 +6,26 @@
 ## Pages
 
 - [ductus](index.html.md): Gauge which parts of a text read as machine-written, and say why — with every finding anchored to th...
-- [API reference](api.html.md): | [`ductus`](_autosummary/ductus.html.md#module-ductus)   | ductus -- gauge which parts of a text re...
+- [API reference](api.html.md): | &#96;ductus&#96;   | ductus -- gauge which parts of a text read as machine-written, and why.   |
 - [ductus](_autosummary/ductus.html.md): ductus – gauge which parts of a text read as machine-written, and why.
 - [ductus.base](_autosummary/ductus.base.html.md): The data model: where a finding lives, what it claims, and how much it weighs.
 - [ductus.core](_autosummary/ductus.core.html.md): The core: stream segments, or take the whole report. Everything else is a surface.
-- [ductus.curvature](_autosummary/ductus.curvature.html.md): Model-based detectors – the `[local]` extra. Two more functions of the same shape.
+- [ductus.curvature](_autosummary/ductus.curvature.html.md): Model-based detectors – the &#96;&#91;local&#93;&#96; extra. Two more functions of the same shape.
 - [ductus.data](_autosummary/ductus.data.html.md): Page content
-- [ductus.detect](_autosummary/ductus.detect.html.md): The detectors – the `detectors=` seam. Each one turns a span into evidence.
+- [ductus.detect](_autosummary/ductus.detect.html.md): The detectors – the &#96;detectors=&#96; seam. Each one turns a span into evidence.
+- [ductus.http](_autosummary/ductus.http.html.md): The HTTP surface: the same verbs the CLI dispatches, served over HTTP.
 - [ductus.mcp](_autosummary/ductus.mcp.html.md): The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.
 - [ductus.render](_autosummary/ductus.render.html.md): Turning a report into something a person reads: JSON, Markdown, or HTML.
-- [ductus.score](_autosummary/ductus.score.html.md): Turning evidence into a lean – the `aggregate=` seam.
-- [ductus.segment](_autosummary/ductus.segment.html.md): Cutting a text into the units that get scored – the `segmenter=` seam.
+- [ductus.score](_autosummary/ductus.score.html.md): Turning evidence into a lean – the &#96;aggregate=&#96; seam.
+- [ductus.segment](_autosummary/ductus.segment.html.md): Cutting a text into the units that get scored – the &#96;segmenter=&#96; seam.
 - [ductus.tells](_autosummary/ductus.tells.html.md): The tells catalogue: named regular-expression patterns, tiered by confidence.
 - [ductus.tools](_autosummary/ductus.tools.html.md): The verb SSOT: plain functions, JSON-ready in, JSON-ready out.
-- [For AI agents](ai-agents.html.md): `ductus` ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on **2026-09-18 13:01 UTC** from commit <a href="https://github.com/tho...
+- [For AI agents](ai-agents.html.md): &#96;ductus&#96; ships artifacts for coding agents alongside its code. This page lists
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-09-22 10:25 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
 
----
+## Optional
 
-For more comprehensive documentation, see [ductus.md](ductus.md)
+- [ductus.md](ductus.md): Complete documentation in a single file.
 
 ## Build
 

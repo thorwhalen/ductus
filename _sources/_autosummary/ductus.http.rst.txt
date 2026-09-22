@@ -1,0 +1,21 @@
+ductus.http
+===========
+
+.. automodule:: ductus.http
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      ROUTED_FUNCS
+      DESCRIPTION
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      export_client
+      main
+      mk_app
+   

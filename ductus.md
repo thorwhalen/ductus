@@ -1,4 +1,4 @@
-> built 2026-09-18 13:01 UTC from e68b6ca (main) · ductus 0.0.7. Details: build_info.json
+> built 2026-09-22 10:25 UTC from 5b4381f (main) · ductus 0.0.8. Details: build_info.json
 
 # index.html.md
 
@@ -145,6 +145,24 @@ ductus-mcp                    # stdio, for a local agent host
 
 There is **no second verb list**. `ductus.mcp.TOOL_REFS` is derived from the one list the CLI already dispatches, so the two surfaces cannot drift — and a verb that changes the host declares that at its own definition rather than by appearing in some other list. `middleware=` and `auth=` pass straight through `mk_mcp()` for a deployed server.
 
+## HTTP
+
+The same verbs again, over HTTP:
+
+```bash
+pip install "ductus[http]"
+ductus-http                   # http://127.0.0.1:8000, and /docs for the OpenAPI UI
+```
+
+```bash
+curl -s localhost:8000/gauge -H 'content-type: application/json' \
+  -d '{"source": "Great question! Let us delve in.", "format": "json"}'
+```
+
+Same rule as MCP, one layer further: `ductus.http.ROUTED_FUNCS` is *derived* from the CLI’s list, so a third surface still means no second implementation and no parity test. The typed TypeScript client the frontend imports is generated from this app’s own OpenAPI (`ductus.http.export_client()`), so a changed Python signature becomes a TypeScript type error rather than a runtime surprise.
+
+**This surface found something the other two could not.** `gauge(source=...)` reads a file when the string names one, and `gauge(out=...)` writes one. That is exactly right when you typed the command yourself — and an arbitrary file read and an arbitrary file write when the caller is a stranger. Neither the CLI nor a local stdio MCP host can see it, because on those surfaces it is not a bug. The verbs now declare which of their parameters address the filesystem (`@host_paths(source="read", out="write")`, a sibling of the existing `@host_mutating`), and the HTTP adapter refuses them by reading that declaration rather than by knowing anything about `gauge`. `mk_app(guard_host_paths=False)` turns it off for a loopback service you run for yourself.
+
 ## Seams
 
 Three, each one keyword argument, each defaulting to something that genuinely works:
@@ -182,6 +200,7 @@ pip install ductus              # the core: pyyaml and cw, nothing else
 pip install "ductus[local]"     # + Fast-DetectGPT and Binoculars: offline, no API key, opt-in
 pip install "ductus[api]"       # + vendor detector adapters
 pip install "ductus[mcp]"       # + the MCP server (`ductus-mcp`)
+pip install "ductus[http]"      # + the HTTP service (`ductus-http`) and its typed client
 ```
 
 ## References
@@ -1125,12 +1144,122 @@ True
 | [`curvature`](_autosummary/ductus.curvature.html.md#module-ductus.curvature) | Model-based detectors -- the `[local]` extra.                                    |
 | [`data`](_autosummary/ductus.data.html.md#module-ductus.data)           |                                                                                  |
 | [`detect`](_autosummary/ductus.detect.html.md#module-ductus.detect)       | The detectors -- the `detectors=` seam.                                          |
+| [`http`](_autosummary/ductus.http.html.md#module-ductus.http)           | The HTTP surface: the same verbs the CLI dispatches, served over HTTP.           |
 | [`mcp`](_autosummary/ductus.mcp.html.md#module-ductus.mcp)             | The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.        |
 | [`render`](_autosummary/ductus.render.html.md#module-ductus.render)       | Turning a report into something a person reads: JSON, Markdown, or HTML.         |
 | [`score`](_autosummary/ductus.score.html.md#module-ductus.score)         | Turning evidence into a lean -- the `aggregate=` seam.                           |
 | [`segment`](_autosummary/ductus.segment.html.md#module-ductus.segment)     | Cutting a text into the units that get scored -- the `segmenter=` seam.          |
 | [`tells`](_autosummary/ductus.tells.html.md#module-ductus.tells)         | The tells catalogue: named regular-expression patterns, tiered by confidence.    |
 | [`tools`](_autosummary/ductus.tools.html.md#module-ductus.tools)         | The verb SSOT: plain functions, JSON-ready in, JSON-ready out.                   |
+
+
+# _autosummary/ductus.http.html.md
+
+# ductus.http
+
+The HTTP surface: the same verbs the CLI dispatches, served over HTTP.
+
+Like [`ductus.mcp`](_autosummary/ductus.mcp.html.md#module-ductus.mcp), there is **no second verb list here**. [`ROUTED_FUNCS`](_autosummary/ductus.http.html.md#ductus.http.ROUTED_FUNCS)
+is *derived* from `ductus.tools._dispatch_funcs` – the one list `cw` builds
+the CLI from – so no two surfaces can drift apart and there is no parity test to
+write. `qh.mk_app` turns those callables into a FastAPI app; `qh.export_ts_client`
+turns the same app’s OpenAPI into the typed client the frontend imports. One registry,
+three emitters.
+
+The core did not change to make this work, which is the roadmap’s standing claim.
+`ductus.tools` still imports nothing about HTTP, and `qh` lives in the `[http]`
+extra, so `import ductus` is unaffected by installing it.
+
+**What this surface found.** A verb list that is safe at a CLI is not automatically
+safe when the caller is a stranger. `gauge(source=...)` reads a file when the string
+names one, and `gauge(out=...)` writes one – exactly right when you typed the
+command yourself, an arbitrary file read and an arbitrary file write when you did not.
+Neither the CLI nor a local stdio MCP host can see that, because on those surfaces it
+is not a bug. `_guard()` refuses both, driven by the `host_paths` declaration on
+the verb itself rather than by this module knowing anything about `gauge`.
+
+Run it:
+
+```default
+pip install 'ductus[http]'
+ductus-http                     # http://127.0.0.1:8000, /docs for the OpenAPI UI
+```
+
+```pycon
+>>> ROUTED_FUNCS[0].__name__
+'gauge'
+>>> "install_skills" in [f.__name__ for f in ROUTED_FUNCS]  # host-mutating, left out
+False
+```
+
+### Module Attributes
+
+| [`ROUTED_FUNCS`](_autosummary/ductus.http.html.md#ductus.http.ROUTED_FUNCS)   | One callable per read-only verb, derived from the CLI's own list.   |
+|-----------------------------------------------------------------|---------------------------------------------------------------------|
+| [`DESCRIPTION`](_autosummary/ductus.http.html.md#ductus.http.DESCRIPTION)    | The service description, carried into the OpenAPI document.         |
+
+### Functions
+
+| [`export_client`](_autosummary/ductus.http.html.md#ductus.http.export_client)(\*[, class_name, base_url, app])   | The TypeScript client for this surface, generated from its own OpenAPI.   |
+|---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| [`main`](_autosummary/ductus.http.html.md#ductus.http.main)()                                           | Serve on `127.0.0.1:8000`.                                                |
+| [`mk_app`](_autosummary/ductus.http.html.md#ductus.http.mk_app)(\*[, funcs, title, description, ...])     | Build a FastAPI app serving `funcs`, one POST endpoint per verb.          |
+
+### ductus.http.DESCRIPTION *= 'Gauge which parts of a text read as machine-written, with every finding anchored to\\nthe exact characters that carry it.\\n\\nThis service never returns a percentage, a confidence, or a verdict about a person,\\nand a caller should not synthesise one from what it does return. It gives a lean in\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\nwith a quote that can be checked against the text.\\n\\nIts false-positive rate on human-written text is measured: with the default\\ndetectors, 6.0% of 350 human-written documents are called \`leans-machine\`. Every one\\nof those is wrong. A flagged \*sentence\* is much better evidence than a flagged\\n\*document\* -- the per-sentence rate is 0.4-2%.\\n\\nThe bias runs toward formal, fluent, essayistic prose, not toward simple prose. In\\nthe measured corpus the native-speaker control was the most-accused group.\\n\\n"No findings" is a weak result, not a clean bill.\\n'*
+
+The service description, carried into the OpenAPI document. An HTTP client that
+reads anything at all reads this, so the limits belong here and not only in a
+README. The numbers are the measured ones – see
+`misc/docs/reducing-false-accusations.md`.
+
+### ductus.http.ROUTED_FUNCS *: [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[Callable](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[...], [Any](https://docs.python.org/3/library/typing.html#typing.Any)], ...]* *= (<function gauge>, <function detectors>, <function segmenters>, <function tells>)*
+
+One callable per read-only verb, derived from the CLI’s own list. Never
+hand-written. The filter reads `mutates_host`, declared at each verb’s own
+definition – the same rule, and the same reason, as [`ductus.mcp`](_autosummary/ductus.mcp.html.md#module-ductus.mcp).
+
+### ductus.http.export_client(, class_name='DuctusClient', base_url='', app=None)
+
+The TypeScript client for this surface, generated from its own OpenAPI.
+
+The frontend imports the result rather than hand-writing fetch calls, so a
+changed Python signature becomes a TypeScript type error instead of a runtime
+surprise. `base_url` defaults to empty, which makes every request relative –
+correct when the app and the UI are served from the same origin, as
+[`mk_app()`](_autosummary/ductus.http.html.md#ductus.http.mk_app) arranges.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### ductus.http.main()
+
+Serve on `127.0.0.1:8000`. The `ductus-http` console script.
+
+Host and port come from `DUCTUS_HTTP_HOST` / `DUCTUS_HTTP_PORT` so a
+container can move them without a code change. The default binds to loopback:
+a tool that can call a text machine-written should not appear on a network
+because someone ran it to look at it.
+
+* **Return type:**
+  [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
+### ductus.http.mk_app(\*, funcs=(<function gauge>, <function detectors>, <function segmenters>, <function tells>), title='ductus', description='Gauge which parts of a text read as machine-written, with every finding anchored to\\\\nthe exact characters that carry it.\\\\n\\\\nThis service never returns a percentage, a confidence, or a verdict about a person,\\\\nand a caller should not synthesise one from what it does return. It gives a lean in\\\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\\\nwith a quote that can be checked against the text.\\\\n\\\\nIts false-positive rate on human-written text is measured: with the default\\\\ndetectors, 6.0% of 350 human-written documents are called \`leans-machine\`. Every one\\\\nof those is wrong. A flagged \*sentence\* is much better evidence than a flagged\\\\n\*document\* -- the per-sentence rate is 0.4-2%.\\\\n\\\\nThe bias runs toward formal, fluent, essayistic prose, not toward simple prose. In\\\\nthe measured corpus the native-speaker control was the most-accused group.\\\\n\\\\n"No findings" is a weak result, not a clean bill.\\\\n', guard_host_paths=True, ui=None, \*\*qh_kwargs)
+
+Build a FastAPI app serving `funcs`, one POST endpoint per verb.
+
+`guard_host_paths` is the seam for the one case that wants it off: a service
+bound to loopback for your own use, where reading a local file by name is the
+convenience it is at a CLI. It defaults to on, because the safe reading of an
+ambiguous deployment is the one that does not hand out the filesystem.
+
+`ui` is a directory of built frontend assets to serve at `/`. When it is
+`None` the default location is used if it exists and is skipped if it does not,
+so the API works with no frontend built and the two are served same-origin when
+one is – which is also what lets a browser test drive it without CORS.
+
+Extra keyword arguments pass straight through to `qh.mk_app`.
+
+Raises [`ImportError`](https://docs.python.org/3/builtins/exceptions.html#ImportError) with an actionable message when the extra is missing.
 
 
 # _autosummary/ductus.mcp.html.md
@@ -1186,7 +1315,7 @@ False
 |----------------------------------------------------------------------------------------------|-----------------------------------------------|
 | [`mk_mcp`](_autosummary/ductus.mcp.html.md#ductus.mcp.mk_mcp)(\*[, name, refs, instructions, ...]) | Build an MCP server exposing `refs` as tools. |
 
-### ductus.mcp.INSTRUCTIONS *= 'Gauge which parts of a text read as machine-written, with every finding anchored to\\nthe exact characters that carry it.\\n\\nThis server never returns a percentage, a confidence, or a verdict about a person, and\\na caller should not synthesise one from what it does return. It gives a lean in\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\nwith a quote that can be checked against the text.\\n\\nIts false-positive rate on human-written text is measured and is not small: with the\\ndefault detectors, about one document in five that a person wrote is called\\nleans-machine. A flagged \*sentence\* is much better evidence than a flagged \*document\*.\\nThe bias runs toward formal, fluent, essayistic prose rather than toward simple prose.\\n\\n"No findings" is a weak result, not a clean bill.\\n'*
+### ductus.mcp.INSTRUCTIONS *= 'Gauge which parts of a text read as machine-written, with every finding anchored to\\nthe exact characters that carry it.\\n\\nThis server never returns a percentage, a confidence, or a verdict about a person, and\\na caller should not synthesise one from what it does return. It gives a lean in\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\nwith a quote that can be checked against the text.\\n\\nIts false-positive rate on human-written text is measured: with the default detectors,\\n6.0% of 350 human-written documents are called leans-machine, and every one of those is\\nwrong. A flagged \*sentence\* is much better evidence than a flagged \*document\* -- the\\nper-sentence rate is 0.4-2%. The bias runs toward formal, fluent, essayistic prose\\nrather than toward simple prose; in the measured corpus the native-speaker control was\\nthe most-accused group.\\n\\n"No findings" is a weak result, not a clean bill.\\n'*
 
 What the server tells a model about itself. The limits are here rather than in a
 README because this is the only description an MCP client ever reads.
@@ -1202,7 +1331,7 @@ Serve on stdio. The `ductus-mcp` console script.
 * **Return type:**
   [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### ductus.mcp.mk_mcp(, name='ductus', refs=('ductus.tools:gauge', 'ductus.tools:detectors', 'ductus.tools:segmenters', 'ductus.tools:tells'), instructions='Gauge which parts of a text read as machine-written, with every finding anchored to\\\\nthe exact characters that carry it.\\\\n\\\\nThis server never returns a percentage, a confidence, or a verdict about a person, and\\\\na caller should not synthesise one from what it does return. It gives a lean in\\\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\\\nwith a quote that can be checked against the text.\\\\n\\\\nIts false-positive rate on human-written text is measured and is not small: with the\\\\ndefault detectors, about one document in five that a person wrote is called\\\\nleans-machine. A flagged \*sentence\* is much better evidence than a flagged \*document\*.\\\\nThe bias runs toward formal, fluent, essayistic prose rather than toward simple prose.\\\\n\\\\n"No findings" is a weak result, not a clean bill.\\\\n', middleware=None, auth=None)
+### ductus.mcp.mk_mcp(, name='ductus', refs=('ductus.tools:gauge', 'ductus.tools:detectors', 'ductus.tools:segmenters', 'ductus.tools:tells'), instructions='Gauge which parts of a text read as machine-written, with every finding anchored to\\\\nthe exact characters that carry it.\\\\n\\\\nThis server never returns a percentage, a confidence, or a verdict about a person, and\\\\na caller should not synthesise one from what it does return. It gives a lean in\\\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\\\nwith a quote that can be checked against the text.\\\\n\\\\nIts false-positive rate on human-written text is measured: with the default detectors,\\\\n6.0% of 350 human-written documents are called leans-machine, and every one of those is\\\\nwrong. A flagged \*sentence\* is much better evidence than a flagged \*document\* -- the\\\\nper-sentence rate is 0.4-2%. The bias runs toward formal, fluent, essayistic prose\\\\nrather than toward simple prose; in the measured corpus the native-speaker control was\\\\nthe most-accused group.\\\\n\\\\n"No findings" is a weak result, not a clean bill.\\\\n', middleware=None, auth=None)
 
 Build an MCP server exposing `refs` as tools.
 
@@ -1760,6 +1889,7 @@ this one list. Adding a surface never means writing a second implementation.
 |----------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
 | [`gauge`](_autosummary/ductus.tools.html.md#ductus.tools.gauge)(source, \*[, format, segmenter, ...]) | Gauge how machine-written a text reads, and render the result.             |
 | [`host_mutating`](_autosummary/ductus.tools.html.md#ductus.tools.host_mutating)(fn)                           | Mark a verb that changes the machine it runs on, rather than only reading. |
+| [`host_paths`](_autosummary/ductus.tools.html.md#ductus.tools.host_paths)(\*\*roles)                       | Declare which parameters of a verb address the machine's own filesystem.   |
 | [`install_skills`](_autosummary/ductus.tools.html.md#ductus.tools.install_skills)(\*[, target, write])         | Link this package's shipped skills into an agent host's skills directory.  |
 | [`segmenters`](_autosummary/ductus.tools.html.md#ductus.tools.segmenters)()                                | The available ways of cutting the text into scored units.                  |
 | [`tells`](_autosummary/ductus.tools.html.md#ductus.tools.tells)(\*[, tier])                           | The tells catalogue, optionally filtered to one tier (E, W or S).          |
@@ -1807,6 +1937,29 @@ remote MCP caller did not necessarily, so [`ductus.mcp`](_autosummary/ductus.mcp
 True
 >>> getattr(segmenters, "mutates_host", False)
 False
+```
+
+### ductus.tools.host_paths(\*\*roles)
+
+Declare which parameters of a verb address the machine’s own filesystem.
+
+A sibling of [`host_mutating()`](_autosummary/ductus.tools.html.md#ductus.tools.host_mutating), and the same idea: the fact is stated once,
+at the verb’s own definition, and every surface reads it from there. A surface
+that never writes a second verb list also never writes a second list of which
+arguments are dangerous on it.
+
+`role` is `"read"` for a parameter the verb may read a file from, and
+`"write"` for one it may write a file to. Both are ordinary, correct behaviour
+at a CLI, where the caller and the filesystem belong to the same person. They are
+an arbitrary file read and an arbitrary file write on a surface where they do not
+– so [`ductus.http`](_autosummary/ductus.http.html.md#module-ductus.http) refuses them, driven by this declaration rather than by
+knowing anything about `gauge`.
+
+```pycon
+>>> sorted(gauge.host_paths.items())
+[('judgments', 'read'), ('out', 'write'), ('source', 'read')]
+>>> getattr(segmenters, "host_paths", {})
+{}
 ```
 
 ### ductus.tools.install_skills(, target=None, write=False)
@@ -1857,16 +2010,18 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-18 13:01 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/e68b6ca4ea61742e33343318549253f054903508"><code>e68b6ca</code></a> on branch <code>main</code>, for **ductus 0.0.7** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-22 10:25 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/5b4381f92db0936adad62ca78a29cb33635467fc"><code>5b4381f</code></a> on branch <code>main</code>, for **ductus 0.0.8** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.0.8) is behind the latest release on PyPI (0.0.9): `pip install ductus` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/e68b6ca4ea61742e33343318549253f054903508"><code>e68b6ca4ea61742e33343318549253f054903508</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/5b4381f92db0936adad62ca78a29cb33635467fc"><code>5b4381f92db0936adad62ca78a29cb33635467fc</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -1877,9 +2032,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35347666837">35347666837</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35715707236">35715707236</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>e68b6ca4ea61742e33343318549253f054903508</code> (in the history of the built commit) |
+| Event commit | <code>5b4381f92db0936adad62ca78a29cb33635467fc</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1904,13 +2059,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.7/">0.0.7</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ductus/0.0.9/">0.0.9</a>, newer than the documented version (0.0.8).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout e68b6ca4ea61742e33343318549253f054903508
+git checkout 5b4381f92db0936adad62ca78a29cb33635467fc
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

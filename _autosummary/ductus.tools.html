@@ -23,6 +23,8 @@
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link href="ductus.tools.html.md" rel="alternate" type="text/markdown"/>
 <link href="../llms.txt" rel="describedby" type="text/markdown"/>
+<link href="ductus.tools.html.md" rel="alternate" type="text/markdown"/>
+<link href="llms.txt" rel="describedby"/>
 <title>ductus.tools | ductus</title>
 <meta content="ductus.tools | ductus" property="og:title"/>
 <meta content="ductus.tools | ductus" name="twitter:title"/>
@@ -86,6 +88,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.data.html">ductus.data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.detect.html">ductus.detect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ductus.http.html">ductus.http</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.mcp.html">ductus.mcp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.render.html">ductus.render</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.score.html">ductus.score</a></li>
@@ -148,13 +151,16 @@ this one list. Adding a surface never means writing a second implementation.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#ductus.tools.host_mutating" title="ductus.tools.host_mutating"><code class="xref py py-obj docutils literal notranslate"><span class="pre">host_mutating</span></code></a>(fn)</p></td>
 <td><p>Mark a verb that changes the machine it runs on, rather than only reading.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#ductus.tools.install_skills" title="ductus.tools.install_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_skills</span></code></a>(*[, target, write])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#ductus.tools.host_paths" title="ductus.tools.host_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">host_paths</span></code></a>(**roles)</p></td>
+<td><p>Declare which parameters of a verb address the machine's own filesystem.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.tools.install_skills" title="ductus.tools.install_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_skills</span></code></a>(*[, target, write])</p></td>
 <td><p>Link this package's shipped skills into an agent host's skills directory.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.tools.segmenters" title="ductus.tools.segmenters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">segmenters</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#ductus.tools.segmenters" title="ductus.tools.segmenters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">segmenters</span></code></a>()</p></td>
 <td><p>The available ways of cutting the text into scored units.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#ductus.tools.tells" title="ductus.tools.tells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tells</span></code></a>(*[, tier])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ductus.tools.tells" title="ductus.tools.tells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tells</span></code></a>(*[, tier])</p></td>
 <td><p>The tells catalogue, optionally filtered to one tier (E, W or S).</p></td>
 </tr>
 </tbody>
@@ -205,6 +211,29 @@ remote MCP caller did not necessarily, so <a class="reference internal" href="du
 </span><span id="line-4"><span class="go">False</span>
 </span></code></pre></div>
 </div>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="ductus.tools.host_paths">
+<span class="sig-prename descclassname"><span class="pre">ductus.tools.</span></span><span class="sig-name descname"><span class="pre">host_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">roles</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/tools.html#host_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.tools.host_paths" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.tools.host_paths'">¶</a></dt>
+<dd><p>Declare which parameters of a verb address the machine’s own filesystem.</p>
+<p>A sibling of <a class="reference internal" href="#ductus.tools.host_mutating" title="ductus.tools.host_mutating"><code class="xref py py-func docutils literal notranslate"><span class="pre">host_mutating()</span></code></a>, and the same idea: the fact is stated once,
+at the verb’s own definition, and every surface reads it from there. A surface
+that never writes a second verb list also never writes a second list of which
+arguments are dangerous on it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">role</span></code> is <code class="docutils literal notranslate"><span class="pre">"read"</span></code> for a parameter the verb may read a file from, and
+<code class="docutils literal notranslate"><span class="pre">"write"</span></code> for one it may write a file to. Both are ordinary, correct behaviour
+at a CLI, where the caller and the filesystem belong to the same person. They are
+an arbitrary file read and an arbitrary file write on a surface where they do not
+– so <a class="reference internal" href="ductus.http.html#module-ductus.http" title="ductus.http"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ductus.http</span></code></a> refuses them, driven by this declaration rather than by
+knowing anything about <code class="docutils literal notranslate"><span class="pre">gauge</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">gauge</span><span class="o">.</span><span class="n">host_paths</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+</span><span id="line-2"><span class="go">[('judgments', 'read'), ('out', 'write'), ('source', 'read')]</span>
+</span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="nb">getattr</span><span class="p">(</span><span class="n">segmenters</span><span class="p">,</span> <span class="s2">"host_paths"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-4"><span class="go">{}</span>
+</span></code></pre></div>
+</div>
+<dl class="field-list simple">
+</dl>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="ductus.tools.install_skills">
@@ -259,6 +288,7 @@ remote MCP caller did not necessarily, so <a class="reference internal" href="du
 <li><a :data-current="activeSection === '#ductus.tools.detectors'" class="reference internal" href="#ductus.tools.detectors"><code class="docutils literal notranslate"><span class="pre">detectors()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.tools.gauge'" class="reference internal" href="#ductus.tools.gauge"><code class="docutils literal notranslate"><span class="pre">gauge()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.tools.host_mutating'" class="reference internal" href="#ductus.tools.host_mutating"><code class="docutils literal notranslate"><span class="pre">host_mutating()</span></code></a></li>
+<li><a :data-current="activeSection === '#ductus.tools.host_paths'" class="reference internal" href="#ductus.tools.host_paths"><code class="docutils literal notranslate"><span class="pre">host_paths()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.tools.install_skills'" class="reference internal" href="#ductus.tools.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.tools.segmenters'" class="reference internal" href="#ductus.tools.segmenters"><code class="docutils literal notranslate"><span class="pre">segmenters()</span></code></a></li>
 <li><a :data-current="activeSection === '#ductus.tools.tells'" class="reference internal" href="#ductus.tools.tells"><code class="docutils literal notranslate"><span class="pre">tells()</span></code></a></li>
@@ -275,7 +305,7 @@ remote MCP caller did not necessarily, so <a class="reference internal" href="du
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=bbaf98b3"></script>
+<script src="../_static/documentation_options.js?v=53b53b71"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

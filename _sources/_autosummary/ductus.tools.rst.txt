@@ -11,6 +11,7 @@ ductus.tools
       detectors
       gauge
       host_mutating
+      host_paths
       install_skills
       segmenters
       tells

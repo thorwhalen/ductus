@@ -23,6 +23,8 @@
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link href="ductus.html.md" rel="alternate" type="text/markdown"/>
 <link href="../llms.txt" rel="describedby" type="text/markdown"/>
+<link href="ductus.html.md" rel="alternate" type="text/markdown"/>
+<link href="llms.txt" rel="describedby"/>
 <title>ductus</title>
 <meta content="ductus" property="og:title"/>
 <meta content="ductus" name="twitter:title"/>
@@ -86,6 +88,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.data.html">ductus.data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.detect.html">ductus.detect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ductus.http.html">ductus.http</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.mcp.html">ductus.mcp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.render.html">ductus.render</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.score.html">ductus.score</a></li>
@@ -544,22 +547,25 @@ larger document gets offsets into the document.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="ductus.detect.html#module-ductus.detect" title="ductus.detect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">detect</span></code></a></p></td>
 <td><p>The detectors -- the <code class="docutils literal notranslate"><span class="pre">detectors=</span></code> seam.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ductus.mcp.html#module-ductus.mcp" title="ductus.mcp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcp</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ductus.http.html#module-ductus.http" title="ductus.http"><code class="xref py py-obj docutils literal notranslate"><span class="pre">http</span></code></a></p></td>
+<td><p>The HTTP surface: the same verbs the CLI dispatches, served over HTTP.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="ductus.mcp.html#module-ductus.mcp" title="ductus.mcp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcp</span></code></a></p></td>
 <td><p>The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ductus.render.html#module-ductus.render" title="ductus.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ductus.render.html#module-ductus.render" title="ductus.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
 <td><p>Turning a report into something a person reads: JSON, Markdown, or HTML.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ductus.score.html#module-ductus.score" title="ductus.score"><code class="xref py py-obj docutils literal notranslate"><span class="pre">score</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ductus.score.html#module-ductus.score" title="ductus.score"><code class="xref py py-obj docutils literal notranslate"><span class="pre">score</span></code></a></p></td>
 <td><p>Turning evidence into a lean -- the <code class="docutils literal notranslate"><span class="pre">aggregate=</span></code> seam.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ductus.segment.html#module-ductus.segment" title="ductus.segment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">segment</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ductus.segment.html#module-ductus.segment" title="ductus.segment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">segment</span></code></a></p></td>
 <td><p>Cutting a text into the units that get scored -- the <code class="docutils literal notranslate"><span class="pre">segmenter=</span></code> seam.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ductus.tells.html#module-ductus.tells" title="ductus.tells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tells</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ductus.tells.html#module-ductus.tells" title="ductus.tells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tells</span></code></a></p></td>
 <td><p>The tells catalogue: named regular-expression patterns, tiered by confidence.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ductus.tools.html#module-ductus.tools" title="ductus.tools"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tools</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ductus.tools.html#module-ductus.tools" title="ductus.tools"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tools</span></code></a></p></td>
 <td><p>The verb SSOT: plain functions, JSON-ready in, JSON-ready out.</p></td>
 </tr>
 </tbody>
@@ -610,7 +616,7 @@ larger document gets offsets into the document.</p>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=bbaf98b3"></script>
+<script src="../_static/documentation_options.js?v=53b53b71"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

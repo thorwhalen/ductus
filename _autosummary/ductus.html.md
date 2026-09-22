@@ -361,6 +361,7 @@ True
 | [`curvature`](ductus.curvature.html.md#module-ductus.curvature) | Model-based detectors -- the `[local]` extra.                                    |
 | [`data`](ductus.data.html.md#module-ductus.data)           |                                                                                  |
 | [`detect`](ductus.detect.html.md#module-ductus.detect)       | The detectors -- the `detectors=` seam.                                          |
+| [`http`](ductus.http.html.md#module-ductus.http)           | The HTTP surface: the same verbs the CLI dispatches, served over HTTP.           |
 | [`mcp`](ductus.mcp.html.md#module-ductus.mcp)             | The MCP surface: the same verbs the CLI dispatches, emitted as MCP tools.        |
 | [`render`](ductus.render.html.md#module-ductus.render)       | Turning a report into something a person reads: JSON, Markdown, or HTML.         |
 | [`score`](ductus.score.html.md#module-ductus.score)         | Turning evidence into a lean -- the `aggregate=` seam.                           |
