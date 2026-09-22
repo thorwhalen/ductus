@@ -123,7 +123,10 @@ def test_html_and_markdown_formats(client):
 
 
 def test_a_bad_format_is_an_error_not_a_silent_default(client):
-    assert client.post("/gauge", json={"source": "x", "format": "pdf"}).status_code >= 400
+    """And 422, not 500: the caller asked for something invalid, nothing crashed."""
+    r = client.post("/gauge", json={"source": "x", "format": "pdf"})
+    assert r.status_code == 422
+    assert "format must be one of" in r.text
 
 
 # ------------------------------------------------------- the filesystem is not ours
@@ -135,8 +138,9 @@ def test_a_remote_caller_cannot_read_a_file_from_the_server(client, tmp_path):
     local.write_text("content that belongs to whoever runs the server", encoding="utf-8")
 
     r = client.post("/gauge", json={"source": str(local), "format": "json"})
-    assert r.status_code >= 400, "the server read its own filesystem for a stranger"
+    assert r.status_code == 422, "the server read its own filesystem for a stranger"
     assert "not available over HTTP" in r.text
+    assert local.read_text() not in r.text
 
     # And the guard is exact, not a guess at path-shaped strings: a string that
     # merely looks like a path, but names nothing, is ordinary text to be scored.
@@ -149,13 +153,13 @@ def test_a_remote_caller_cannot_read_a_file_from_the_server(client, tmp_path):
 def test_a_remote_caller_cannot_write_a_file_on_the_server(client, tmp_path):
     target = tmp_path / "written_by_a_stranger.txt"
     r = client.post("/gauge", json={"source": "hello", "out": str(target)})
-    assert r.status_code >= 400
+    assert r.status_code == 422
     assert not target.exists()
 
 
 def test_stdin_is_refused(client):
     """``-`` means stdin, which on a server is meaningless or a hang."""
-    assert client.post("/gauge", json={"source": "-"}).status_code >= 400
+    assert client.post("/gauge", json={"source": "-"}).status_code == 422
 
 
 def test_judgments_is_guarded_too(client, tmp_path):
@@ -163,7 +167,7 @@ def test_judgments_is_guarded_too(client, tmp_path):
     local = tmp_path / "judgments.json"
     local.write_text("[]", encoding="utf-8")
     r = client.post("/gauge", json={"source": "hello", "judgments": str(local)})
-    assert r.status_code >= 400
+    assert r.status_code == 422
 
 
 def test_the_guard_is_generic_not_a_list_of_verbs():

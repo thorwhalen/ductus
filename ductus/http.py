@@ -174,9 +174,39 @@ def mk_app(
         ) from e
 
     routed = [_guard(fn) for fn in funcs] if guard_host_paths else list(funcs)
+    routed = [_as_http_error(fn) for fn in routed]
     app = _mk_app(routed, title=title, description=description, **qh_kwargs)
     _mount_ui(app, ui)
     return app
+
+
+def _as_http_error(fn: Callable[..., Any]) -> Callable[..., Any]:
+    """Translate a rejected argument into 422 instead of letting it read as a crash.
+
+    Every verb signals a bad argument the ordinary Python way, by raising
+    ``ValueError`` -- ``gauge`` for an unknown ``format``, :func:`_guard` for a path
+    aimed at the server. ``qh`` wraps anything that is not already an
+    ``HTTPException`` into a 500, so without this each one reaches the caller as
+    "the service is broken" when what happened is that they asked for something it
+    will not do. A frontend that believes a 500 shows "something went wrong" in place
+    of the reason, and a reader who is told the server crashed learns nothing.
+
+    A status code is an HTTP concern, so the translation lives in the HTTP adapter and
+    the core keeps raising plain ``ValueError`` for every surface. One generic
+    wrapper: it knows no verb's name.
+    """
+    import functools
+
+    from fastapi import HTTPException
+
+    @functools.wraps(fn)
+    def translating(*args: Any, **kwargs: Any) -> Any:
+        try:
+            return fn(*args, **kwargs)
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+
+    return translating
 
 
 def _default_ui_dir() -> str:
