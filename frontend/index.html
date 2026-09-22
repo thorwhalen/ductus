@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ductus — where this reads as machine-written</title>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>Where this reads as machine-written</h1>
+        <p class="sub">
+          Paste a text, read it, edit it, read it again. Every finding is anchored to
+          the exact characters that carry it &mdash; and it is
+          <strong>evidence, not a verdict about a person</strong>.
+        </p>
+        <div class="actions">
+          <button id="read" type="button" class="primary">Read this text</button>
+          <button id="sample" type="button">Load a sample</button>
+          <span class="hint">&#8984;/Ctrl&nbsp;+&nbsp;Enter</span>
+        </div>
+      </header>
+      <div id="banner"></div>
+      <main>
+        <div id="editor-pane">
+          <div id="editor" aria-label="The text being read"></div>
+        </div>
+        <div id="sidebar"></div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

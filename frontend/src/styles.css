@@ -1,0 +1,247 @@
+/*
+ * The colour ramp and layout.
+ *
+ * The ramp below is restated from `ductus/render.py`'s `_CSS`, on purpose and at a
+ * known cost: the shipped HTML report and this UI must not disagree about what orange
+ * means, and factoring six OKLCH stops out of a Python string literal costs more than
+ * it saves. If the ramp is ever tuned, both files need the change. Recorded in
+ * `misc/docs/frontend-stack-decision.md` so this is a known cost, not a discovery.
+ *
+ * Two channels, as there: hue encodes score and only score; overlap is structural.
+ * Lightness is re-clamped for dark mode rather than reusing one set of values, because
+ * a ramp tuned as a background under dark text washes out under light text.
+ */
+
+:root {
+  --bg: #fdfdfb;
+  --fg: #1b1b16;
+  --muted: #6b6b60;
+  --line: #e2e2d8;
+  --card: #ffffff;
+  --panel: #f5f5ef;
+  --h0: oklch(0.95 0.03 235);
+  --h1: oklch(0.72 0.11 235);
+  --m0: oklch(0.95 0.05 65);
+  --m1: oklch(0.78 0.15 55);
+  --n1: oklch(0.75 0.03 280);
+  --warn: oklch(0.45 0.13 45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #14140f;
+    --fg: #ececdf;
+    --muted: #95958a;
+    --line: #2e2e26;
+    --card: #1c1c16;
+    --panel: #1f1f18;
+    --h0: oklch(0.3 0.04 235);
+    --h1: oklch(0.54 0.11 235);
+    --m0: oklch(0.32 0.05 65);
+    --m1: oklch(0.56 0.14 55);
+    --n1: oklch(0.45 0.03 280);
+    --warn: oklch(0.8 0.12 60);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 ui-sans-serif, system-ui, sans-serif;
+}
+
+header {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 20px 16px;
+}
+
+h1 { font-size: 22px; font-weight: 600; margin: 0 0 6px; }
+
+.sub { margin: 0 0 16px; color: var(--muted); font-size: 14px; max-width: 62ch; }
+
+.actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+button {
+  font: inherit;
+  font-size: 14px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--fg);
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--muted); }
+button:disabled { opacity: 0.5; cursor: default; }
+button.primary { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+.hint { font-size: 12px; color: var(--muted); }
+
+main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 8px 20px 60px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+  gap: 22px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  main { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------------------------------------------------------------- the editor */
+
+#editor-pane {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/*
+ * `white-space: pre-wrap` is not cosmetic: it is what makes the editor show exactly the
+ * characters `ductus` will read. Collapsing whitespace here would hide the trailing
+ * spaces and lone newlines that are among the strongest human-leaning signals.
+ */
+.ductus-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 60vh;
+  padding: 20px 22px;
+  outline: none;
+  font: 16px/1.75 ui-serif, Georgia, serif;
+  tab-size: 4;
+}
+
+#editor-pane[data-empty='true'] .ductus-body::before {
+  content: 'Paste or type the text you want read…';
+  color: var(--muted);
+  pointer-events: none;
+  position: absolute;
+}
+
+/* Hue = score. Nothing else is allowed to ride on this channel. */
+.finding {
+  background: var(--fill);
+  box-shadow: 0 1.5px 0 0 var(--line);
+  border-radius: 2px;
+  padding: 0.06em 0;
+  cursor: help;
+}
+.finding.focused { box-shadow: 0 0 0 2px var(--line); }
+
+/*
+ * An unverified finding keeps its exact position and loses its colour. The hatch says
+ * "something was found here and the claim no longer applies" without showing a stale
+ * score as though it were current.
+ */
+.finding.unverified {
+  background: repeating-linear-gradient(
+    135deg, transparent, transparent 4px,
+    color-mix(in oklab, var(--muted) 22%, transparent) 4px,
+    color-mix(in oklab, var(--muted) 22%, transparent) 8px
+  );
+  box-shadow: none;
+  border-bottom: 1px dashed var(--muted);
+}
+
+.stale-banner {
+  max-width: 1280px;
+  margin: 0 auto 4px;
+  padding: 8px 20px;
+  font-size: 13px;
+  color: var(--warn);
+}
+
+/* -------------------------------------------------------------- the sidebar */
+
+#sidebar { display: flex; flex-direction: column; gap: 18px; }
+
+section, aside {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;
+     color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+
+.muted { color: var(--muted); font-size: 14px; margin: 0; }
+.error { color: var(--warn); font-size: 14px; margin: 0; }
+
+/*
+ * The verdict is deliberately not the loudest thing on the page. A reader should be
+ * pulled toward the findings list, which is where the checkable evidence is.
+ */
+.verdict-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.verdict-label { font-size: 15px; font-weight: 600; }
+.verdict-head.label-leans-machine .verdict-label { color: var(--m1); }
+.verdict-head.label-leans-human .verdict-label { color: var(--h1); }
+.verdict-head.unverified { opacity: 0.55; }
+.verdict-meta { font-size: 12px; color: var(--muted); }
+.verdict-sentence { font-size: 14px; margin: 8px 0 14px; }
+
+.lean-bar { display: flex; align-items: center; gap: 8px; font-size: 11px;
+            color: var(--muted); }
+.lean-track {
+  position: relative; flex: 1; height: 6px; border-radius: 3px;
+  background: linear-gradient(90deg, var(--h1), var(--panel), var(--m1));
+}
+.lean-mark {
+  position: absolute; top: -3px; width: 2px; height: 12px;
+  background: var(--fg); transform: translateX(-1px);
+}
+
+.stale-note { font-size: 13px; color: var(--warn); margin: 12px 0 0; }
+
+/* The limits, beside the verdict rather than under it. */
+.honesty {
+  margin-top: 14px; padding: 12px 14px; border-radius: 6px;
+  background: var(--panel); border: 1px solid var(--line);
+  font-size: 13px; line-height: 1.55;
+}
+.honesty.loud { border-color: var(--warn); }
+.honesty p { margin: 0 0 8px; }
+.honesty p:last-child { margin-bottom: 0; }
+
+/* ------------------------------------------------------------- the findings */
+
+.finding-list { list-style: none; margin: 0; padding: 0;
+                display: flex; flex-direction: column; gap: 10px; }
+
+.finding-row {
+  padding: 10px 12px; border-radius: 6px; border: 1px solid var(--line);
+  border-left-width: 3px; background: var(--panel); cursor: default;
+}
+/* Human-leaning findings get the same weight of treatment as machine-leaning ones. */
+.finding-row.dir-machine { border-left-color: var(--m1); }
+.finding-row.dir-human { border-left-color: var(--h1); }
+.finding-row.dir-neutral { border-left-color: var(--n1); }
+.finding-row.focused { outline: 2px solid var(--muted); outline-offset: 1px; }
+.finding-row.unverified { opacity: 0.55; }
+
+.finding-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;
+                font-size: 12px; }
+.finding-name { font-weight: 600; font-size: 13px; }
+.finding-dir { color: var(--muted); }
+.finding-weight { color: var(--muted); margin-left: auto; }
+
+.finding-quote {
+  margin: 8px 0; padding: 4px 10px; border-left: 2px solid var(--line);
+  font: 14px/1.5 ui-serif, Georgia, serif; white-space: pre-wrap;
+}
+.finding-note { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+.finding-stale { margin: 6px 0 0; font-size: 12px; color: var(--warn); }
+
+.limits ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.55; }
+.limits li { margin-bottom: 7px; }
+.provenance { font-size: 11px; color: var(--muted); margin: 12px 0 0;
+              word-break: break-all; }
