@@ -208,127 +208,89 @@
 </span><span id="line-34">
 </span><span id="line-35"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 </span><span id="line-36">
-</span><span id="line-37"><span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
-</span><span id="line-38"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-</span><span id="line-39"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
-</span><span id="line-40">
-</span><span id="line-41"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">_dispatch_funcs</span>
-</span><span id="line-42">
-</span><span id="line-43"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"INSTRUCTIONS"</span><span class="p">,</span> <span class="s2">"TOOL_REFS"</span><span class="p">,</span> <span class="s2">"main"</span><span class="p">,</span> <span class="s2">"mk_mcp"</span><span class="p">]</span>
-</span><span id="line-44">
-</span><span id="line-45"><span class="c1">#: One ref per read-only verb, derived from the CLI's own list. Never hand-written.</span>
-</span><span id="line-46"><span class="n">TOOL_REFS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-</span><span id="line-47">    <span class="sa">f</span><span class="s2">"ductus.tools:</span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
-</span><span id="line-48">    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">_dispatch_funcs</span>
-</span><span id="line-49">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">"mutates_host"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-</span><span id="line-50"><span class="p">)</span>
-</span><span id="line-51">
-</span><span id="line-52"><span class="c1">#: What the server tells a model about itself. The limits are here rather than in a</span>
-</span><span id="line-53"><span class="c1">#: README because this is the only description an MCP client ever reads.</span>
-</span><span id="line-54"><span class="n">INSTRUCTIONS</span> <span class="o">=</span> <span class="s2">"""</span><span class="se">\</span>
-</span><span id="line-55"><span class="s2">Gauge which parts of a text read as machine-written, with every finding anchored to</span>
-</span><span id="line-56"><span class="s2">the exact characters that carry it.</span>
-</span><span id="line-57">
-</span><span id="line-58"><span class="s2">This server never returns a percentage, a confidence, or a verdict about a person, and</span>
-</span><span id="line-59"><span class="s2">a caller should not synthesise one from what it does return. It gives a lean in</span>
-</span><span id="line-60"><span class="s2">[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each</span>
-</span><span id="line-61"><span class="s2">with a quote that can be checked against the text.</span>
-</span><span id="line-62">
-</span><span id="line-63"><span class="s2">Its false-positive rate on human-written text is measured: with the default detectors,</span>
-</span><span id="line-64"><span class="s2">6.0</span><span class="si">% o</span><span class="s2">f 350 human-written documents are called leans-machine, and every one of those is</span>
-</span><span id="line-65"><span class="s2">wrong. A flagged *sentence* is much better evidence than a flagged *document* -- the</span>
-</span><span id="line-66"><span class="s2">per-sentence rate is 0.4-2%. The bias runs toward formal, fluent, essayistic prose</span>
-</span><span id="line-67"><span class="s2">rather than toward simple prose; in the measured corpus the native-speaker control was</span>
-</span><span id="line-68"><span class="s2">the most-accused group.</span>
-</span><span id="line-69">
-</span><span id="line-70"><span class="s2">"No findings" is a weak result, not a clean bill.</span>
-</span><span id="line-71"><span class="s2">"""</span>
+</span><span id="line-37"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+</span><span id="line-38"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+</span><span id="line-39">
+</span><span id="line-40"><span class="kn">from</span><span class="w"> </span><span class="nn">ductus.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">_dispatch_funcs</span>
+</span><span id="line-41">
+</span><span id="line-42"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"INSTRUCTIONS"</span><span class="p">,</span> <span class="s2">"TOOL_REFS"</span><span class="p">,</span> <span class="s2">"main"</span><span class="p">,</span> <span class="s2">"mk_mcp"</span><span class="p">]</span>
+</span><span id="line-43">
+</span><span id="line-44"><span class="c1">#: One ref per read-only verb, derived from the CLI's own list. Never hand-written.</span>
+</span><span id="line-45"><span class="n">TOOL_REFS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+</span><span id="line-46">    <span class="sa">f</span><span class="s2">"ductus.tools:</span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="line-47">    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">_dispatch_funcs</span>
+</span><span id="line-48">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">"mutates_host"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+</span><span id="line-49"><span class="p">)</span>
+</span><span id="line-50">
+</span><span id="line-51"><span class="c1">#: What the server tells a model about itself. The limits are here rather than in a</span>
+</span><span id="line-52"><span class="c1">#: README because this is the only description an MCP client ever reads.</span>
+</span><span id="line-53"><span class="n">INSTRUCTIONS</span> <span class="o">=</span> <span class="s2">"""</span><span class="se">\</span>
+</span><span id="line-54"><span class="s2">Gauge which parts of a text read as machine-written, with every finding anchored to</span>
+</span><span id="line-55"><span class="s2">the exact characters that carry it.</span>
+</span><span id="line-56">
+</span><span id="line-57"><span class="s2">This server never returns a percentage, a confidence, or a verdict about a person, and</span>
+</span><span id="line-58"><span class="s2">a caller should not synthesise one from what it does return. It gives a lean in</span>
+</span><span id="line-59"><span class="s2">[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each</span>
+</span><span id="line-60"><span class="s2">with a quote that can be checked against the text.</span>
+</span><span id="line-61">
+</span><span id="line-62"><span class="s2">Its false-positive rate on human-written text is measured: with the default detectors,</span>
+</span><span id="line-63"><span class="s2">6.0</span><span class="si">% o</span><span class="s2">f 350 human-written documents are called leans-machine, and every one of those is</span>
+</span><span id="line-64"><span class="s2">wrong. A flagged *sentence* is much better evidence than a flagged *document* -- the</span>
+</span><span id="line-65"><span class="s2">per-sentence rate is 0.4-2%. The bias runs toward formal, fluent, essayistic prose</span>
+</span><span id="line-66"><span class="s2">rather than toward simple prose; in the measured corpus the native-speaker control was</span>
+</span><span id="line-67"><span class="s2">the most-accused group.</span>
+</span><span id="line-68">
+</span><span id="line-69"><span class="s2">"No findings" is a weak result, not a clean bill.</span>
+</span><span id="line-70"><span class="s2">"""</span>
+</span><span id="line-71">
 </span><span id="line-72">
-</span><span id="line-73">
-</span><span id="line-74"><span class="k">def</span><span class="w"> </span><span class="nf">_resolve_annotations</span><span class="p">(</span><span class="o">*</span><span class="n">funcs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-75"><span class="w">    </span><span class="sd">"""Replace lazy string annotations with real types, in place.</span>
-</span><span id="line-76">
-</span><span id="line-77"><span class="sd">    Working around an upstream defect, and worth stating because it is invisible</span>
-</span><span id="line-78"><span class="sd">    otherwise. Under ``from __future__ import annotations`` -- which every module in</span>
-</span><span id="line-79"><span class="sd">    this package uses -- a function's ``__annotations__`` are strings. The schema</span>
-</span><span id="line-80"><span class="sd">    layer under ``fastmcp`` builds its validator from them without resolving them, and</span>
-</span><span id="line-81"><span class="sd">    every **keyword-only parameter loses its default**: calling ``gauge(source=...)``</span>
-</span><span id="line-82"><span class="sd">    fails with "Missing required keyword only argument" for `segmenter`, `detectors`,</span>
-</span><span id="line-83"><span class="sd">    `judgments`, `out` and `title`, none of which the caller should have to supply.</span>
-</span><span id="line-84">
-</span><span id="line-85"><span class="sd">    Since this package's convention is keyword-only from the second or third argument,</span>
-</span><span id="line-86"><span class="sd">    that would break every verb on this surface. Resolving the annotations eagerly is</span>
-</span><span id="line-87"><span class="sd">    semantically identical -- :func:`typing.get_type_hints` returns exactly what the</span>
-</span><span id="line-88"><span class="sd">    strings denote -- and it makes the defaults visible again.</span>
-</span><span id="line-89">
-</span><span id="line-90"><span class="sd">    Filed upstream; remove this when ``py2mcp``/``fastmcp`` resolve annotations</span>
-</span><span id="line-91"><span class="sd">    themselves.</span>
-</span><span id="line-92">
-</span><span id="line-93"><span class="sd">    &gt;&gt;&gt; def verb(a, *, b="bee"): return f"{a}{b}"</span>
-</span><span id="line-94"><span class="sd">    &gt;&gt;&gt; verb.__annotations__ = {"a": "int", "b": "str"}  # the lazy state, explicitly</span>
-</span><span id="line-95"><span class="sd">    &gt;&gt;&gt; _resolve_annotations(verb)</span>
-</span><span id="line-96"><span class="sd">    &gt;&gt;&gt; verb.__annotations__</span>
-</span><span id="line-97"><span class="sd">    {'a': &lt;class 'int'&gt;, 'b': &lt;class 'str'&gt;}</span>
-</span><span id="line-98"><span class="sd">    &gt;&gt;&gt; verb(1)  # and the function itself is untouched</span>
-</span><span id="line-99"><span class="sd">    '1bee'</span>
-</span><span id="line-100"><span class="sd">    """</span>
-</span><span id="line-101">    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">funcs</span><span class="p">:</span>
-</span><span id="line-102">        <span class="k">try</span><span class="p">:</span>
-</span><span id="line-103">            <span class="n">fn</span><span class="o">.</span><span class="vm">__annotations__</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_type_hints</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-</span><span id="line-104">        <span class="k">except</span> <span class="p">(</span><span class="ne">NameError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-</span><span id="line-105">            <span class="c1"># An annotation naming something not importable at runtime. Leaving it</span>
-</span><span id="line-106">            <span class="c1"># lazy is what would have happened anyway, so the verb is no worse off.</span>
-</span><span id="line-107">            <span class="k">continue</span>
-</span><span id="line-108">
-</span><span id="line-109">
 <div class="viewcode-block" id="mk_mcp">
 <a class="viewcode-back" href="../../_autosummary/ductus.mcp.html#ductus.mcp.mk_mcp">[docs]</a>
-</span><span id="line-110"><span class="k">def</span><span class="w"> </span><span class="nf">mk_mcp</span><span class="p">(</span>
-</span><span id="line-111">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-112">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ductus"</span><span class="p">,</span>
-</span><span id="line-113">    <span class="n">refs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">TOOL_REFS</span><span class="p">,</span>
-</span><span id="line-114">    <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">INSTRUCTIONS</span><span class="p">,</span>
-</span><span id="line-115">    <span class="n">middleware</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-116">    <span class="n">auth</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-117"><span class="p">):</span>
-</span><span id="line-118"><span class="w">    </span><span class="sd">"""Build an MCP server exposing ``refs`` as tools.</span>
-</span><span id="line-119">
-</span><span id="line-120"><span class="sd">    ``middleware=`` and ``auth=`` pass straight through to ``py2mcp``. They are where</span>
-</span><span id="line-121"><span class="sd">    a deployed connector attaches metering and authentication without the core</span>
-</span><span id="line-122"><span class="sd">    learning that either exists.</span>
-</span><span id="line-123">
-</span><span id="line-124"><span class="sd">    Raises :class:`ImportError` with an actionable message when the extra is missing.</span>
-</span><span id="line-125"><span class="sd">    """</span>
-</span><span id="line-126">    <span class="k">try</span><span class="p">:</span>
-</span><span id="line-127">        <span class="kn">from</span><span class="w"> </span><span class="nn">py2mcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_mcp_from_refs</span>
-</span><span id="line-128">    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover - exercised only without the extra</span>
-</span><span id="line-129">        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
-</span><span id="line-130">            <span class="s2">"the MCP surface needs the [mcp] extra:</span><span class="se">\n</span><span class="s2">"</span>
-</span><span id="line-131">            <span class="s2">"    pip install 'ductus[mcp]'</span><span class="se">\n</span><span class="s2">"</span>
-</span><span id="line-132">            <span class="s2">"which installs py2mcp. The library and the CLI need neither."</span>
-</span><span id="line-133">        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
-</span><span id="line-134">
-</span><span id="line-135">    <span class="n">_resolve_annotations</span><span class="p">(</span><span class="o">*</span><span class="n">_dispatch_funcs</span><span class="p">)</span>
-</span><span id="line-136">    <span class="k">return</span> <span class="n">mk_mcp_from_refs</span><span class="p">(</span>
-</span><span id="line-137">        <span class="n">refs</span><span class="p">,</span>
-</span><span id="line-138">        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-</span><span id="line-139">        <span class="n">instructions</span><span class="o">=</span><span class="n">instructions</span><span class="p">,</span>
-</span><span id="line-140">        <span class="n">middleware</span><span class="o">=</span><span class="n">middleware</span><span class="p">,</span>
-</span><span id="line-141">        <span class="n">auth</span><span class="o">=</span><span class="n">auth</span><span class="p">,</span>
-</span><span id="line-142">    <span class="p">)</span></div>
+</span><span id="line-73"><span class="k">def</span><span class="w"> </span><span class="nf">mk_mcp</span><span class="p">(</span>
+</span><span id="line-74">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-75">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ductus"</span><span class="p">,</span>
+</span><span id="line-76">    <span class="n">refs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">TOOL_REFS</span><span class="p">,</span>
+</span><span id="line-77">    <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">INSTRUCTIONS</span><span class="p">,</span>
+</span><span id="line-78">    <span class="n">middleware</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-79">    <span class="n">auth</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-80"><span class="p">):</span>
+</span><span id="line-81"><span class="w">    </span><span class="sd">"""Build an MCP server exposing ``refs`` as tools.</span>
+</span><span id="line-82">
+</span><span id="line-83"><span class="sd">    ``middleware=`` and ``auth=`` pass straight through to ``py2mcp``. They are where</span>
+</span><span id="line-84"><span class="sd">    a deployed connector attaches metering and authentication without the core</span>
+</span><span id="line-85"><span class="sd">    learning that either exists.</span>
+</span><span id="line-86">
+</span><span id="line-87"><span class="sd">    Raises :class:`ImportError` with an actionable message when the extra is missing.</span>
+</span><span id="line-88"><span class="sd">    """</span>
+</span><span id="line-89">    <span class="k">try</span><span class="p">:</span>
+</span><span id="line-90">        <span class="kn">from</span><span class="w"> </span><span class="nn">py2mcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_mcp_from_refs</span>
+</span><span id="line-91">    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover - exercised only without the extra</span>
+</span><span id="line-92">        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+</span><span id="line-93">            <span class="s2">"the MCP surface needs the [mcp] extra:</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="line-94">            <span class="s2">"    pip install 'ductus[mcp]'</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="line-95">            <span class="s2">"which installs py2mcp. The library and the CLI need neither."</span>
+</span><span id="line-96">        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="line-97">
+</span><span id="line-98">    <span class="k">return</span> <span class="n">mk_mcp_from_refs</span><span class="p">(</span>
+</span><span id="line-99">        <span class="n">refs</span><span class="p">,</span>
+</span><span id="line-100">        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+</span><span id="line-101">        <span class="n">instructions</span><span class="o">=</span><span class="n">instructions</span><span class="p">,</span>
+</span><span id="line-102">        <span class="n">middleware</span><span class="o">=</span><span class="n">middleware</span><span class="p">,</span>
+</span><span id="line-103">        <span class="n">auth</span><span class="o">=</span><span class="n">auth</span><span class="p">,</span>
+</span><span id="line-104">    <span class="p">)</span></div>
 
-</span><span id="line-143">
-</span><span id="line-144">
+</span><span id="line-105">
+</span><span id="line-106">
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../_autosummary/ductus.mcp.html#ductus.mcp.main">[docs]</a>
-</span><span id="line-145"><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover - a blocking server loop</span>
-</span><span id="line-146"><span class="w">    </span><span class="sd">"""Serve on stdio. The ``ductus-mcp`` console script."""</span>
-</span><span id="line-147">    <span class="n">mk_mcp</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
+</span><span id="line-107"><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover - a blocking server loop</span>
+</span><span id="line-108"><span class="w">    </span><span class="sd">"""Serve on stdio. The ``ductus-mcp`` console script."""</span>
+</span><span id="line-109">    <span class="n">mk_mcp</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
 
-</span><span id="line-148">
-</span><span id="line-149">
-</span><span id="line-150"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-</span><span id="line-151">    <span class="n">main</span><span class="p">()</span>
+</span><span id="line-110">
+</span><span id="line-111">
+</span><span id="line-112"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+</span><span id="line-113">    <span class="n">main</span><span class="p">()</span>
 </span></code></pre></div>
     </div></div>
           </main>
@@ -342,7 +304,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=3bbcec59"></script>
+    <script src="../../_static/documentation_options.js?v=9fc46840"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

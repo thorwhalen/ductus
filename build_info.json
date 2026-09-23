@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-09-22T14:49:28Z",
+  "built_at": "2026-09-23T15:57:55Z",
   "package": {
     "name": "ductus",
-    "version": "0.0.12",
+    "version": "0.0.13",
     "display_name": "ductus",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "494e4d638ff3b49ebb0cdf9b681a682fe06a5ea4",
-    "short_commit": "494e4d6",
+    "commit": "64854f1fccb1a3bd796bf2150588719d26e63ad6",
+    "short_commit": "64854f1",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/ductus",
-    "commit_url": "https://github.com/thorwhalen/ductus/commit/494e4d638ff3b49ebb0cdf9b681a682fe06a5ea4",
+    "commit_url": "https://github.com/thorwhalen/ductus/commit/64854f1fccb1a3bd796bf2150588719d26e63ad6",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/ductus",
-    "sha": "494e4d638ff3b49ebb0cdf9b681a682fe06a5ea4",
+    "sha": "64854f1fccb1a3bd796bf2150588719d26e63ad6",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "35742803710",
-    "run_url": "https://github.com/thorwhalen/ductus/actions/runs/35742803710",
+    "run_id": "35885198658",
+    "run_url": "https://github.com/thorwhalen/ductus/actions/runs/35885198658",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -60,11 +60,11 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.0.12",
+    "latest": "0.0.13",
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/ductus && cd ductus\ngit checkout 494e4d638ff3b49ebb0cdf9b681a682fe06a5ea4\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/ductus && cd ductus\ngit checkout 64854f1fccb1a3bd796bf2150588719d26e63ad6\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,
