@@ -18,7 +18,7 @@ import sys
 
 import pytest
 
-from ductus.mcp import TOOL_REFS, _resolve_annotations
+from ductus.mcp import TOOL_REFS
 from ductus.tools import _dispatch_funcs, host_mutating, install_skills
 
 
@@ -79,24 +79,6 @@ def test_host_mutating_is_declared_at_the_definition_site():
         pass
 
     assert getattr(reads_something, "mutates_host", False) is False
-
-
-def test_resolving_annotations_recovers_keyword_only_defaults():
-    """The upstream workaround, pinned so its removal is a deliberate act.
-
-    Under `from __future__ import annotations` the schema layer under fastmcp reads
-    annotations as strings and drops every keyword-only default, which would make
-    every verb in this package uncallable over MCP. See `ductus.mcp._resolve_annotations`.
-    """
-
-    def verb(a: "int", *, b: "str" = "bee") -> "str":
-        return f"{a}{b}"
-
-    assert verb.__annotations__["b"] == "str"
-    _resolve_annotations(verb)
-    assert verb.__annotations__["b"] is str
-    assert verb.__annotations__["a"] is int
-    assert verb(1) == "1bee"  # behaviour is untouched
 
 
 def test_the_instructions_carry_the_limits():

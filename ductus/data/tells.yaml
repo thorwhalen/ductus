@@ -5,10 +5,25 @@
 # the ceiling. The rhetoric and rhythm detectors, and any LLM judge layered on top,
 # cover what patterns cannot.
 #
-# Tiers, in descending confidence:
-#   E  near-certain artifact of a model having written it
-#   W  likely pattern; still appears in human writing that has been over-polished
-#   S  common in human writing too -- only meaningful when it clusters
+# A rule has two axes, and they answer different questions. Keeping them apart is what
+# lets measurement move one without disturbing the other.
+#
+# `tier` is how firmly a rule is worth enforcing *as writing advice*. `acquaint` reads
+# it and never reads `weight`: a reader who tolerates AI-sounding prose is shown tier E
+# only, a neutral reader E and W, an averse reader all three.
+#   E  worth fixing whoever is reading
+#   W  worth fixing unless it is the author's own habit
+#   S  common in careful human writing too -- fix when it clusters, or for an averse reader
+#
+# `weight` (optional, per rule) is how much a hit is worth as *evidence about who wrote
+# the text*. `ductus` reads it; `acquaint` never does. Absent, it falls back to the
+# tier's default. A rule can be firm advice and near-worthless evidence at the same
+# time, and `summary-closer` below is exactly that.
+#
+# These tiers originally read as confidence that a model wrote it -- E meaning
+# "near-certain artifact". Measuring 350 human-written documents falsified that for
+# several rules while leaving them worth fixing as advice, which is why the axes were
+# split rather than the rules demoted. See misc/docs/reducing-false-accusations.md.
 #
 # Ordinary human courtesy ("I hope this finds you well", "happy to help") is S at most.
 #
