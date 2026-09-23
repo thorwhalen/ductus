@@ -34,7 +34,6 @@ False
 
 from __future__ import annotations
 
-import typing
 from collections.abc import Sequence
 from typing import Any
 
@@ -71,42 +70,6 @@ the most-accused group.
 """
 
 
-def _resolve_annotations(*funcs) -> None:
-    """Replace lazy string annotations with real types, in place.
-
-    Working around an upstream defect, and worth stating because it is invisible
-    otherwise. Under ``from __future__ import annotations`` -- which every module in
-    this package uses -- a function's ``__annotations__`` are strings. The schema
-    layer under ``fastmcp`` builds its validator from them without resolving them, and
-    every **keyword-only parameter loses its default**: calling ``gauge(source=...)``
-    fails with "Missing required keyword only argument" for `segmenter`, `detectors`,
-    `judgments`, `out` and `title`, none of which the caller should have to supply.
-
-    Since this package's convention is keyword-only from the second or third argument,
-    that would break every verb on this surface. Resolving the annotations eagerly is
-    semantically identical -- :func:`typing.get_type_hints` returns exactly what the
-    strings denote -- and it makes the defaults visible again.
-
-    Filed upstream; remove this when ``py2mcp``/``fastmcp`` resolve annotations
-    themselves.
-
-    >>> def verb(a, *, b="bee"): return f"{a}{b}"
-    >>> verb.__annotations__ = {"a": "int", "b": "str"}  # the lazy state, explicitly
-    >>> _resolve_annotations(verb)
-    >>> verb.__annotations__
-    {'a': <class 'int'>, 'b': <class 'str'>}
-    >>> verb(1)  # and the function itself is untouched
-    '1bee'
-    """
-    for fn in funcs:
-        try:
-            fn.__annotations__ = typing.get_type_hints(fn)
-        except (NameError, TypeError):  # pragma: no cover
-            # An annotation naming something not importable at runtime. Leaving it
-            # lazy is what would have happened anyway, so the verb is no worse off.
-            continue
-
-
 def mk_mcp(
     *,
     name: str = "ductus",
@@ -132,7 +95,6 @@ def mk_mcp(
             "which installs py2mcp. The library and the CLI need neither."
         ) from e
 
-    _resolve_annotations(*_dispatch_funcs)
     return mk_mcp_from_refs(
         refs,
         name=name,

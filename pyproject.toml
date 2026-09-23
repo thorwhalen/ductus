@@ -51,7 +51,10 @@ local = ["torch>=2.0", "transformers>=4.30"]
 api = ["httpx"]
 # The MCP surface. `py2mcp` resolves 'module:function' strings at call time, so the
 # core never imports MCP and `import ductus` is unaffected by installing this.
-mcp = ["py2mcp>=0.1.10"]
+# >=0.1.12 pins fastmcp>=3.2, where keyword-only defaults survive
+# `from __future__ import annotations`. Below that every verb on this
+# surface is uncallable -- i2mint/py2mcp#12.
+mcp = ["py2mcp>=0.1.12"]
 # The HTTP surface, and the frontend that consumes it. `qh` builds a FastAPI app from
 # the same callables the CLI dispatches, and generates the frontend's typed client
 # from that app's own OpenAPI, so there is nothing to keep in sync by hand.
