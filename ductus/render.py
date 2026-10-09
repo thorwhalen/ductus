@@ -164,8 +164,9 @@ _CSS = """
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
  --bg:#14140f;--fg:#ececdf;--muted:#95958a;--line:#2e2e26;--card:#1c1c16;--panel:#1f1f18;
  --h0:oklch(0.30 0.04 235);--h1:oklch(0.54 0.11 235);
- --m0:oklch(0.32 0.05 65);--m1:oklch(0.56 0.14 55);--n1:oklch(0.45 0.03 280)}}
-:root[data-theme="dark"]{--bg:#14140f;--fg:#ececdf;--muted:#95958a;--line:#2e2e26;--card:#1c1c16;
+ --m0:oklch(0.32 0.05 65);--m1:oklch(0.56 0.14 55);--n1:oklch(0.45 0.03 280);
+ color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#14140f;--fg:#ececdf;--muted:#95958a;--line:#2e2e26;--card:#1c1c16;
  --panel:#1f1f18;--h0:oklch(0.30 0.04 235);--h1:oklch(0.54 0.11 235);
  --m0:oklch(0.32 0.05 65);--m1:oklch(0.56 0.14 55);--n1:oklch(0.45 0.03 280)}
 *{box-sizing:border-box}
@@ -205,6 +206,16 @@ aside.at{right:auto;bottom:auto}
 aside .dir{font-weight:600}
 aside .dir.machine{color:var(--m1)}aside .dir.human{color:var(--h1)}
 aside .why{margin-top:7px;padding-top:7px;border-top:1px solid var(--line)}
+.rank{margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+.rank h2{font:600 17px/1.3 ui-sans-serif,system-ui,sans-serif;margin:0 0 4px;text-wrap:balance}
+.rank ol{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+.rank li{display:grid;grid-template-columns:3.2em minmax(0,1fr);gap:10px;
+ font:13px/1.5 ui-sans-serif,system-ui,sans-serif}
+.rk-w{font-variant-numeric:tabular-nums;font-weight:600}
+.rk-b{min-width:0}
+.rk-b q{display:block;font:15px/1.5 ui-serif,Georgia,serif;margin:2px 0;overflow-wrap:anywhere}
+.rk-n{display:block;color:var(--muted)}
+.rank .dir.machine{color:var(--m1)}.rank .dir.human{color:var(--h1)}
 footer{border-top:1px solid var(--line);padding-top:16px;padding-bottom:48px;
  font:12px/1.6 ui-sans-serif,system-ui,sans-serif;color:var(--muted)}
 /* Too narrow to sit beside anything: fall back to a bottom sheet. */
@@ -231,6 +242,46 @@ for(const m of document.querySelectorAll('mark')){m.tabIndex=0;
  m.addEventListener('mouseenter',show);m.addEventListener('mouseleave',hide);
  m.addEventListener('focus',show);m.addEventListener('blur',hide);}
 """
+
+
+def _ranked_section(report: Report) -> str:
+    """The "Flags by weight" list: every signal, strongest first, with its quote.
+
+    Built only from the report -- no new judgement. Signals without a span (document-
+    or segment-level) are listed too, without a character range.
+    """
+    signals = sorted(
+        (s for seg in report.segments for s in seg.signals),
+        key=lambda s: (-s.weight, s.span.start if s.span else 0),
+    )
+    totals: dict[str, float] = {}
+    for s in signals:
+        totals[s.direction] = totals.get(s.direction, 0.0) + s.weight
+    by_dir = " &middot; ".join(f"{d} {w:.2f}" for d, w in sorted(totals.items())) or "none"
+    doc = report.document
+
+    def item(s: Signal) -> str:
+        where = f" &middot; chars {s.span.start}&ndash;{s.span.end}" if s.span else ""
+        quote = f"<q>{_html.escape(s.span.quote)}</q>" if s.span else ""
+        return (
+            f'<li><span class="rk-w">{s.weight:.2f}</span><span class="rk-b">'
+            f"<b>{_html.escape(s.name)}</b> "
+            f'<span class="dir {s.direction}">{s.direction}</span> '
+            f"&middot; {_html.escape(s.detector)}{where}{quote}"
+            f'<span class="rk-n">{_html.escape(s.note)}</span></span></li>'
+        )
+
+    body = (
+        f'<ol>{"".join(item(s) for s in signals)}</ol>'
+        if signals
+        else '<p class="sub">No signals fired. That is a weak result, not a clean bill.</p>'
+    )
+    return (
+        '<section class="rank"><h2>Flags by weight</h2>'
+        f'<p class="sub">Document: <b>{doc.label}</b>, lean {doc.lean:+.2f}, strength '
+        f"{doc.strength:.2f} &middot; {len(signals)} signal(s) &middot; "
+        f"weight by direction: {by_dir}</p>{body}</section>"
+    )
 
 
 def _shade(direction: str, weight: float) -> tuple[str, str]:
@@ -331,7 +382,7 @@ def to_html(
         '<span class="chip"><span class="sw h"></span> human-leaning</span>'
         f'<span class="chip">document: <b>&nbsp;{doc.label}</b> '
         f"({doc.lean:+.2f}, strength {doc.strength:.2f})</span></div></header>"
-        f'<main>{"".join(body)}</main><aside id="tip"></aside>'
+        f'<main>{"".join(body)}{_ranked_section(report)}</main><aside id="tip"></aside>'
         f"<footer><p><b>{_DISCLAIMER}</b></p>"
         f"<p>sha256 {report.text_sha256[:16]} &middot; detectors: "
         f"{', '.join(report.detectors)} &middot; calibration: {report.calibration}</p></footer>"
