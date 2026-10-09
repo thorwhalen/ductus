@@ -109,3 +109,38 @@ def test_gauge_verb_keeps_each_renderers_default_title():
     assert "Where this reads as machine-written" in gauge_verb(
         "Sent it Friday.", format="html"
     )
+
+
+    assert "Where this reads as machine-written" in gauge_verb("Sent it Friday.", format="html")
+
+
+def test_ranked_flags_list_is_ordered_by_weight(html):
+    section = html.split('<section class="rank">')[1].split("</section>")[0]
+    weights = [float(w) for w in re.findall(r'class="rk-w">([\d.]+)<', section)]
+    assert weights and weights == sorted(weights, reverse=True)
+    assert "Flags by weight" in section
+
+
+def test_ranked_flags_escape_the_quoted_text():
+    import dataclasses
+
+    report = gauge(SAMPLE)
+    seg = next(seg for seg in report.segments if seg.signals)
+    sig = seg.signals[0]
+    hostile = dataclasses.replace(sig, span=dataclasses.replace(sig.span, quote="<script>x</script>"))
+    seg = dataclasses.replace(seg, signals=(hostile, *seg.signals[1:]))
+    report = dataclasses.replace(report, segments=[seg])
+    section = to_html(report, text=SAMPLE).split('<section class="rank">')[1]
+    assert "<script>x" not in section
+    assert "&lt;script&gt;x" in section
+
+
+def test_ranked_flags_say_so_when_nothing_fired():
+    section = to_html(gauge("ok.")).split('<section class="rank">')[1]
+    assert "weak result, not a clean bill" in section
+    assert "<li>" not in section
+
+
+def test_dark_mode_sets_color_scheme(html):
+    """Scrollbars and form controls follow dark mode only with the property itself."""
+    assert len(re.findall(r"(?<![-\w])color-scheme:dark", html)) == 2
