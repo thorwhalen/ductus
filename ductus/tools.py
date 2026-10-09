@@ -154,13 +154,14 @@ def gauge(
     detectors: str | Sequence[str] | None = None,
     judgments: str | None = None,
     out: str | None = None,
-    title: str = "Reading",
+    title: str | None = None,
 ) -> str:
     """Gauge how machine-written a text reads, and render the result.
 
     ``source`` is a file path, a literal string, or ``-`` for stdin.
     ``format`` is one of markdown, json, html. ``detectors`` is a comma-separated
-    subset of the available detectors. ``judgments`` is a path to a JSON file of
+    subset of the available detectors. ``title`` overrides the heading of the
+    markdown and html renderings (each has its own default). ``judgments`` is a path to a JSON file of
     an agent's own readings, folded in alongside the deterministic ones. With
     ``out``, the result is written there and a one-line summary is returned.
 
@@ -175,13 +176,17 @@ def gauge(
     text = _read_source(source)
     extra = _signals_from_judgments(text, judgments) if judgments else ()
     report = _gauge(text, segmenter=segmenter, detectors=detectors, extra_signals=extra)
+    # Only override when asked: each renderer owns its own default title.
+    titled = {} if title is None else {"title": title}
 
     if format == "json":
         rendered = to_json(report)
     elif format == "html":
-        rendered = to_html(report, text=text, subtitle=f"{report.n_chars} characters")
+        rendered = to_html(
+            report, text=text, subtitle=f"{report.n_chars} characters", **titled
+        )
     else:
-        rendered = to_markdown(report, text=text, title=title)
+        rendered = to_markdown(report, text=text, **titled)
 
     if out:
         with open(out, "w", encoding="utf-8") as f:

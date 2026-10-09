@@ -9,7 +9,7 @@ export interface GaugeParams {
   detectors?: string | string[] | null;
   judgments?: string | null;
   out?: string | null;
-  title?: string;
+  title?: string | null;
 }
 
 export interface DetectorsParams {
@@ -39,14 +39,15 @@ export class DuctusClient {
    *
    * ``source`` is a file path, a literal string, or ``-`` for stdin.
    * ``format`` is one of markdown, json, html. ``detectors`` is a comma-separated
-   * subset of the available detectors. ``judgments`` is a path to a JSON file of
+   * subset of the available detectors. ``title`` overrides the heading of the
+   * markdown and html renderings (each has its own default). ``judgments`` is a path to a JSON file of
    * an agent's own readings, folded in alongside the deterministic ones. With
    * ``out``, the result is written there and a one-line summary is returned.
    *
    * >>> gauge("Sent it Friday. Two sites, not five.").splitlines()[0]
    * '# Reading'
    */
-  async gauge(source: string, format?: string, segmenter?: string, detectors?: string | string[] | null, judgments?: string | null, out?: string | null, title?: string): Promise<string> {
+  async gauge(source: string, format?: string, segmenter?: string, detectors?: string | string[] | null, judgments?: string | null, out?: string | null, title?: string | null): Promise<string> {
     let url = `${this.baseUrl}/gauge`;
     const data = { source, format, segmenter, detectors, judgments, out, title };
     const response = await fetch(url, {

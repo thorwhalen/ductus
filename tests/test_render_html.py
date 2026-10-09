@@ -88,3 +88,20 @@ def test_markdown_and_html_agree_on_the_verdict():
     report = gauge(SAMPLE)
     assert report.document.label in to_markdown(report)
     assert report.document.label in to_html(report)
+
+
+@pytest.mark.parametrize("fmt", ["html", "markdown"])
+def test_gauge_verb_passes_title_through(fmt):
+    """`ductus gauge --title` must reach the rendering, not be silently dropped."""
+    from ductus.tools import gauge as gauge_verb
+
+    out = gauge_verb("Sent it Friday. Two sites, not five.", format=fmt, title="Custom heading")
+    assert "Custom heading" in out
+    assert "Where this reads as machine-written" not in out
+
+
+def test_gauge_verb_keeps_each_renderers_default_title():
+    from ductus.tools import gauge as gauge_verb
+
+    assert gauge_verb("Sent it Friday.", format="markdown").startswith("# Reading")
+    assert "Where this reads as machine-written" in gauge_verb("Sent it Friday.", format="html")
