@@ -39,13 +39,14 @@ The available detectors and what each one looks at.
 True
 ```
 
-### ductus.tools.gauge(source, , format='markdown', segmenter='paragraph', detectors=None, judgments=None, out=None, title='Reading')
+### ductus.tools.gauge(source, , format='markdown', segmenter='paragraph', detectors=None, judgments=None, out=None, title=None)
 
 Gauge how machine-written a text reads, and render the result.
 
 `source` is a file path, a literal string, or `-` for stdin.
 `format` is one of markdown, json, html. `detectors` is a comma-separated
-subset of the available detectors. `judgments` is a path to a JSON file of
+subset of the available detectors. `title` overrides the heading of the
+markdown and html renderings (each has its own default). `judgments` is a path to a JSON file of
 an agent’s own readings, folded in alongside the deterministic ones. With
 `out`, the result is written there and a one-line summary is returned.
 

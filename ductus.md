@@ -1,4 +1,4 @@
-> built 2026-09-23 15:57 UTC from 64854f1 (main) · ductus 0.0.13. Details: build_info.json
+> built 2026-10-09 16:33 UTC from 8364f61 (main) · ductus 0.0.14. Details: build_info.json
 
 # index.html.md
 
@@ -1960,13 +1960,14 @@ The available detectors and what each one looks at.
 True
 ```
 
-### ductus.tools.gauge(source, , format='markdown', segmenter='paragraph', detectors=None, judgments=None, out=None, title='Reading')
+### ductus.tools.gauge(source, , format='markdown', segmenter='paragraph', detectors=None, judgments=None, out=None, title=None)
 
 Gauge how machine-written a text reads, and render the result.
 
 `source` is a file path, a literal string, or `-` for stdin.
 `format` is one of markdown, json, html. `detectors` is a comma-separated
-subset of the available detectors. `judgments` is a path to a JSON file of
+subset of the available detectors. `title` overrides the heading of the
+markdown and html renderings (each has its own default). `judgments` is a path to a JSON file of
 an agent’s own readings, folded in alongside the deterministic ones. With
 `out`, the result is written there and a one-line summary is returned.
 
@@ -2064,7 +2065,7 @@ True
 
 # About this build
 
-This documentation was built on **2026-09-23 15:57 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/64854f1fccb1a3bd796bf2150588719d26e63ad6"><code>64854f1</code></a> on branch <code>main</code>, for **ductus 0.0.13** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-09 16:33 UTC** from commit <a href="https://github.com/thorwhalen/ductus/commit/8364f61b89af3ffb6c4d4982755367a93f294aa5"><code>8364f61</code></a> on branch <code>main</code>, for **ductus 0.0.14** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -2073,7 +2074,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/64854f1fccb1a3bd796bf2150588719d26e63ad6"><code>64854f1fccb1a3bd796bf2150588719d26e63ad6</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ductus/commit/8364f61b89af3ffb6c4d4982755367a93f294aa5"><code>8364f61b89af3ffb6c4d4982755367a93f294aa5</code></a> |
 | Branch              | <code>main</code>                                                                                                                                        |
 | Tags at this commit | none                                                                                                                                                     |
 | Working tree        | clean                                                                                                                                                    |
@@ -2084,9 +2085,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ductus</code>                                                             |
-| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/35885198658">35885198658</a>    |
+| Run          | <a href="https://github.com/thorwhalen/ductus/actions/runs/37959810315">37959810315</a>    |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>64854f1fccb1a3bd796bf2150588719d26e63ad6</code> (in the history of the built commit) |
+| Event commit | <code>8364f61b89af3ffb6c4d4982755367a93f294aa5</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -2095,7 +2096,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 | epythet  | 0.2.12  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
-| Python   | 3.12.14 |
+| Python   | 3.12.15 |
 
 ## Configuration as resolved
 
@@ -2111,13 +2112,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ductus/0.0.13/">0.0.13</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ductus/0.0.14/">0.0.14</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ductus && cd ductus
-git checkout 64854f1fccb1a3bd796bf2150588719d26e63ad6
+git checkout 8364f61b89af3ffb6c4d4982755367a93f294aa5
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

@@ -1,39 +1,39 @@
 {
   "schema_version": 1,
-  "built_at": "2026-09-23T15:57:55Z",
+  "built_at": "2026-10-09T16:33:38Z",
   "package": {
     "name": "ductus",
-    "version": "0.0.13",
+    "version": "0.0.14",
     "display_name": "ductus",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "64854f1fccb1a3bd796bf2150588719d26e63ad6",
-    "short_commit": "64854f1",
+    "commit": "8364f61b89af3ffb6c4d4982755367a93f294aa5",
+    "short_commit": "8364f61",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/ductus",
-    "commit_url": "https://github.com/thorwhalen/ductus/commit/64854f1fccb1a3bd796bf2150588719d26e63ad6",
+    "commit_url": "https://github.com/thorwhalen/ductus/commit/8364f61b89af3ffb6c4d4982755367a93f294aa5",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/ductus",
-    "sha": "64854f1fccb1a3bd796bf2150588719d26e63ad6",
+    "sha": "8364f61b89af3ffb6c4d4982755367a93f294aa5",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "35885198658",
-    "run_url": "https://github.com/thorwhalen/ductus/actions/runs/35885198658",
+    "run_id": "37959810315",
+    "run_url": "https://github.com/thorwhalen/ductus/actions/runs/37959810315",
     "server_url": "https://github.com"
   },
   "tools": {
     "epythet": "0.2.12",
     "sphinx": "9.1.0",
     "docutils": "0.22.4",
-    "python": "3.12.14"
+    "python": "3.12.15"
   },
   "config": {
     "theme": "auto",
@@ -60,11 +60,11 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.0.13",
+    "latest": "0.0.14",
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/ductus && cd ductus\ngit checkout 64854f1fccb1a3bd796bf2150588719d26e63ad6\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/ductus && cd ductus\ngit checkout 8364f61b89af3ffb6c4d4982755367a93f294aa5\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,
