@@ -110,8 +110,9 @@ def test_gauge_verb_keeps_each_renderers_default_title():
         "Sent it Friday.", format="html"
     )
 
-
-    assert "Where this reads as machine-written" in gauge_verb("Sent it Friday.", format="html")
+    assert "Where this reads as machine-written" in gauge_verb(
+        "Sent it Friday.", format="html"
+    )
 
 
 def test_ranked_flags_list_is_ordered_by_weight(html):
@@ -127,7 +128,9 @@ def test_ranked_flags_escape_the_quoted_text():
     report = gauge(SAMPLE)
     seg = next(seg for seg in report.segments if seg.signals)
     sig = seg.signals[0]
-    hostile = dataclasses.replace(sig, span=dataclasses.replace(sig.span, quote="<script>x</script>"))
+    hostile = dataclasses.replace(
+        sig, span=dataclasses.replace(sig.span, quote="<script>x</script>")
+    )
     seg = dataclasses.replace(seg, signals=(hostile, *seg.signals[1:]))
     report = dataclasses.replace(report, segments=[seg])
     section = to_html(report, text=SAMPLE).split('<section class="rank">')[1]

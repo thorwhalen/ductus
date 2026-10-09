@@ -257,7 +257,9 @@ def _ranked_section(report: Report) -> str:
     totals: dict[str, float] = {}
     for s in signals:
         totals[s.direction] = totals.get(s.direction, 0.0) + s.weight
-    by_dir = " &middot; ".join(f"{d} {w:.2f}" for d, w in sorted(totals.items())) or "none"
+    by_dir = (
+        " &middot; ".join(f"{d} {w:.2f}" for d, w in sorted(totals.items())) or "none"
+    )
     doc = report.document
 
     def item(s: Signal) -> str:
@@ -272,7 +274,7 @@ def _ranked_section(report: Report) -> str:
         )
 
     body = (
-        f'<ol>{"".join(item(s) for s in signals)}</ol>'
+        f"<ol>{''.join(item(s) for s in signals)}</ol>"
         if signals
         else '<p class="sub">No signals fired. That is a weak result, not a clean bill.</p>'
     )
