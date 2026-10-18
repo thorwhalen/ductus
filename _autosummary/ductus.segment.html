@@ -30,6 +30,7 @@
 <meta content="ductus.segment | ductus" name="twitter:title"/>
 <link href="../_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
 <link href="../_static/theme.css?v=d6d7c91b" rel="stylesheet" type="text/css"/>
+<link href="../_static/sphinx_autodoc_typehints.css?v=057ac668" rel="stylesheet" type="text/css"/>
 <link href="../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
 <link href="../_static/epythet.css?v=f7dd8900" rel="stylesheet" type="text/css"/>
 <link href="../search.html" rel="search" title="Search"/>
@@ -84,6 +85,7 @@
 <li class="toctree-l1 current" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../api.html">API reference<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul class="current" x-show="expanded">
 <li class="toctree-l2 current" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="ductus.html">ductus<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul class="current" x-show="expanded">
 <li class="toctree-l3"><a class="reference internal" href="ductus.base.html">ductus.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ductus.consensus.html">ductus.consensus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.core.html">ductus.core</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ductus.data.html">ductus.data</a></li>
@@ -169,45 +171,45 @@ or normalises the text, so every offset it yields indexes the original.</p>
 <dt class="sig sig-object py" id="ductus.segment.paragraph_spans">
 <span class="sig-prename descclassname"><span class="pre">ductus.segment.</span></span><span class="sig-name descname"><span class="pre">paragraph_spans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/segment.html#paragraph_spans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.segment.paragraph_spans" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.segment.paragraph_spans'">¶</a></dt>
 <dd><p>Yield one span per paragraph.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">end</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">paragraph_spans</span><span class="p">(</span><span class="s2">"ab</span><span class="se">\n\n</span><span class="s2">cd"</span><span class="p">)</span> <span class="p">]</span>
+</span><span id="line-2"><span class="go">[(0, 2), (4, 6)]</span>
+</span></code></pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference internal" href="ductus.base.html#ductus.base.Span" title="ductus.base.Span"><code class="xref py py-class docutils literal notranslate"><span class="pre">Span</span></code></a>]</span></p>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">end</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">paragraph_spans</span><span class="p">(</span><span class="s2">"ab</span><span class="se">\n\n</span><span class="s2">cd"</span><span class="p">)</span> <span class="p">]</span>
-</span><span id="line-2"><span class="go">[(0, 2), (4, 6)]</span>
-</span></code></pre></div>
-</div>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="ductus.segment.sentence_spans">
 <span class="sig-prename descclassname"><span class="pre">ductus.segment.</span></span><span class="sig-name descname"><span class="pre">sentence_spans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/segment.html#sentence_spans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.segment.sentence_spans" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.segment.sentence_spans'">¶</a></dt>
 <dd><p>Yield one span per sentence, never crossing a paragraph boundary.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">quote</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sentence_spans</span><span class="p">(</span><span class="s2">"Hi there! Bye."</span><span class="p">)]</span>
+</span><span id="line-2"><span class="go">['Hi there!', 'Bye.']</span>
+</span></code></pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference internal" href="ductus.base.html#ductus.base.Span" title="ductus.base.Span"><code class="xref py py-class docutils literal notranslate"><span class="pre">Span</span></code></a>]</span></p>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">quote</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sentence_spans</span><span class="p">(</span><span class="s2">"Hi there! Bye."</span><span class="p">)]</span>
-</span><span id="line-2"><span class="go">['Hi there!', 'Bye.']</span>
-</span></code></pre></div>
-</div>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="ductus.segment.spans_of">
 <span class="sig-prename descclassname"><span class="pre">ductus.segment.</span></span><span class="sig-name descname"><span class="pre">spans_of</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmenter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ductus/segment.html#spans_of"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ductus.segment.spans_of" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ductus.segment.spans_of'">¶</a></dt>
 <dd><p>Resolve <code class="docutils literal notranslate"><span class="pre">segmenter</span></code> (a name or a callable) and run it over <code class="docutils literal notranslate"><span class="pre">text</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference internal" href="ductus.base.html#ductus.base.Span" title="ductus.base.Span"><code class="xref py py-class docutils literal notranslate"><span class="pre">Span</span></code></a>]</span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">spans_of</span><span class="p">(</span><span class="s2">"a</span><span class="se">\n\n</span><span class="s2">b"</span><span class="p">,</span> <span class="s2">"paragraph"</span><span class="p">)))</span>
 </span><span id="line-2"><span class="go">2</span>
 </span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">spans_of</span><span class="p">(</span><span class="s2">"a b"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="nb">iter</span><span class="p">([</span><span class="n">Span</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]))))</span>
 </span><span id="line-4"><span class="go">1</span>
 </span></code></pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference internal" href="ductus.base.html#ductus.base.Span" title="ductus.base.Span"><code class="xref py py-class docutils literal notranslate"><span class="pre">Span</span></code></a>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 </section>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
@@ -230,7 +232,7 @@ or normalises the text, so every offset it yields indexes the original.</p>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=f0357c94"></script>
+<script src="../_static/documentation_options.js?v=c7cdf6fe"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

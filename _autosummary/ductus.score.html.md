@@ -90,9 +90,6 @@ false accusation rises from 11% to 74% with document length alone, because two
 stray signals weigh the same in 600 characters as in 3000. See
 [`density_aggregate()`](#ductus.score.density_aggregate) and `misc/docs/phase-2-results.md`.
 
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> from ductus.base import Signal
 >>> aggregate([Signal("x", "human", 0.6, "d")])
@@ -100,6 +97,9 @@ stray signals weigh the same in 600 characters as in 3000. See
 >>> aggregate([Signal("x", "neutral", 0.9, "d")])
 (0.0, 0.6, 'uncertain')
 ```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### ductus.score.density_aggregate(signals, , n_chars=None)
 
@@ -117,9 +117,6 @@ quantity-integrating score, which is to say a probability. See
 The scaling only ever *divides*, never multiplies, so this scorer can only remove
 accusations, never add one. Short passages behave exactly as before.
 
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> from ductus.base import Signal
 >>> evidence = [Signal("x", "machine", 0.4, "d")]
@@ -130,6 +127,9 @@ accusations, never add one. Short passages behave exactly as before.
 >>> density_aggregate(evidence) == aggregate(evidence)  # no length, no opinion
 True
 ```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### ductus.score.roll_up(segments, , n_chars=None)
 
@@ -148,9 +148,6 @@ the same claim whether the document has twenty segments or two hundred.
 The two axes keep exactly the meanings they have one level down, which is what
 stops “what proportion of segments lean machine” from becoming “what percentage is
 AI”:
-
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 `lean`
 : unchanged: the *direction ratio* over the document’s signal weights, exactly as
@@ -198,3 +195,6 @@ paragraphs are four thousand characters of text carrying one weak signal:
 >>> roll_up(pair, n_chars=4000)[2]
 'no-evidence'
 ```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]

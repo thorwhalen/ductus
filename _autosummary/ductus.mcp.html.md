@@ -30,7 +30,7 @@ ductus-mcp                      # stdio, for a local agent host
 
 ```pycon
 >>> TOOL_REFS[:2]
-('ductus.tools:gauge', 'ductus.tools:detectors')
+('ductus.tools:gauge', 'ductus.tools:baseline')
 >>> all(ref.startswith("ductus.tools:") for ref in TOOL_REFS)
 True
 >>> "ductus.tools:install_skills" in TOOL_REFS  # host-mutating, left out
@@ -54,7 +54,7 @@ False
 What the server tells a model about itself. The limits are here rather than in a
 README because this is the only description an MCP client ever reads.
 
-### ductus.mcp.TOOL_REFS *: [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), ...]* *= ('ductus.tools:gauge', 'ductus.tools:detectors', 'ductus.tools:segmenters', 'ductus.tools:tells')*
+### ductus.mcp.TOOL_REFS *: [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), ...]* *= ('ductus.tools:gauge', 'ductus.tools:baseline', 'ductus.tools:detectors', 'ductus.tools:segmenters', 'ductus.tools:tells')*
 
 One ref per read-only verb, derived from the CLI’s own list. Never hand-written.
 
@@ -65,7 +65,7 @@ Serve on stdio. The `ductus-mcp` console script.
 * **Return type:**
   [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### ductus.mcp.mk_mcp(, name='ductus', refs=('ductus.tools:gauge', 'ductus.tools:detectors', 'ductus.tools:segmenters', 'ductus.tools:tells'), instructions='Gauge which parts of a text read as machine-written, with every finding anchored to\\\\nthe exact characters that carry it.\\\\n\\\\nThis server never returns a percentage, a confidence, or a verdict about a person, and\\\\na caller should not synthesise one from what it does return. It gives a lean in\\\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\\\nwith a quote that can be checked against the text.\\\\n\\\\nIts false-positive rate on human-written text is measured: with the default detectors,\\\\n6.0% of 350 human-written documents are called leans-machine, and every one of those is\\\\nwrong. A flagged \*sentence\* is much better evidence than a flagged \*document\* -- the\\\\nper-sentence rate is 0.4-2%. The bias runs toward formal, fluent, essayistic prose\\\\nrather than toward simple prose; in the measured corpus the native-speaker control was\\\\nthe most-accused group.\\\\n\\\\n"No findings" is a weak result, not a clean bill.\\\\n', middleware=None, auth=None)
+### ductus.mcp.mk_mcp(, name='ductus', refs=('ductus.tools:gauge', 'ductus.tools:baseline', 'ductus.tools:detectors', 'ductus.tools:segmenters', 'ductus.tools:tells'), instructions='Gauge which parts of a text read as machine-written, with every finding anchored to\\nthe exact characters that carry it.\\n\\nThis server never returns a percentage, a confidence, or a verdict about a person, and\\na caller should not synthesise one from what it does return. It gives a lean in\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\nwith a quote that can be checked against the text.\\n\\nIts false-positive rate on human-written text is measured: with the default detectors,\\n6.0% of 350 human-written documents are called leans-machine, and every one of those is\\nwrong. A flagged \*sentence\* is much better evidence than a flagged \*document\* -- the\\nper-sentence rate is 0.4-2%. The bias runs toward formal, fluent, essayistic prose\\nrather than toward simple prose; in the measured corpus the native-speaker control was\\nthe most-accused group.\\n\\n"No findings" is a weak result, not a clean bill.\\n', middleware=None, auth=None)
 
 Build an MCP server exposing `refs` as tools.
 

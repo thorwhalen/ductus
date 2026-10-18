@@ -128,6 +128,27 @@ ductus gauge draft.md --judgments judgments.json --format html --out report.html
 
 A quote that no longer occurs is dropped rather than mis-anchored, so re-running after an edit is safe.
 
+### Several readers, and a baseline to read them beside
+
+One reader’s judgments turn out to be too noisy to measure a rewrite with. Fresh, strict close readers each flagged about 40 machine-leaning shapes in every version of a 3,700-word essay across five rounds of rewrites, mostly on text the previous reader had passed, so the raw count could not tell a round that helped from one that did not. What did move was the number of **sentences that independent readers both flag**. So `--judgments` can be given once per reader:
+
+```bash
+ductus gauge essay.md --judgments essay.a.json --judgments essay.b.json --judgments essay.c.json
+```
+
+With two or more readers the report gets a **Readers** section: each reader’s count of flagged sentences (machine- and human-leaning, plus any quotes that were not found), and the **consensus** — sentences flagged by at least `k` readers (`-k`, default 2) — as a density per 1,000 words. Only the consensus is folded into the segments; a single reader’s flags are a reading, not a finding.
+
+A density on its own is a bare number. `baseline` takes the same measure on reference texts, typically the author’s own writing from before the question arose:
+
+```bash
+ductus baseline 2019-essay.md 2020-essay.md --out baseline.json   # readers: 2019-essay.*.json, or 2019-essay/*.json
+ductus gauge essay.md --judgments essay.a.json --judgments essay.b.json --baseline baseline.json
+```
+
+The baseline pools the texts by words and keeps the per-text range, because two reference essays at 2.4 and 9.3 per 1,000 words say something a pooled 5.0 hides. Its output carries counts only, never a sentence from the reference texts. When the reference texts had a different number of readers, or were read at a different `k`, the report says the comparison is not like-for-like rather than comparing silently. The prompt for spawning the independent readers is in the `ductus-gauge` skill.
+
+None of this is a probability. It describes how a text reads to these readers next to how the author’s own writing reads to them; it says nothing about who wrote either.
+
 ## MCP
 
 The same verbs the CLI dispatches, as MCP tools:
@@ -137,7 +158,7 @@ pip install "ductus[mcp]"
 ductus-mcp                    # stdio, for a local agent host
 ```
 
-`gauge`, `detectors`, `segmenters` and `tells`. `install_skills` is deliberately absent: it symlinks into an agent host’s skills directory, and a person typing that at a CLI chose to in a way a remote caller did not.
+`gauge`, `baseline`, `detectors`, `segmenters` and `tells`. `install_skills` is deliberately absent: it symlinks into an agent host’s skills directory, and a person typing that at a CLI chose to in a way a remote caller did not.
 
 There is **no second verb list**. `ductus.mcp.TOOL_REFS` is derived from the one list the CLI already dispatches, so the two surfaces cannot drift — and a verb that changes the host declares that at its own definition rather than by appearing in some other list. `middleware=` and `auth=` pass straight through `mk_mcp()` for a deployed server.
 

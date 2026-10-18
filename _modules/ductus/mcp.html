@@ -30,6 +30,7 @@
   <meta name="twitter:title" content="ductus.mcp | ductus" />
   <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
   <link rel="stylesheet" type="text/css" href="../../_static/theme.css?v=d6d7c91b" />
+  <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
   <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
   <link rel="stylesheet" type="text/css" href="../../_static/epythet.css?v=f7dd8900" />
   <link rel="search" title="Search" href="../../search.html" />
@@ -114,6 +115,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ductus.html">ductus</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.base.html">ductus.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.consensus.html">ductus.consensus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.core.html">ductus.core</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/ductus.data.html">ductus.data</a></li>
@@ -199,7 +201,7 @@
 </span><span id="line-25"><span class="sd">    ductus-mcp                      # stdio, for a local agent host</span>
 </span><span id="line-26">
 </span><span id="line-27"><span class="sd">&gt;&gt;&gt; TOOL_REFS[:2]</span>
-</span><span id="line-28"><span class="sd">('ductus.tools:gauge', 'ductus.tools:detectors')</span>
+</span><span id="line-28"><span class="sd">('ductus.tools:gauge', 'ductus.tools:baseline')</span>
 </span><span id="line-29"><span class="sd">&gt;&gt;&gt; all(ref.startswith("ductus.tools:") for ref in TOOL_REFS)</span>
 </span><span id="line-30"><span class="sd">True</span>
 </span><span id="line-31"><span class="sd">&gt;&gt;&gt; "ductus.tools:install_skills" in TOOL_REFS  # host-mutating, left out</span>
@@ -304,7 +306,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=f0357c94"></script>
+    <script src="../../_static/documentation_options.js?v=c7cdf6fe"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

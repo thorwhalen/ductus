@@ -92,9 +92,6 @@ Needs the `[local]` extra, and observer and performer must share a tokenizer.
 
 Resolve a detector spec into callables and their names.
 
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Span`](ductus.base.html.md#ductus.base.Span)], [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](ductus.base.html.md#ductus.base.Signal)]]], [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]]
-
 ```pycon
 >>> fns, names = detectors_from(["forensic"])
 >>> names
@@ -103,6 +100,9 @@ Resolve a detector spec into callables and their names.
 >>> names
 ('tells', 'forensic', 'rhetoric', 'rhythm')
 ```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Span`](ductus.base.html.md#ductus.base.Span)], [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](ductus.base.html.md#ductus.base.Signal)]]], [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]]
 
 ### ductus.detect.fast_detect_gpt(text, span, , model='gpt2', bands=((1.5, 0.3), (2.5, 0.45)), min_windows=6, min_tokens=16, device=None)
 
@@ -125,15 +125,15 @@ Typographic and mechanical artifacts of how the text was produced.
 Several of these argue for a *human*, which is the point: a detector that can
 only ever accuse is not a measuring instrument.
 
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](ductus.base.html.md#ductus.base.Signal)]
-
 ```pycon
 >>> from ductus.base import Span
 >>> t = "he said\nand then left"
 >>> [s.name for s in forensic(t, Span.of(t, 0, len(t)))]
 ['mid-sentence-newline', 'no-terminal-punctuation']
 ```
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](ductus.base.html.md#ductus.base.Signal)]
 
 ### ductus.detect.rhetoric(text, span)
 
@@ -142,15 +142,15 @@ Sentence shapes a phrase catalogue cannot see.
 These are the patterns that survive a model being told to avoid “AI words”,
 which is why they matter more than vocabulary as models improve.
 
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](ductus.base.html.md#ductus.base.Signal)]
-
 ```pycon
 >>> from ductus.base import Span
 >>> t = "This is a pattern: you plan it, you build it, and you ship it."
 >>> [s.name for s in rhetoric(t, Span.of(t, 0, len(t)))]
 ['colon-tricolon']
 ```
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](ductus.base.html.md#ductus.base.Signal)]
 
 ### ductus.detect.rhythm(text, span)
 
@@ -160,9 +160,6 @@ Uniform lengths lean machine, uneven lengths lean human. This is the weakest
 detector here and the thresholds come from the shared catalogue metrics, not
 from a fitted model – treat it as a tiebreaker, never as a finding.
 
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](ductus.base.html.md#ductus.base.Signal)]
-
 ```pycon
 >>> from ductus.base import Span
 >>> t = ("One two three four five six. " * 7)
@@ -170,12 +167,12 @@ from a fitted model – treat it as a tiebreaker, never as a finding.
 ['low-burstiness']
 ```
 
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](ductus.base.html.md#ductus.base.Signal)]
+
 ### ductus.detect.tells(text, span)
 
 Catalogue phrase matches, as signals. Quoted text is skipped.
-
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](ductus.base.html.md#ductus.base.Signal)]
 
 ```pycon
 >>> from ductus.base import Span
@@ -186,3 +183,6 @@ Catalogue phrase matches, as signals. Quoted text is skipped.
 >>> list(tells(q, Span.of(q, 0, len(q))))
 []
 ```
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Signal`](ductus.base.html.md#ductus.base.Signal)]

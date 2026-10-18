@@ -8,6 +8,7 @@ ductus.tools
 
    .. autosummary::
    
+      baseline
       detectors
       gauge
       host_mutating

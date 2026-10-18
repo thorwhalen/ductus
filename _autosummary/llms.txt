@@ -7,6 +7,7 @@
 
 - [ductus](ductus.html.md): ductus – gauge which parts of a text read as machine-written, and why.
 - [ductus.base](ductus.base.html.md): The data model: where a finding lives, what it claims, and how much it weighs.
+- [ductus.consensus](ductus.consensus.html.md): Several close readers, and the sentences at least &#96;k&#96; of them agree on.
 - [ductus.core](ductus.core.html.md): The core: stream segments, or take the whole report. Everything else is a surface.
 - [ductus.curvature](ductus.curvature.html.md): Model-based detectors – the &#96;&#91;local&#93;&#96; extra. Two more functions of the same shape.
 - [ductus.data](ductus.data.html.md): Bundled non-code data: the tells catalogue, agent skills, and the reader subagent.

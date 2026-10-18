@@ -36,6 +36,7 @@
    :recursive:
 
    base
+   consensus
    core
    curvature
    data

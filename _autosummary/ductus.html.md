@@ -58,7 +58,7 @@ flagged *sentence* is much better evidence than a flagged *document*. See
 | [`TellMatch`](#ductus.TellMatch)(rule_id, tier, message, start, ...)    | Where a rule fired, and on what text.                                     |
 | [`TellRule`](#ductus.TellRule)(id, tier, message, patterns[, ...])     | One named rule: a tier, a message, and the patterns that trigger it.      |
 
-### *class* ductus.Report(text_sha256, n_chars, document, segments, detectors, segmenter, schema_version='1', calibration='uncalibrated', meta=<factory>)
+### *class* ductus.Report(text_sha256, n_chars, document, segments, detectors, segmenter, schema_version='1', calibration='uncalibrated', meta=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -118,26 +118,26 @@ viewer re-find a finding after the text around it changed.
 
 Whether `other` falls entirely inside this span.
 
-* **Return type:**
-  [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
-
 ```pycon
 >>> a, b = Span.of("abcdef", 0, 6), Span.of("abcdef", 2, 4)
 >>> a.contains(b), b.contains(a)
 (True, False)
 ```
 
+* **Return type:**
+  [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
+
 #### *classmethod* of(text, start, end, , level='segment')
 
 Build a span over `text`, capturing its re-anchoring context.
-
-* **Return type:**
-  [`Span`](ductus.base.html.md#ductus.base.Span)
 
 ```pycon
 >>> Span.of("abcdef", 2, 4).suffix
 'ef'
 ```
+
+* **Return type:**
+  [`Span`](ductus.base.html.md#ductus.base.Span)
 
 ### *class* ductus.TellMatch(rule_id, tier, message, start, end, matched, weight=0.0)
 
@@ -199,9 +199,6 @@ false accusation rises from 11% to 74% with document length alone, because two
 stray signals weigh the same in 600 characters as in 3000. See
 [`density_aggregate()`](#ductus.density_aggregate) and `misc/docs/phase-2-results.md`.
 
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> from ductus.base import Signal
 >>> aggregate([Signal("x", "human", 0.6, "d")])
@@ -209,6 +206,9 @@ stray signals weigh the same in 600 characters as in 3000. See
 >>> aggregate([Signal("x", "neutral", 0.9, "d")])
 (0.0, 0.6, 'uncertain')
 ```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### ductus.density_aggregate(signals, , n_chars=None)
 
@@ -226,9 +226,6 @@ quantity-integrating score, which is to say a probability. See
 The scaling only ever *divides*, never multiplies, so this scorer can only remove
 accusations, never add one. Short passages behave exactly as before.
 
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> from ductus.base import Signal
 >>> evidence = [Signal("x", "machine", 0.4, "d")]
@@ -239,6 +236,9 @@ accusations, never add one. Short passages behave exactly as before.
 >>> density_aggregate(evidence) == aggregate(evidence)  # no length, no opinion
 True
 ```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`float`](https://docs.python.org/3/builtins/functions.html#float), [`float`](https://docs.python.org/3/builtins/functions.html#float), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### ductus.gauge(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
@@ -256,9 +256,6 @@ the argument and what it cost.
 The segments themselves are untouched by this, and remain the better evidence: a
 flagged sentence says much more than a flagged document.
 
-* **Return type:**
-  [`Report`](ductus.base.html.md#ductus.base.Report)
-
 ```pycon
 >>> r = gauge("It is important to note that this is a robust tapestry.")
 >>> r.document.lean > 0 and r.n_chars == 55
@@ -267,12 +264,12 @@ True
 ('paragraph', 4)
 ```
 
+* **Return type:**
+  [`Report`](ductus.base.html.md#ductus.base.Report)
+
 ### ductus.iter_segments(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
 Yield one scored segment at a time.
-
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Segment`](ductus.base.html.md#ductus.base.Segment)]
 
 ```pycon
 >>> segs = list(iter_segments("Let's delve in.\n\nSent it Friday."))
@@ -280,15 +277,15 @@ Yield one scored segment at a time.
 (2, 'leans-machine')
 ```
 
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Segment`](ductus.base.html.md#ductus.base.Segment)]
+
 ### ductus.iter_tell_matches(text, , rules=None, tiers=None, offset=0)
 
 Every catalogue hit in `text`, in document order.
 
 `offset` is added to every position, so a caller scanning one segment of a
 larger document gets offsets into the document.
-
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`TellMatch`](ductus.tells.html.md#ductus.tells.TellMatch)]
 
 ```pycon
 >>> [m.rule_id for m in iter_tell_matches("In conclusion, it's important to note this.")]
@@ -299,12 +296,12 @@ larger document gets offsets into the document.
 []
 ```
 
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`TellMatch`](ductus.tells.html.md#ductus.tells.TellMatch)]
+
 ### ductus.load_rules(path=None)
 
 The catalogue’s rules, compiled.
-
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`TellRule`](ductus.tells.html.md#ductus.tells.TellRule), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
 
 ```pycon
 >>> rules = load_rules()
@@ -314,12 +311,12 @@ True
 ['E', 'S', 'W']
 ```
 
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`TellRule`](ductus.tells.html.md#ductus.tells.TellRule), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
+
 ### ductus.to_html(report, , text=None, title='Where this reads as machine-written', subtitle='')
 
 A single self-contained HTML file. `text` defaults to the spans’ own quotes.
-
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ```pycon
 >>> from ductus.core import gauge
@@ -328,12 +325,12 @@ A single self-contained HTML file. `text` defaults to the spans’ own quotes.
 True
 ```
 
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
 ### ductus.to_json(report, , indent=2)
 
 The whole report, serialized.
-
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ```pycon
 >>> from ductus.core import gauge
@@ -342,12 +339,12 @@ The whole report, serialized.
 'tells'
 ```
 
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
 ### ductus.to_markdown(report, , text=None, title='Reading')
 
 A readable diagnosis: synopsis first, then the flagged segments.
-
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ```pycon
 >>> from ductus.core import gauge
@@ -356,10 +353,14 @@ A readable diagnosis: synopsis first, then the flagged segments.
 True
 ```
 
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
 ### Modules
 
 | [`base`](ductus.base.html.md#module-ductus.base)           | The data model: where a finding lives, what it claims, and how much it weighs.     |
 |------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| [`consensus`](ductus.consensus.html.md#module-ductus.consensus) | Several close readers, and the sentences at least `k` of them agree on.            |
 | [`core`](ductus.core.html.md#module-ductus.core)           | The core: stream segments, or take the whole report.                               |
 | [`curvature`](ductus.curvature.html.md#module-ductus.curvature) | Model-based detectors -- the `[local]` extra.                                      |
 | [`data`](ductus.data.html.md#module-ductus.data)           | Bundled non-code data: the tells catalogue, agent skills, and the reader subagent. |

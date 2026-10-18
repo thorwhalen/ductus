@@ -42,9 +42,6 @@ True
 
 A single self-contained HTML file. `text` defaults to the spans’ own quotes.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> from ductus.core import gauge
 >>> h = to_html(gauge("Let's delve in."))
@@ -52,12 +49,12 @@ A single self-contained HTML file. `text` defaults to the spans’ own quotes.
 True
 ```
 
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
 ### ductus.render.to_json(report, , indent=2)
 
 The whole report, serialized.
-
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ```pycon
 >>> from ductus.core import gauge
@@ -66,12 +63,12 @@ The whole report, serialized.
 'tells'
 ```
 
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
 ### ductus.render.to_markdown(report, , text=None, title='Reading')
 
 A readable diagnosis: synopsis first, then the flagged segments.
-
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ```pycon
 >>> from ductus.core import gauge
@@ -79,3 +76,6 @@ A readable diagnosis: synopsis first, then the flagged segments.
 >>> md.splitlines()[0].startswith("# ")
 True
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)

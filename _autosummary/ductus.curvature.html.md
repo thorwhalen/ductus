@@ -80,15 +80,15 @@ the name, so nothing is emitted.
 
 The weight for a standing of `z`, or `None` when it says nothing.
 
-* **Return type:**
-  [`float`](https://docs.python.org/3/builtins/functions.html#float) | [`None`](https://docs.python.org/3/builtins/constants.html#None)
-
 ```pycon
 >>> band_of(1.49) is None
 True
 >>> band_of(1.5), band_of(2.49), band_of(2.5), band_of(-9.0)
 (0.3, 0.3, 0.45, 0.45)
 ```
+
+* **Return type:**
+  [`float`](https://docs.python.org/3/builtins/functions.html#float) | [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
 ### ductus.curvature.binoculars(text, span, , observer='distilgpt2', performer='gpt2', bands=((1.5, 0.3), (2.5, 0.45)), min_windows=6, min_tokens=16, device=None)
 
@@ -128,12 +128,12 @@ themselves and hide the thing being looked for.
 A degenerate reference (every value identical) yields `0.0`, which falls in the
 dead zone and so emits nothing.
 
-* **Return type:**
-  [`float`](https://docs.python.org/3/builtins/functions.html#float)
-
 ```pycon
 >>> robust_z(3.0, [1.0, 2.0, 3.0, 4.0, 5.0])
 0.0
 >>> robust_z(1.0, [1.0, 1.0, 1.0])
 0.0
 ```
+
+* **Return type:**
+  [`float`](https://docs.python.org/3/builtins/functions.html#float)

@@ -56,7 +56,7 @@ reads anything at all reads this, so the limits belong here and not only in a
 README. The numbers are the measured ones – see
 `misc/docs/reducing-false-accusations.md`.
 
-### ductus.http.ROUTED_FUNCS *: [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[Callable](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[...], [Any](https://docs.python.org/3/library/typing.html#typing.Any)], ...]* *= (<function gauge>, <function detectors>, <function segmenters>, <function tells>)*
+### ductus.http.ROUTED_FUNCS *: [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[Callable](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[..., [Any](https://docs.python.org/3/library/typing.html#typing.Any)], ...]* *= (<function gauge>, <function baseline>, <function detectors>, <function segmenters>, <function tells>)*
 
 One callable per read-only verb, derived from the CLI’s own list. Never
 hand-written. The filter reads `mutates_host`, declared at each verb’s own
@@ -87,9 +87,6 @@ silent `undefined` in a browser rather than a failing test.
 The generated client types `gauge` as returning `string`, because it does –
 a JSON document. [`export_types()`](#ductus.http.export_types) supplies what is inside it.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> ts = export_types()
 >>> "export interface Report {" in ts and "text_sha256: string;" in ts
@@ -97,6 +94,9 @@ True
 >>> "signals: Signal[];" in ts
 True
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### ductus.http.main()
 
@@ -110,7 +110,7 @@ because someone ran it to look at it.
 * **Return type:**
   [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### ductus.http.mk_app(\*, funcs=(<function gauge>, <function detectors>, <function segmenters>, <function tells>), title='ductus', description='Gauge which parts of a text read as machine-written, with every finding anchored to\\\\nthe exact characters that carry it.\\\\n\\\\nThis service never returns a percentage, a confidence, or a verdict about a person,\\\\nand a caller should not synthesise one from what it does return. It gives a lean in\\\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\\\nwith a quote that can be checked against the text.\\\\n\\\\nIts false-positive rate on human-written text is measured: with the default\\\\ndetectors, 6.0% of 350 human-written documents are called \`leans-machine\`. Every one\\\\nof those is wrong. A flagged \*sentence\* is much better evidence than a flagged\\\\n\*document\* -- the per-sentence rate is 0.4-2%.\\\\n\\\\nThe bias runs toward formal, fluent, essayistic prose, not toward simple prose. In\\\\nthe measured corpus the native-speaker control was the most-accused group.\\\\n\\\\n"No findings" is a weak result, not a clean bill.\\\\n', guard_host_paths=True, ui=None, \*\*qh_kwargs)
+### ductus.http.mk_app(\*, funcs=(<function gauge>, <function baseline>, <function detectors>, <function segmenters>, <function tells>), title='ductus', description='Gauge which parts of a text read as machine-written, with every finding anchored to\\nthe exact characters that carry it.\\n\\nThis service never returns a percentage, a confidence, or a verdict about a person,\\nand a caller should not synthesise one from what it does return. It gives a lean in\\n[-1, +1], an evidence strength, a coarse label, and the signals behind them -- each\\nwith a quote that can be checked against the text.\\n\\nIts false-positive rate on human-written text is measured: with the default\\ndetectors, 6.0% of 350 human-written documents are called \`leans-machine\`. Every one\\nof those is wrong. A flagged \*sentence\* is much better evidence than a flagged\\n\*document\* -- the per-sentence rate is 0.4-2%.\\n\\nThe bias runs toward formal, fluent, essayistic prose, not toward simple prose. In\\nthe measured corpus the native-speaker control was the most-accused group.\\n\\n"No findings" is a weak result, not a clean bill.\\n', guard_host_paths=True, ui=None, \*\*qh_kwargs)
 
 Build a FastAPI app serving `funcs`, one POST endpoint per verb.
 

@@ -1,0 +1,21 @@
+ductus.consensus
+================
+
+.. automodule:: ductus.consensus
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DEFAULT_K
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      anchor_judgment
+      consensus
+      consensus_signals
+      pooled
+   

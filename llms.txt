@@ -9,6 +9,7 @@
 - [API reference](api.html.md): | &#96;ductus&#96;   | ductus -- gauge which parts of a text read as machine-written, and why.   |
 - [ductus](_autosummary/ductus.html.md): ductus – gauge which parts of a text read as machine-written, and why.
 - [ductus.base](_autosummary/ductus.base.html.md): The data model: where a finding lives, what it claims, and how much it weighs.
+- [ductus.consensus](_autosummary/ductus.consensus.html.md): Several close readers, and the sentences at least &#96;k&#96; of them agree on.
 - [ductus.core](_autosummary/ductus.core.html.md): The core: stream segments, or take the whole report. Everything else is a surface.
 - [ductus.curvature](_autosummary/ductus.curvature.html.md): Model-based detectors – the &#96;&#91;local&#93;&#96; extra. Two more functions of the same shape.
 - [ductus.data](_autosummary/ductus.data.html.md): Bundled non-code data: the tells catalogue, agent skills, and the reader subagent.
@@ -21,7 +22,7 @@
 - [ductus.tells](_autosummary/ductus.tells.html.md): The tells catalogue: named regular-expression patterns, tiered by confidence.
 - [ductus.tools](_autosummary/ductus.tools.html.md): The verb SSOT: plain functions, JSON-ready in, JSON-ready out.
 - [For AI agents](ai-agents.html.md): &#96;ductus&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-09 16:38 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-18 10:09 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
 
 ## Optional
 

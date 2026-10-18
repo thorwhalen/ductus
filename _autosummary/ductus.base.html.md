@@ -49,7 +49,7 @@ does not discriminate – it is kept because hiding it would be dishonest.
 The coarse vocabulary a segment is labelled with. Deliberately not a
 percentage: see `docs/why-no-percentage.md`.
 
-### *class* ductus.base.Report(text_sha256, n_chars, document, segments, detectors, segmenter, schema_version='1', calibration='uncalibrated', meta=<factory>)
+### *class* ductus.base.Report(text_sha256, n_chars, document, segments, detectors, segmenter, schema_version='1', calibration='uncalibrated', meta=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -113,23 +113,23 @@ viewer re-find a finding after the text around it changed.
 
 Whether `other` falls entirely inside this span.
 
-* **Return type:**
-  [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
-
 ```pycon
 >>> a, b = Span.of("abcdef", 0, 6), Span.of("abcdef", 2, 4)
 >>> a.contains(b), b.contains(a)
 (True, False)
 ```
 
+* **Return type:**
+  [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
+
 #### *classmethod* of(text, start, end, , level='segment')
 
 Build a span over `text`, capturing its re-anchoring context.
-
-* **Return type:**
-  [`Span`](#ductus.base.Span)
 
 ```pycon
 >>> Span.of("abcdef", 2, 4).suffix
 'ef'
 ```
+
+* **Return type:**
+  [`Span`](#ductus.base.Span)

@@ -58,9 +58,6 @@ the argument and what it cost.
 The segments themselves are untouched by this, and remain the better evidence: a
 flagged sentence says much more than a flagged document.
 
-* **Return type:**
-  [`Report`](ductus.base.html.md#ductus.base.Report)
-
 ```pycon
 >>> r = gauge("It is important to note that this is a robust tapestry.")
 >>> r.document.lean > 0 and r.n_chars == 55
@@ -69,15 +66,18 @@ True
 ('paragraph', 4)
 ```
 
+* **Return type:**
+  [`Report`](ductus.base.html.md#ductus.base.Report)
+
 ### ductus.core.iter_segments(text, \*, segmenter='paragraph', detectors=None, aggregate=<function density_aggregate>, extra_signals=())
 
 Yield one scored segment at a time.
-
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Segment`](ductus.base.html.md#ductus.base.Segment)]
 
 ```pycon
 >>> segs = list(iter_segments("Let's delve in.\n\nSent it Friday."))
 >>> len(segs), segs[0].label
 (2, 'leans-machine')
 ```
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Segment`](ductus.base.html.md#ductus.base.Segment)]

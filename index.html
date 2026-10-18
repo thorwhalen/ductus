@@ -30,6 +30,7 @@
 <meta content="ductus" name="twitter:title"/>
 <link href="_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
 <link href="_static/theme.css?v=d6d7c91b" rel="stylesheet" type="text/css"/>
+<link href="_static/sphinx_autodoc_typehints.css?v=057ac668" rel="stylesheet" type="text/css"/>
 <link href="_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
 <link href="_static/epythet.css?v=f7dd8900" rel="stylesheet" type="text/css"/>
 <link href="search.html" rel="search" title="Search"/>
@@ -83,6 +84,7 @@
 <li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="api.html">API reference<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-cloak="" x-show="expanded">
 <li class="toctree-l2" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="_autosummary/ductus.html">ductus<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-cloak="" x-show="expanded">
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.base.html">ductus.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.consensus.html">ductus.consensus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.core.html">ductus.core</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.curvature.html">ductus.curvature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ductus.data.html">ductus.data</a></li>
@@ -311,6 +313,21 @@
 </span></code></pre></div>
 </div>
 <p>A quote that no longer occurs is dropped rather than mis-anchored, so re-running after an edit is safe.</p>
+<section id="several-readers-and-a-baseline-to-read-them-beside">
+<h3>Several readers, and a baseline to read them beside<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#several-readers-and-a-baseline-to-read-them-beside" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#several-readers-and-a-baseline-to-read-them-beside'">¶</a></h3>
+<p>One reader’s judgments turn out to be too noisy to measure a rewrite with. Fresh, strict close readers each flagged about 40 machine-leaning shapes in every version of a 3,700-word essay across five rounds of rewrites, mostly on text the previous reader had passed, so the raw count could not tell a round that helped from one that did not. What did move was the number of <strong>sentences that independent readers both flag</strong>. So <code class="docutils literal notranslate"><span class="pre">--judgments</span></code> can be given once per reader:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">ductus<span class="w"> </span>gauge<span class="w"> </span>essay.md<span class="w"> </span>--judgments<span class="w"> </span>essay.a.json<span class="w"> </span>--judgments<span class="w"> </span>essay.b.json<span class="w"> </span>--judgments<span class="w"> </span>essay.c.json
+</span></code></pre></div>
+</div>
+<p>With two or more readers the report gets a <strong>Readers</strong> section: each reader’s count of flagged sentences (machine- and human-leaning, plus any quotes that were not found), and the <strong>consensus</strong> — sentences flagged by at least <code class="docutils literal notranslate"><span class="pre">k</span></code> readers (<code class="docutils literal notranslate"><span class="pre">-k</span></code>, default 2) — as a density per 1,000 words. Only the consensus is folded into the segments; a single reader’s flags are a reading, not a finding.</p>
+<p>A density on its own is a bare number. <code class="docutils literal notranslate"><span class="pre">baseline</span></code> takes the same measure on reference texts, typically the author’s own writing from before the question arose:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">ductus<span class="w"> </span>baseline<span class="w"> </span><span class="m">2019</span>-essay.md<span class="w"> </span><span class="m">2020</span>-essay.md<span class="w"> </span>--out<span class="w"> </span>baseline.json<span class="w">   </span><span class="c1"># readers: 2019-essay.*.json, or 2019-essay/*.json</span>
+</span><span id="line-2">ductus<span class="w"> </span>gauge<span class="w"> </span>essay.md<span class="w"> </span>--judgments<span class="w"> </span>essay.a.json<span class="w"> </span>--judgments<span class="w"> </span>essay.b.json<span class="w"> </span>--baseline<span class="w"> </span>baseline.json
+</span></code></pre></div>
+</div>
+<p>The baseline pools the texts by words and keeps the per-text range, because two reference essays at 2.4 and 9.3 per 1,000 words say something a pooled 5.0 hides. Its output carries counts only, never a sentence from the reference texts. When the reference texts had a different number of readers, or were read at a different <code class="docutils literal notranslate"><span class="pre">k</span></code>, the report says the comparison is not like-for-like rather than comparing silently. The prompt for spawning the independent readers is in the <code class="docutils literal notranslate"><span class="pre">ductus-gauge</span></code> skill.</p>
+<p>None of this is a probability. It describes how a text reads to these readers next to how the author’s own writing reads to them; it says nothing about who wrote either.</p>
+</section>
 </section>
 <section id="mcp">
 <h2>MCP<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#mcp" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#mcp'">¶</a></h2>
@@ -319,7 +336,7 @@
 </span><span id="line-2">ductus-mcp<span class="w">                    </span><span class="c1"># stdio, for a local agent host</span>
 </span></code></pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">gauge</span></code>, <code class="docutils literal notranslate"><span class="pre">detectors</span></code>, <code class="docutils literal notranslate"><span class="pre">segmenters</span></code> and <code class="docutils literal notranslate"><span class="pre">tells</span></code>. <code class="docutils literal notranslate"><span class="pre">install_skills</span></code> is deliberately absent: it symlinks into an agent host’s skills directory, and a person typing that at a CLI chose to in a way a remote caller did not.</p>
+<p><code class="docutils literal notranslate"><span class="pre">gauge</span></code>, <code class="docutils literal notranslate"><span class="pre">baseline</span></code>, <code class="docutils literal notranslate"><span class="pre">detectors</span></code>, <code class="docutils literal notranslate"><span class="pre">segmenters</span></code> and <code class="docutils literal notranslate"><span class="pre">tells</span></code>. <code class="docutils literal notranslate"><span class="pre">install_skills</span></code> is deliberately absent: it symlinks into an agent host’s skills directory, and a person typing that at a CLI chose to in a way a remote caller did not.</p>
 <p>There is <strong>no second verb list</strong>. <code class="docutils literal notranslate"><span class="pre">ductus.mcp.TOOL_REFS</span></code> is derived from the one list the CLI already dispatches, so the two surfaces cannot drift — and a verb that changes the host declares that at its own definition rather than by appearing in some other list. <code class="docutils literal notranslate"><span class="pre">middleware=</span></code> and <code class="docutils literal notranslate"><span class="pre">auth=</span></code> pass straight through <code class="docutils literal notranslate"><span class="pre">mk_mcp()</span></code> for a deployed server.</p>
 </section>
 <section id="http">
@@ -397,7 +414,7 @@
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-09 16:38 UTC from <a href="https://github.com/thorwhalen/ductus/commit/a6cd145534d28cddc3aae809c8ad9a7e74a08b18">a6cd145</a> (main) · ductus 0.0.15 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-18 10:09 UTC from <a href="https://github.com/thorwhalen/ductus/commit/413a0abd695de6c24788cf84401da3029a33e86d">413a0ab</a> (main) · ductus 0.0.16 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -411,7 +428,10 @@
 <li><a :data-current="activeSection === '#the-html-rendering'" class="reference internal" href="#the-html-rendering">The HTML rendering</a></li>
 </ul>
 </li>
-<li><a :data-current="activeSection === '#agent-skills'" class="reference internal" href="#agent-skills">Agent skills</a></li>
+<li><a :data-current="activeSection === '#agent-skills'" class="reference internal" href="#agent-skills">Agent skills</a><ul>
+<li><a :data-current="activeSection === '#several-readers-and-a-baseline-to-read-them-beside'" class="reference internal" href="#several-readers-and-a-baseline-to-read-them-beside">Several readers, and a baseline to read them beside</a></li>
+</ul>
+</li>
 <li><a :data-current="activeSection === '#mcp'" class="reference internal" href="#mcp">MCP</a></li>
 <li><a :data-current="activeSection === '#http'" class="reference internal" href="#http">HTTP</a></li>
 <li><a :data-current="activeSection === '#the-editor-score-edit-score-again'" class="reference internal" href="#the-editor-score-edit-score-again">The editor: score, edit, score again</a></li>
@@ -433,7 +453,7 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=f0357c94"></script>
+<script src="_static/documentation_options.js?v=c7cdf6fe"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

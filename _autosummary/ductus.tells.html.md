@@ -101,9 +101,6 @@ Every catalogue hit in `text`, in document order.
 `offset` is added to every position, so a caller scanning one segment of a
 larger document gets offsets into the document.
 
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`TellMatch`](#ductus.tells.TellMatch)]
-
 ```pycon
 >>> [m.rule_id for m in iter_tell_matches("In conclusion, it's important to note this.")]
 ['summary-closer', 'throat-clearing']
@@ -113,24 +110,24 @@ larger document gets offsets into the document.
 []
 ```
 
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`TellMatch`](#ductus.tells.TellMatch)]
+
 ### ductus.tells.load_catalogue(path=None)
 
 Read the catalogue file. Cached; pass a path to use a different one.
-
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ```pycon
 >>> sorted(load_catalogue())
 ['metrics', 'rules']
 ```
 
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
 ### ductus.tells.load_rules(path=None)
 
 The catalogue’s rules, compiled.
-
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`TellRule`](#ductus.tells.TellRule), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
 
 ```pycon
 >>> rules = load_rules()
@@ -140,14 +137,17 @@ True
 ['E', 'S', 'W']
 ```
 
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`TellRule`](#ductus.tells.TellRule), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
+
 ### ductus.tells.metrics(path=None)
 
 The catalogue’s shared numeric thresholds.
-
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ```pycon
 >>> metrics()["min_sentences_for_rhythm"] > 0
 True
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]

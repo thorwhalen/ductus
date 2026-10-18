@@ -36,32 +36,29 @@ The registry the `segmenter=` seam resolves names against.
 
 Yield one span per paragraph.
 
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Span`](ductus.base.html.md#ductus.base.Span)]
-
 ```pycon
 >>> [ (s.start, s.end) for s in paragraph_spans("ab\n\ncd") ]
 [(0, 2), (4, 6)]
 ```
 
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Span`](ductus.base.html.md#ductus.base.Span)]
+
 ### ductus.segment.sentence_spans(text)
 
 Yield one span per sentence, never crossing a paragraph boundary.
-
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Span`](ductus.base.html.md#ductus.base.Span)]
 
 ```pycon
 >>> [s.quote for s in sentence_spans("Hi there! Bye.")]
 ['Hi there!', 'Bye.']
 ```
 
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Span`](ductus.base.html.md#ductus.base.Span)]
+
 ### ductus.segment.spans_of(text, segmenter)
 
 Resolve `segmenter` (a name or a callable) and run it over `text`.
-
-* **Return type:**
-  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Span`](ductus.base.html.md#ductus.base.Span)]
 
 ```pycon
 >>> len(list(spans_of("a\n\nb", "paragraph")))
@@ -69,3 +66,6 @@ Resolve `segmenter` (a name or a callable) and run it over `text`.
 >>> len(list(spans_of("a b", lambda t: iter([Span.of(t, 0, 1)]))))
 1
 ```
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Span`](ductus.base.html.md#ductus.base.Span)]
