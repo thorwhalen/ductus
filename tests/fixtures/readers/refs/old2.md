@@ -1,0 +1,1 @@
+Our street got a bike lane last summer. Half the neighbours hated it for a month and then forgot they had. The shop on the corner says trade is up; the bakery says it is down. Neither of them counted.

@@ -25,7 +25,7 @@ Run it::
     ductus-mcp                      # stdio, for a local agent host
 
 >>> TOOL_REFS[:2]
-('ductus.tools:gauge', 'ductus.tools:detectors')
+('ductus.tools:gauge', 'ductus.tools:baseline')
 >>> all(ref.startswith("ductus.tools:") for ref in TOOL_REFS)
 True
 >>> "ductus.tools:install_skills" in TOOL_REFS  # host-mutating, left out

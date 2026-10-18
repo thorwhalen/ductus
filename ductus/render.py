@@ -69,6 +69,67 @@ def to_json(report: Report, *, indent: int | None = 2) -> str:
     return json.dumps(asdict(report), indent=indent, ensure_ascii=False)
 
 
+def _rate(d: dict[str, Any]) -> str:
+    r = d.get("per_1000_words")
+    return "n/a" if r is None else f"{r:.1f}"
+
+
+def _readers_facts(meta: dict[str, Any]) -> tuple[list[list[str]], list[str]] | None:
+    """The multi-reader part of a report, as table rows and sentences, or ``None``.
+
+    Shared by the markdown and HTML renderers so they cannot say different things.
+    Sentences carry ``**bold**`` for the one figure that matters; each renderer turns
+    that into its own markup.
+    """
+    reading = meta.get("readers")
+    if not reading:
+        return None
+    rows = [
+        [r["name"], str(r["machine"]), str(r["human"]), str(r["dropped"])]
+        for r in reading["readers"]
+    ]
+    m, h, k, n = reading["machine"], reading["human"], reading["k"], reading["n_readers"]
+    unit = reading["unit"]
+    lines = [
+        (
+            f"**Consensus, {unit}s flagged by at least {k} of {n} readers: "
+            f"{m['count']} machine-leaning, {_rate(m)} per 1,000 words.** "
+            f"Human-leaning: {h['count']}, {_rate(h)} per 1,000 words. "
+            f"Over {reading['n_words']:,} words, {reading['n_units']} {unit}s."
+        )
+    ]
+    ref = meta.get("baseline")
+    if ref:
+        lo, hi = ref["machine"].get("range") or (None, None)
+        spread = "" if lo is None else f", {lo:.1f} to {hi:.1f} across texts"
+        lines.append(
+            f"**Next to the reference texts: {_rate(ref['machine'])} per 1,000 words** "
+            f"pooled over {ref['n_texts']} text(s) and {ref['n_words']:,} words{spread}. "
+            f"Human-leaning: {_rate(ref['human'])} per 1,000 words."
+        )
+        lines += [f"Not like-for-like: {c}." for c in ref.get("caveats", ())]
+    else:
+        lines.append(
+            "No baseline given. A consensus density means little on its own; the same "
+            "measure on the author's own earlier writing (`ductus baseline`) is what it "
+            "should be read beside."
+        )
+    lines.append(
+        "One reader's flags are a reading, not a finding: independent readers disagree "
+        "on most of them. Only the consensus enters the segments below, and it describes "
+        "how the text reads to these readers, not who wrote it."
+    )
+    return rows, lines
+
+
+_READER_HEAD = [
+    "Reader",
+    "Machine-leaning sentences",
+    "Human-leaning sentences",
+    "Quotes not found",
+]
+
+
 def _stats(seg: Segment) -> str:
     m = sum(s.weight for s in seg.signals if s.direction == "machine")
     h = sum(s.weight for s in seg.signals if s.direction == "human")
@@ -106,6 +167,16 @@ def to_markdown(
         + f". Detectors: {', '.join(report.detectors)}. Calibration: {report.calibration}."
     )
     out.append("")
+
+    facts = _readers_facts(report.meta)
+    if facts:
+        rows, lines = facts
+        out += ["## Readers", "", "| " + " | ".join(_READER_HEAD) + " |"]
+        out += ["|" + "---|" * len(_READER_HEAD)]
+        out += ["| " + " | ".join(c.replace("|", "\\|") for c in r) + " |" for r in rows]
+        out.append("")
+        for line in lines:
+            out += [line, ""]
 
     if not flagged:
         out += [
@@ -216,6 +287,11 @@ aside .why{margin-top:7px;padding-top:7px;border-top:1px solid var(--line)}
 .rk-b q{display:block;font:15px/1.5 ui-serif,Georgia,serif;margin:2px 0;overflow-wrap:anywhere}
 .rk-n{display:block;color:var(--muted)}
 .rank .dir.machine{color:var(--m1)}.rank .dir.human{color:var(--h1)}
+.readers{margin:0 0 22px;padding-top:0;border-top:0}
+.readers table{border-collapse:collapse;margin:10px 0;font:13px/1.4 ui-sans-serif,system-ui,sans-serif;
+ font-variant-numeric:tabular-nums;display:block;overflow-x:auto;max-width:100%}
+.readers th,.readers td{padding:4px 10px 4px 0;text-align:left;border-bottom:1px solid var(--line)}
+.readers p.sub{margin:8px 0}
 footer{border-top:1px solid var(--line);padding-top:16px;padding-bottom:48px;
  font:12px/1.6 ui-sans-serif,system-ui,sans-serif;color:var(--muted)}
 /* Too narrow to sit beside anything: fall back to a bottom sheet. */
@@ -283,6 +359,30 @@ def _ranked_section(report: Report) -> str:
         f'<p class="sub">Document: <b>{doc.label}</b>, lean {doc.lean:+.2f}, strength '
         f"{doc.strength:.2f} &middot; {len(signals)} signal(s) &middot; "
         f"weight by direction: {by_dir}</p>{body}</section>"
+    )
+
+
+def _readers_section(report: Report) -> str:
+    """The per-reader counts and the consensus, for the HTML page. Empty if none."""
+    import re
+
+    facts = _readers_facts(report.meta)
+    if not facts:
+        return ""
+    rows, lines = facts
+
+    def bold(text: str) -> str:
+        return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", _html.escape(text))
+
+    head = "".join(f"<th>{_html.escape(h)}</th>" for h in _READER_HEAD)
+    body = "".join(
+        "<tr>" + "".join(f"<td>{_html.escape(c)}</td>" for c in r) + "</tr>" for r in rows
+    )
+    paras = "".join(f'<p class="sub">{bold(line)}</p>' for line in lines)
+    return (
+        '<section class="rank readers"><h2>Readers</h2>'
+        f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
+        f"{paras}</section>"
     )
 
 
@@ -384,7 +484,7 @@ def to_html(
         '<span class="chip"><span class="sw h"></span> human-leaning</span>'
         f'<span class="chip">document: <b>&nbsp;{doc.label}</b> '
         f"({doc.lean:+.2f}, strength {doc.strength:.2f})</span></div></header>"
-        f'<main>{"".join(body)}{_ranked_section(report)}</main><aside id="tip"></aside>'
+        f'<main>{_readers_section(report)}{"".join(body)}{_ranked_section(report)}</main><aside id="tip"></aside>'
         f"<footer><p><b>{_DISCLAIMER}</b></p>"
         f"<p>sha256 {report.text_sha256[:16]} &middot; detectors: "
         f"{', '.join(report.detectors)} &middot; calibration: {report.calibration}</p></footer>"

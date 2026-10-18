@@ -22,6 +22,7 @@ detect.py    the four deterministic detectors (the `detectors=` seam) + the regi
 curvature.py Fast-DetectGPT and Binoculars ([local] extra, deferred torch import)
 score.py     (density_)aggregate() per segment; roll_up() per document. No percentage. Ever.
 core.py      iter_segments() streams, gauge() batches over it
+consensus.py several readers' judgments -> sentences >= k agree on, per 1,000 words; pooled() baselines
 render.py    to_json / to_markdown / to_html (self-contained, no CDN, two-channel highlighting)
 tools.py     the verb SSOT: JSON in, JSON out, never prints or exits
 mcp.py       the MCP surface ([mcp] extra); TOOL_REFS is DERIVED from _dispatch_funcs
@@ -38,6 +39,7 @@ data/        tells.yaml, skills/, agents/
 - **Nothing in `tools.py` prints or exits.** The CLI is `cw`; MCP is `py2mcp` string refs to the same functions.
 - **A surface never gets its own verb list.** `ductus/mcp.py` *derives* `TOOL_REFS` from `tools._dispatch_funcs`, so there is nothing to keep in sync and no parity test to write — a parity test between two surfaces means there are two implementations. A verb that changes the host declares it at its own definition with `@host_mutating`, and surfaces filter on that property rather than on a second list.
 - **The core stays cheap to import.** `torch`/`transformers` live in the `[local]` extra behind deferred imports. `pyyaml` and `cw` are the only hard dependencies.
+- **With several readers, only their consensus enters the report.** One reader's flags vary more between readers than between rewrites (thorwhalen/ductus#20); what is scored is the sentences at least `k` readers flag, and a single `--judgments` keeps its original behaviour. A baseline is counts only -- the reference texts' sentences never leave `baseline()`.
 - **"No findings" is a weak result, not a clean bill**, and the renderers say so.
 - **The deterministic layer has high precision and low recall** — 7 signals across the 12 known-mixed fixture documents at sentence granularity (11 at paragraph). `tests/test_ground_truth.py` asserts that floor rather than a flattering number. Do not raise the assertion to make a change look good.
 - **Calibrate the instrument, not the verdict.** Fitting may tune how much each *kind* of evidence weighs, or how evidence is normalised — properties of the tool, publishable as a table. It may never produce a per-document estimate of P(machine), however renamed. The operational test: if a reader who knows the procedure can invert the reported output back into a probability, the package is emitting one. `lean` must stay a ratio that reaches ±1.0 on a single weak signal; that jaggedness is the guardrail, not a defect. Full argument: `misc/docs/what-calibration-means-here.md`.

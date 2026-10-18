@@ -90,12 +90,12 @@ def _guard(fn: Callable[..., Any]) -> Callable[..., Any]:
     choosing a path on the server's disk, and silently ignoring the argument would
     leave them believing a file was written.
 
-    ``read`` parameters are refused when the value names a file that exists, and when
-    it is ``-`` (stdin, which on a server is either meaningless or a hang). That is
-    precisely the condition under which ``tools._read_source`` would open a file, so
-    the branch becomes unreachable and the value can only ever be treated as literal
-    text. Checking the same condition the core checks is what makes this exact rather
-    than a guess at what a path looks like.
+    ``read`` parameters are refused when the value names a file or directory that
+    exists, and when it is ``-`` (stdin, which on a server is either meaningless or a
+    hang). That covers every condition under which the core opens something --
+    ``tools._read_source`` opens an existing file, ``baseline`` lists an existing
+    directory -- so those branches become unreachable and the value can only ever be
+    treated as literal text. A list-valued parameter is checked element by element.
 
     >>> import ductus.tools as t
     >>> g = _guard(t.gauge)
@@ -120,18 +120,23 @@ def _guard(fn: Callable[..., Any]) -> Callable[..., Any]:
         bound = signature.bind_partial(*args, **kwargs)
         for name, role in roles.items():
             value = bound.arguments.get(name)
-            if value is None or not isinstance(value, str):
-                continue
-            if role == "write":
-                raise ValueError(
-                    f"{name!r} names a path on the server and is not available over "
-                    "HTTP. Ask for the rendered result in the response body instead."
-                )
-            if value == "-" or (len(value) < 4096 and os.path.isfile(value)):
-                raise ValueError(
-                    f"{name!r} was read as a path on the server, which is not "
-                    "available over HTTP. Send the text itself, not a filename."
-                )
+            # A parameter may take several paths (`judgments`, `sources`); each one
+            # is checked, or the second reader's file would be read unguarded.
+            values = value if isinstance(value, (list, tuple)) else [value]
+            for v in values:
+                if not isinstance(v, str):
+                    continue
+                if role == "write":
+                    raise ValueError(
+                        f"{name!r} names a path on the server and is not available "
+                        "over HTTP. Ask for the rendered result in the response body "
+                        "instead."
+                    )
+                if v == "-" or (len(v) < 4096 and os.path.exists(v)):
+                    raise ValueError(
+                        f"{name!r} was read as a path on the server, which is not "
+                        "available over HTTP. Send the text itself, not a filename."
+                    )
         return fn(*args, **kwargs)
 
     # `functools.wraps` copies `host_paths` across with the rest of `__dict__`, which

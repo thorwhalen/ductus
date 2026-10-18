@@ -1,0 +1,5 @@
+[
+  {"quote": "Time spent can't by itself be a measure of care.", "direction": "machine", "name": "principle-generalisation", "weight": 0.45, "note": "Maxim."},
+  {"quote": "In the end, the move worked.", "direction": "machine", "name": "summary-closer", "weight": 0.3, "note": "Restates."},
+  {"quote": "She had kept the old manifest in a spreadsheet nobody else knew about", "direction": "human", "name": "unhedged-specificity", "weight": 0.3, "note": "Particular."}
+]

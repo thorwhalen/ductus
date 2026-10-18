@@ -7,9 +7,19 @@ export interface GaugeParams {
   format?: string;
   segmenter?: string;
   detectors?: string | string[] | null;
-  judgments?: string | null;
+  judgments?: string | string[] | null;
+  k?: number;
+  baseline?: string | Record<string, any> | null;
   out?: string | null;
   title?: string | null;
+}
+
+export interface BaselineParams {
+  sources: string[];
+  judgments_dir?: string | null;
+  k?: number;
+  format?: string;
+  out?: string | null;
 }
 
 export interface DetectorsParams {
@@ -44,12 +54,47 @@ export class DuctusClient {
    * an agent's own readings, folded in alongside the deterministic ones. With
    * ``out``, the result is written there and a one-line summary is returned.
    *
+   * Give ``judgments`` several times -- one file per independent reader -- and what is
+   * folded in is no longer each reader's flags but the sentences at least ``k`` readers
+   * flag; the report shows each reader's count and that consensus per 1,000 words.
+   * ``baseline`` is the output of :func:`baseline` on reference texts (a path, the
+   * JSON text, or the parsed dict), shown beside the consensus; a previous reading's
+   * ``meta["readers"]`` works too, as a one-text baseline.
+   *
    * >>> gauge("Sent it Friday. Two sites, not five.").splitlines()[0]
    * '# Reading'
    */
-  async gauge(source: string, format?: string, segmenter?: string, detectors?: string | string[] | null, judgments?: string | null, out?: string | null, title?: string | null): Promise<string> {
+  async gauge(source: string, format?: string, segmenter?: string, detectors?: string | string[] | null, judgments?: string | string[] | null, k?: number, baseline?: string | Record<string, any> | null, out?: string | null, title?: string | null): Promise<string> {
     let url = `${this.baseUrl}/gauge`;
-    const data = { source, format, segmenter, detectors, judgments, out, title };
+    const data = { source, format, segmenter, detectors, judgments, k, baseline, out, title };
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json() as string;
+  }
+
+  /**
+   * The multi-reader consensus density on reference texts, to read a new text beside.
+   *
+   * ``sources`` are files -- typically the author's own writing from before the
+   * question arose. Each one's readers are found by name: ``<stem>.*.json`` in
+   * ``judgments_dir`` (default: beside the file), or ``<stem>/*.json`` under it. Every
+   * text needs at least ``k`` readers.
+   *
+   * The result pools the texts by words and keeps the per-text spread; pass the JSON to
+   * ``gauge(baseline=...)`` so a report can say *next to this author's own writing*
+   * instead of giving a bare number. ``format`` is json or markdown. Quotes from the
+   * reference texts are not included -- only counts.
+   *
+   * It works on files only, so over HTTP (which refuses server paths) it always
+   * refuses; it is for the CLI, a local MCP host, and the library.
+   */
+  async baseline(sources: string[], judgments_dir?: string | null, k?: number, format?: string, out?: string | null): Promise<string> {
+    let url = `${this.baseUrl}/baseline`;
+    const data = { sources, judgments_dir, k, format, out };
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -1,0 +1,7 @@
+[
+  {"quote": "This is a recurring pattern: we plan the migration, underestimate the data, and then rush the verification.", "direction": "machine", "name": "pattern-naming-tricolon", "weight": 0.5, "note": "Names a pattern, then three parallel clauses."},
+  {"quote": "Time spent can't by itself be a measure of care.", "direction": "machine", "name": "principle-generalisation", "weight": 0.45, "note": "Lifts a complaint into a maxim."},
+  {"quote": "The point is not speed but trust.", "direction": "machine", "name": "not-x-but-y", "weight": 0.4, "note": "Balanced reversal."},
+  {"quote": "we learned that the manifest matters more than the transfer", "direction": "machine", "name": "aphoristic-closer", "weight": 0.4, "note": "Moral capping the piece."},
+  {"quote": "Marta found the bad checksum.", "direction": "human", "name": "unhedged-specificity", "weight": 0.3, "note": "Named person, no scaffolding."}
+]

@@ -1,0 +1,7 @@
+{"judgments": [
+  {"quote": "underestimate the data, and then rush the verification", "direction": "machine", "name": "pattern-naming-tricolon", "weight": 0.5, "note": "Tricolon."},
+  {"quote": "The point is not speed but trust.", "direction": "machine", "name": "not-x-but-y", "weight": 0.35, "note": "Reversal."},
+  {"quote": "It took nine hours, three of them spent waiting", "direction": "machine", "name": "over-explanation", "weight": 0.25, "note": "More detail than needed."},
+  {"quote": "Marta found the bad checksum", "direction": "human", "name": "unhedged-specificity", "weight": 0.3, "note": "Specific."},
+  {"quote": "a sentence that is not in the text at all", "direction": "machine", "name": "stale", "weight": 0.5, "note": "Left from an earlier draft."}
+]}
