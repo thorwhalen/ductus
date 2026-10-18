@@ -29,6 +29,7 @@ So: **never produce a percentage**, never say "this was AI-generated", and never
 |---|---|
 | "Which parts of this read as AI?" / "is this AI-written?" | the **ductus-gauge** skill — the full reading |
 | "Check this before I send it" / "make it sound like me" | the **deslop** skill first; gauge after, to check the rewrite |
+| "Did this rewrite help?" / comparing versions of one text | **ductus-gauge**, with several cold readers and `ductus baseline` on the author's own earlier writing — one reader's count moves with the reader, not the text |
 | "Just give me a quick look" | `ductus gauge <file>` and report the segments that fired |
 | "What does it actually look for?" | `ductus tells` and `ductus detectors` |
 
@@ -58,4 +59,5 @@ The pattern worth looking for is not "which sentences are flagged" but **what ki
 
 - Give a percentage, a confidence, or a verdict about a person.
 - Report a document-level number without saying which segments drove it.
+- Report a multi-reader consensus density without the author's baseline beside it.
 - Use this to help someone evade detection. The package exists to describe text, and its sibling `deslop` exists to make writing *good*, not to launder it.

@@ -11,16 +11,24 @@ this one list. Adding a surface never means writing a second implementation.
 'leans-machine'
 >>> [d["name"] for d in detectors()][:2]
 ['tells', 'forensic']
+
+Several readers' judgments go to the same ``judgments`` argument, one source each; what
+enters the report is then the sentences at least ``k`` of them agree on, with the
+per-reader counts beside it (:mod:`ductus.consensus`). :func:`baseline` takes the same
+measure on reference texts, and ``gauge(baseline=...)`` sets the two side by side.
 """
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 from collections.abc import Sequence
 from typing import Any
 
 from ductus.base import Signal, Span
+from ductus.consensus import DEFAULT_K, anchor_judgment, consensus, consensus_signals
+from ductus.consensus import pooled as _pooled
 from ductus.core import gauge as _gauge
 from ductus.detect import DETECTORS
 from ductus.render import to_html, to_json, to_markdown
@@ -28,6 +36,7 @@ from ductus.segment import SEGMENTERS
 
 __all__ = [
     "_dispatch_funcs",
+    "baseline",
     "detectors",
     "gauge",
     "host_mutating",
@@ -72,7 +81,7 @@ def host_paths(**roles: str):
     knowing anything about ``gauge``.
 
     >>> sorted(gauge.host_paths.items())
-    [('judgments', 'read'), ('out', 'write'), ('source', 'read')]
+    [('baseline', 'read'), ('judgments', 'read'), ('out', 'write'), ('source', 'read')]
     >>> getattr(segmenters, "host_paths", {})
     {}
     """
@@ -103,8 +112,46 @@ def _read_source(source: str) -> str:
     return source
 
 
+def _load_judgments(judgments: Any) -> list[dict[str, Any]]:
+    """One reader's judgment records, from a path, JSON text, a wrapper dict or a list.
+
+    >>> _load_judgments('{"judgments": [{"quote": "x", "direction": "human"}]}')
+    [{'quote': 'x', 'direction': 'human'}]
+    """
+    if isinstance(judgments, str):
+        judgments = json.loads(_read_source(judgments))
+    if isinstance(judgments, dict):
+        judgments = judgments.get("judgments", judgments.get("findings", []))
+    return list(judgments or ())
+
+
+def _readers(judgments: Any) -> list[tuple[str, list[dict[str, Any]]]]:
+    """Split a ``judgments`` argument into named readers.
+
+    A string, or a list of records, is **one** reader -- the original single-reader
+    shape. A list of strings (paths, or JSON text) is one reader per string, named
+    after its file.
+
+    >>> [n for n, _ in _readers('[]')], [n for n, _ in _readers(['[]', '[]'])]
+    (['reader 1'], ['reader 1', 'reader 2'])
+    >>> len(_readers([{"quote": "x", "direction": "human"}]))
+    1
+    """
+    if not judgments:
+        return []
+    if isinstance(judgments, (str, dict)) or isinstance(judgments[0], dict):
+        judgments = [judgments]
+
+    def name(i: int, source: Any) -> str:
+        if isinstance(source, str) and len(source) < 4096 and os.path.isfile(source):
+            return os.path.splitext(os.path.basename(source))[0]
+        return f"reader {i + 1}"
+
+    return [(name(i, src), _load_judgments(src)) for i, src in enumerate(judgments)]
+
+
 def _signals_from_judgments(text: str, judgments: Any) -> list[Signal]:
-    """Turn judgment records into signals anchored in ``text``.
+    """Turn one reader's judgment records into signals anchored in ``text``.
 
     A judgment is a dict with ``direction`` and one of ``quote`` or
     ``start``/``end``, plus optional ``name``, ``weight`` and ``note``. This is
@@ -117,20 +164,12 @@ def _signals_from_judgments(text: str, judgments: Any) -> list[Signal]:
     >>> s[0].span.quote, s[0].detector
     ('cat', 'judge')
     """
-    if isinstance(judgments, str):
-        judgments = json.loads(_read_source(judgments))
-    if isinstance(judgments, dict):
-        judgments = judgments.get("judgments", judgments.get("findings", []))
-
     out: list[Signal] = []
-    for j in judgments or ():
-        if "quote" in j:
-            start = text.find(j["quote"])
-            if start < 0:
-                continue  # the quote no longer occurs: drop it rather than mis-anchor
-            end = start + len(j["quote"])
-        else:
-            start, end = int(j["start"]), int(j["end"])
+    for j in _load_judgments(judgments):
+        where = anchor_judgment(text, j)
+        if where is None:
+            continue  # the quote no longer occurs: drop it rather than mis-anchor
+        start, end = where
         out.append(
             Signal(
                 name=j.get("name", "judgment"),
@@ -145,14 +184,36 @@ def _signals_from_judgments(text: str, judgments: Any) -> list[Signal]:
     return out
 
 
-@host_paths(source="read", judgments="read", out="write")
+def _compared(reading: dict[str, Any], reference: dict[str, Any]) -> dict[str, Any]:
+    """The reference measure, plus whatever makes it not like-for-like with ``reading``.
+
+    More readers at the same ``k`` agree more often by chance, and a different ``k`` is
+    a different measure, so either is said out loud rather than silently compared.
+    """
+    caveats = []
+    if reference.get("k") != reading["k"]:
+        caveats.append(
+            f"the reference texts were read at k={reference.get('k')}, this one at "
+            f"k={reading['k']}: different measures"
+        )
+    if reference.get("n_readers") != [reading["n_readers"]]:
+        caveats.append(
+            f"the reference texts had {reference.get('n_readers')} readers each, this "
+            f"one {reading['n_readers']}: more readers agree more often by chance"
+        )
+    return {**reference, "caveats": caveats}
+
+
+@host_paths(source="read", judgments="read", baseline="read", out="write")
 def gauge(
     source: str,
     *,
     format: str = "markdown",
     segmenter: str = "paragraph",
     detectors: str | Sequence[str] | None = None,
-    judgments: str | None = None,
+    judgments: str | Sequence[str] | None = None,
+    k: int = DEFAULT_K,
+    baseline: str | None = None,
     out: str | None = None,
     title: str | None = None,
 ) -> str:
@@ -165,6 +226,12 @@ def gauge(
     an agent's own readings, folded in alongside the deterministic ones. With
     ``out``, the result is written there and a one-line summary is returned.
 
+    Give ``judgments`` several times -- one file per independent reader -- and what is
+    folded in is no longer each reader's flags but the sentences at least ``k`` readers
+    flag; the report shows each reader's count and that consensus per 1,000 words.
+    ``baseline`` is the output of :func:`baseline` on reference texts (a path or the
+    JSON itself), shown beside the consensus.
+
     >>> gauge("Sent it Friday. Two sites, not five.").splitlines()[0]
     '# Reading'
     """
@@ -174,8 +241,27 @@ def gauge(
         detectors = [d.strip() for d in detectors.split(",") if d.strip()]
 
     text = _read_source(source)
-    extra = _signals_from_judgments(text, judgments) if judgments else ()
+    readers = _readers(judgments)
+    reading = None
+    if len(readers) > 1:
+        reading = consensus(
+            text, [js for _, js in readers], k=k, names=[n for n, _ in readers]
+        )
+        extra = consensus_signals(text, reading)
+    elif readers:
+        extra = _signals_from_judgments(text, readers[0][1])
+    else:
+        extra = ()
+    if baseline is not None and reading is None:
+        raise ValueError(
+            "baseline compares a multi-reader consensus; give judgments at least twice"
+        )
     report = _gauge(text, segmenter=segmenter, detectors=detectors, extra_signals=extra)
+    if reading is not None:
+        meta = {"readers": reading}
+        if baseline is not None:
+            meta["baseline"] = _compared(reading, json.loads(_read_source(baseline)))
+        report = dataclasses.replace(report, meta=meta)
     # Only override when asked: each renderer owns its own default title.
     titled = {} if title is None else {"title": title}
 
@@ -196,6 +282,145 @@ def gauge(
             f"lean {report.document.lean:+.2f}, {len(report.signals)} signal(s)"
         )
     return rendered
+
+
+# Several readers means `--judgments a.json --judgments b.json`, so the flag appends.
+# A plain attribute (cw's declared contract), so this module still never imports cw.
+gauge._cw = {"params": {"judgments": {"action": "append"}}}
+
+
+def _readers_beside(source: str, judgments_dir: str | None) -> list[str]:
+    """The judgment files for ``source``, by convention.
+
+    ``<stem>.*.json`` in ``judgments_dir`` (default: the source's own directory), and
+    every ``*.json`` in a ``<stem>/`` subdirectory of it. So ``essay.md`` is read by
+    ``essay.a.json`` and ``essay.b.json`` beside it, or by ``essay/*.json``.
+    """
+    import glob
+
+    stem = os.path.splitext(os.path.basename(source))[0]
+    where = judgments_dir or os.path.dirname(os.path.abspath(source))
+    esc = glob.escape
+    found = glob.glob(os.path.join(esc(where), esc(stem) + ".*.json"))
+    found += glob.glob(os.path.join(esc(where), esc(stem), "*.json"))
+    return sorted(set(found))
+
+
+def _baseline_markdown(result: dict[str, Any]) -> str:
+    def rate(d: dict[str, Any]) -> str:
+        r = d.get("per_1000_words")
+        return "n/a" if r is None else f"{r:.1f}"
+
+    m, h = result["machine"], result["human"]
+    lo, hi = m["range"] or (None, None)
+    spread = "" if lo is None else f", {lo:.1f}&ndash;{hi:.1f} across texts"
+    out = [
+        "# Baseline",
+        "",
+        (
+            f"{result['n_texts']} reference text(s), {result['n_words']:,} words, "
+            f"{result['unit']}s flagged by at least k={result['k']} readers "
+            f"(readers per text: {', '.join(map(str, result['n_readers']))})."
+        ),
+        "",
+        (
+            f"**Machine-leaning consensus: {rate(m)} per 1,000 words** pooled{spread}. "
+            f"Human-leaning: {rate(h)} per 1,000 words."
+        ),
+        "",
+        "| Text | Words | Readers | Machine-leaning / 1,000 words | Human-leaning / 1,000 words |",
+        "|---|---|---|---|---|",
+    ]
+    for t in result["texts"]:
+        out.append(
+            f"| {t['source']} | {t['n_words']:,} | {t['n_readers']} | "
+            f"{rate(t['machine'])} | {rate(t['human'])} |"
+        )
+    out += [
+        "",
+        (
+            "A description of how these texts read to these readers, so another text "
+            "can be set beside it. Not a threshold, and not a statement about who wrote "
+            "anything."
+        ),
+        "",
+    ]
+    return "\n".join(out)
+
+
+@host_paths(sources="read", judgments_dir="read", out="write")
+def baseline(
+    sources: Sequence[str],
+    *,
+    judgments_dir: str | None = None,
+    k: int = DEFAULT_K,
+    format: str = "json",
+    out: str | None = None,
+) -> str:
+    """The multi-reader consensus density on reference texts, to read a new text beside.
+
+    ``sources`` are files -- typically the author's own writing from before the
+    question arose. Each one's readers are found by name: ``<stem>.*.json`` in
+    ``judgments_dir`` (default: beside the file), or ``<stem>/*.json`` under it. Every
+    text needs at least ``k`` readers.
+
+    The result pools the texts by words and keeps the per-text spread; pass the JSON to
+    ``gauge(baseline=...)`` so a report can say *next to this author's own writing*
+    instead of giving a bare number. ``format`` is json or markdown. Quotes from the
+    reference texts are not included -- only counts.
+    """
+    if format not in ("json", "markdown"):
+        raise ValueError(f"format must be json or markdown, got {format!r}")
+    if isinstance(sources, str):
+        sources = [sources]
+    if not sources:
+        raise ValueError("baseline needs at least one reference text")
+    texts = []
+    for src in sources:
+        if not os.path.isfile(src):
+            raise ValueError(f"{src!r} is not a file; baseline finds readers by filename")
+        files = _readers_beside(src, judgments_dir)
+        if len(files) < k:
+            raise ValueError(
+                f"{os.path.basename(src)}: found {len(files)} reader file(s), need at "
+                f"least k={k} ({os.path.splitext(os.path.basename(src))[0]}.*.json)"
+            )
+        names, readers = zip(*_readers(files))
+        result = consensus(_read_source(src), readers, k=k, names=names)
+        texts.append(
+            {
+                "source": os.path.basename(src),
+                "readers": list(names),
+                "k": result["k"],
+                "unit": result["unit"],
+                "n_readers": result["n_readers"],
+                "n_words": result["n_words"],
+                # Counts only: the reference texts' own sentences stay out of the output.
+                **{
+                    d: {f: result[d][f] for f in ("count", "per_1000_words")}
+                    for d in ("machine", "human")
+                },
+            }
+        )
+    result = {**_pooled(texts), "texts": texts}
+    rendered = (
+        json.dumps(result, indent=2, ensure_ascii=False)
+        if format == "json"
+        else _baseline_markdown(result)
+    )
+    if out:
+        with open(out, "w", encoding="utf-8") as f:
+            f.write(rendered)
+        m = result["machine"]
+        return (
+            f"wrote {out} -- {result['n_texts']} text(s), machine-leaning consensus "
+            f"{m['per_1000_words']} per 1,000 words pooled"
+        )
+    return rendered
+
+
+# Several reference texts, one positional each (`ductus baseline a.md b.md`).
+baseline._cw = {"params": {"sources": {"nargs": "+"}}}
 
 
 def detectors() -> list[dict[str, str]]:
@@ -277,4 +502,4 @@ def install_skills(*, target: str | None = None, write: bool = False) -> dict[st
 
 
 #: The SSOT the CLI, an MCP server and an HTTP app would all dispatch from.
-_dispatch_funcs = [gauge, detectors, segmenters, tells, install_skills]
+_dispatch_funcs = [gauge, baseline, detectors, segmenters, tells, install_skills]

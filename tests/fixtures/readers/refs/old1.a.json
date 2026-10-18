@@ -1,0 +1,4 @@
+[
+  {"quote": "It is worth saying that maintenance is a habit, not an event.", "direction": "machine", "name": "not-x-but-y", "weight": 0.4, "note": "Maxim."},
+  {"quote": "I was out forty euros for the visit", "direction": "human", "name": "unhedged-specificity", "weight": 0.3, "note": "Specific."}
+]

@@ -73,6 +73,38 @@ ductus gauge <file> --judgments judgments.json --out reading.md
 
 A quote that no longer occurs in the text is dropped rather than mis-anchored, so re-running after an edit is safe.
 
+### Several readers: when the question is "did this rewrite help?"
+
+One reader is enough to describe a text. It is **not** enough to compare two versions of one: independent strict readers each flag dozens of shapes in a long text, mostly different ones, so a single reader's count moves with the reader, not the rewrite. Use at least two **cold** readers (fresh subagents that have not seen your own reading or each other's), and count only the sentences they agree on.
+
+Spawn each reader with this prompt, one per output file (`essay.a.json`, `essay.b.json`, ...):
+
+```text
+You are a close reader. Read the ductus-gauge skill (the Pass 2 tables only), then read
+<FILE> in full, cold. You have no stake in it. Do not read any other file beside it.
+
+Find every passage that reads as machine-written prose, using the machine-leaning shapes
+in that table, plus: "not X but Y" / "didn't X. It Y." constructions, colon-reveal lists,
+signposting teasers, and summary closers that restate the section. Be strict, but do not
+flag things just for being well written. Lists of cited names, code, and image alt text
+are not findings. Record the human-leaning shapes too.
+
+Write a JSON list to <OUT>. Each finding is {"quote": "<exact verbatim substring, 6-40
+words>", "direction": "machine"|"human", "name": "<kebab-case shape>", "weight": <from the
+table>, "note": "<one line>"}. Quotes must match the file exactly (check with grep -F).
+Do not edit the text.
+```
+
+Then:
+
+```bash
+ductus gauge essay.md --judgments essay.a.json --judgments essay.b.json          # -k 2 is the default
+ductus baseline old-1.md old-2.md --out baseline.json   # the same readers' prompt, on the author's own earlier writing
+ductus gauge essay.md --judgments essay.a.json --judgments essay.b.json --baseline baseline.json
+```
+
+The report's **Readers** section gives each reader's count and the consensus per 1,000 words. Report the consensus **next to the baseline**, never alone, and give the baseline's per-text range — reference texts by one author vary a lot. Use the same number of readers and the same `k` for the text and its baseline; the report flags it when they differ. Keep reference texts and their judgment files where the source lives, never in a repository.
+
 ## Pass 3 — the write-up
 
 Lead with **what kind of passage** carries which signal, not with the number. The useful sentence is usually of the form *"the passages that generalise carry the machine signal; the specific ones carry typing artifacts"*, because that describes a **process** — someone wrote their own material and reached for help framing it — rather than pronouncing on a person.
@@ -80,7 +112,7 @@ Lead with **what kind of passage** carries which signal, not with the number. Th
 Then, in order:
 
 1. The strongest **mechanical** evidence (artifacts, seams, slips). It is the hardest to fake in either direction and should be weighted accordingly.
-2. The strongest **rhetorical** evidence, quoted.
+2. The strongest **rhetorical** evidence, quoted. With several readers, quote the consensus sentences, and give the consensus density beside the author's baseline — never a bare density.
 3. What is **ambiguous**, said plainly. Consistent curly apostrophes mean the text was composed outside the channel it was sent in; they say nothing about who composed it.
 4. The **limits** from the `ductus` skill — at least the editing confound and this tool's own measured false-positive rate (6% of human-written documents; 0.4–2% per sentence, and about 10% for intermediate and advanced non-native writers), including that its bias runs toward *formal, fluent* writing rather than simple writing.
 5. **What would actually settle it**, which is almost never more detection. Usually: a sample of the same author's earlier writing to compare against, or asking them.

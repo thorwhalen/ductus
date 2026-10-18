@@ -236,3 +236,20 @@ def test_the_typed_client_is_generated_from_this_app():
     # has to pass all seven arguments to score a string.
     line = next(ln for ln in ts.splitlines() if "async gauge(" in ln)
     assert "source: string" in line and "format?: string" in line
+
+
+def test_every_path_in_a_list_valued_parameter_is_guarded(client, tmp_path):
+    """Several readers means several paths; the second one must not slip through."""
+    local = tmp_path / "reader.json"
+    local.write_text("[]", encoding="utf-8")
+    r = client.post("/gauge", json={"source": "hello", "judgments": ["[]", str(local)]})
+    assert r.status_code == 422
+
+
+def test_a_directory_is_guarded_like_a_file(client, tmp_path):
+    """`baseline` lists a judgments directory; naming one on the server is refused."""
+    r = client.post(
+        "/baseline", json={"sources": ["some text"], "judgments_dir": str(tmp_path)}
+    )
+    assert r.status_code == 422
+    assert "not available over HTTP" in r.text

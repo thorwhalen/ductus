@@ -1,0 +1,4 @@
+[
+  {"quote": "maintenance is a habit, not an event", "direction": "machine", "name": "principle-generalisation", "weight": 0.45, "note": "Maxim."},
+  {"quote": "the valve is fine, the pressure is not", "direction": "machine", "name": "term-reversal", "weight": 0.35, "note": "Neat reversal."}
+]
