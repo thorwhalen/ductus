@@ -173,7 +173,7 @@ def to_markdown(
         rows, lines = facts
         out += ["## Readers", "", "| " + " | ".join(_READER_HEAD) + " |"]
         out += ["|" + "---|" * len(_READER_HEAD)]
-        out += ["| " + " | ".join(r) + " |" for r in rows]
+        out += ["| " + " | ".join(c.replace("|", "\\|") for c in r) + " |" for r in rows]
         out.append("")
         for line in lines:
             out += [line, ""]

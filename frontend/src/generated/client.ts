@@ -9,7 +9,7 @@ export interface GaugeParams {
   detectors?: string | string[] | null;
   judgments?: string | string[] | null;
   k?: number;
-  baseline?: string | null;
+  baseline?: string | Record<string, any> | null;
   out?: string | null;
   title?: string | null;
 }
@@ -57,13 +57,14 @@ export class DuctusClient {
    * Give ``judgments`` several times -- one file per independent reader -- and what is
    * folded in is no longer each reader's flags but the sentences at least ``k`` readers
    * flag; the report shows each reader's count and that consensus per 1,000 words.
-   * ``baseline`` is the output of :func:`baseline` on reference texts (a path or the
-   * JSON itself), shown beside the consensus.
+   * ``baseline`` is the output of :func:`baseline` on reference texts (a path, the
+   * JSON text, or the parsed dict), shown beside the consensus; a previous reading's
+   * ``meta["readers"]`` works too, as a one-text baseline.
    *
    * >>> gauge("Sent it Friday. Two sites, not five.").splitlines()[0]
    * '# Reading'
    */
-  async gauge(source: string, format?: string, segmenter?: string, detectors?: string | string[] | null, judgments?: string | string[] | null, k?: number, baseline?: string | null, out?: string | null, title?: string | null): Promise<string> {
+  async gauge(source: string, format?: string, segmenter?: string, detectors?: string | string[] | null, judgments?: string | string[] | null, k?: number, baseline?: string | Record<string, any> | null, out?: string | null, title?: string | null): Promise<string> {
     let url = `${this.baseUrl}/gauge`;
     const data = { source, format, segmenter, detectors, judgments, k, baseline, out, title };
     const response = await fetch(url, {
@@ -87,6 +88,9 @@ export class DuctusClient {
    * ``gauge(baseline=...)`` so a report can say *next to this author's own writing*
    * instead of giving a bare number. ``format`` is json or markdown. Quotes from the
    * reference texts are not included -- only counts.
+   *
+   * It works on files only, so over HTTP (which refuses server paths) it always
+   * refuses; it is for the CLI, a local MCP host, and the library.
    */
   async baseline(sources: string[], judgments_dir?: string | null, k?: number, format?: string, out?: string | null): Promise<string> {
     let url = `${this.baseUrl}/baseline`;

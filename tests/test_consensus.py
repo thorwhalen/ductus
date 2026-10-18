@@ -196,3 +196,63 @@ def test_cli_accepts_repeated_judgments_and_a_baseline(tmp_path):
     assert "Next to the reference texts" in r.stdout
     r = _run("gauge", str(DRAFT), *args, "-k", "3")
     assert "0 machine-leaning, 0.0 per 1,000 words" in r.stdout, r.stderr
+
+
+# ------------------------------------------------- shapes that must not be guessed at
+
+
+def test_a_file_beside_the_text_that_is_not_a_reader_is_an_error(tmp_path):
+    """`baseline`'s own output written beside a text must not become a phantom reader."""
+    import shutil
+
+    for f in ("old1.md", "old1.a.json", "old1.b.json"):
+        shutil.copy(FIX / "refs" / f, tmp_path / f)
+    src = str(tmp_path / "old1.md")
+    baseline([src], out=str(tmp_path / "old1.baseline.json"))
+    with pytest.raises(ValueError, match="old1.baseline: not a reader's judgments"):
+        baseline([src])
+
+
+def test_a_sibling_texts_readers_are_not_borrowed(tmp_path):
+    import shutil
+
+    for f in ("old1.md", "old1.a.json", "old1.b.json"):
+        shutil.copy(FIX / "refs" / f, tmp_path / f)
+    (tmp_path / "old1.v2.md").write_text("Another text.", encoding="utf-8")
+    (tmp_path / "old1.v2.x.json").write_text("[]", encoding="utf-8")
+    b = json.loads(baseline([str(tmp_path / "old1.md")]))
+    assert b["texts"][0]["readers"] == ["old1.a", "old1.b"]
+
+
+def test_readers_can_be_wrapper_dicts_or_one_json_list_of_readers():
+    wrapped = [json.loads((FIX / "draft.b.json").read_text())] * 2
+    assert len(_readers(wrapped)) == 2
+    many = json.dumps([json.loads(Path(r).read_text()) for r in READERS])
+    assert [n for n, _ in _readers(many)] == ["reader 1", "reader 2", "reader 3"]
+
+
+def test_mixing_records_and_readers_is_refused():
+    record = {"quote": "Marta", "direction": "human"}
+    with pytest.raises(ValueError, match="mixes single records with whole readers"):
+        _readers([READERS[0], record])
+
+
+def test_baseline_accepts_a_dict_and_a_previous_reading():
+    b = json.loads(baseline(REFS))
+    md = gauge(str(DRAFT), judgments=READERS[:2], baseline=b)
+    assert "Next to the reference texts: 8.6" in md
+    assert "Not like-for-like" not in md
+    # Comparing a rewrite with the version before it: the earlier reading's meta.
+    before = json.loads(gauge(str(DRAFT), judgments=READERS[:2], format="json"))
+    md = gauge(str(DRAFT), judgments=READERS[:2], baseline=before["meta"]["readers"])
+    assert "Next to the reference texts: 17.2 per 1,000 words" in md
+
+
+def test_a_markdown_baseline_gets_a_clear_error():
+    with pytest.raises(ValueError, match="must be the JSON from `ductus baseline`"):
+        gauge(str(DRAFT), judgments=READERS, baseline=baseline(REFS, format="markdown"))
+
+
+def test_k_below_one_is_refused_even_for_one_reader():
+    with pytest.raises(ValueError, match="k must be at least 1"):
+        gauge(str(DRAFT), judgments=READERS[0], k=0)

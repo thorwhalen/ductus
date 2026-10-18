@@ -112,42 +112,80 @@ def _read_source(source: str) -> str:
     return source
 
 
+def _is_record(x: Any) -> bool:
+    """A single judgment: a dict that says which way it argues."""
+    return isinstance(x, dict) and "direction" in x
+
+
+def _parsed(source: Any) -> Any:
+    """A path or JSON text, parsed; anything else as it came."""
+    return json.loads(_read_source(source)) if isinstance(source, str) else source
+
+
 def _load_judgments(judgments: Any) -> list[dict[str, Any]]:
     """One reader's judgment records, from a path, JSON text, a wrapper dict or a list.
 
+    Anything else is refused by name rather than read as a reader who found nothing --
+    an empty reader silently changes the reader count, and with it the consensus.
+
     >>> _load_judgments('{"judgments": [{"quote": "x", "direction": "human"}]}')
     [{'quote': 'x', 'direction': 'human'}]
+    >>> _load_judgments('{"k": 2, "texts": []}')
+    Traceback (most recent call last):
+        ...
+    ValueError: not a reader's judgments: expected a list of {"quote", "direction", ...} records, or {"judgments": [...]}
     """
-    if isinstance(judgments, str):
-        judgments = json.loads(_read_source(judgments))
+    judgments = _parsed(judgments)
     if isinstance(judgments, dict):
-        judgments = judgments.get("judgments", judgments.get("findings", []))
-    return list(judgments or ())
+        key = next((k for k in ("judgments", "findings") if k in judgments), None)
+        judgments = judgments[key] if key else None
+    if not isinstance(judgments, list) or not all(map(_is_record, judgments)):
+        raise ValueError(
+            "not a reader's judgments: expected a list of "
+            '{"quote", "direction", ...} records, or {"judgments": [...]}'
+        )
+    return judgments
 
 
 def _readers(judgments: Any) -> list[tuple[str, list[dict[str, Any]]]]:
     """Split a ``judgments`` argument into named readers.
 
-    A string, or a list of records, is **one** reader -- the original single-reader
-    shape. A list of strings (paths, or JSON text) is one reader per string, named
-    after its file.
+    One reader is a path or JSON text holding one reader's records, a wrapper dict, or
+    a list of records -- the original single-reader shape. Several readers is a list of
+    those (or a path / JSON text holding such a list), each named after its file. A list
+    mixing records with readers is refused: there is no reading of it that is not a
+    guess.
 
     >>> [n for n, _ in _readers('[]')], [n for n, _ in _readers(['[]', '[]'])]
     (['reader 1'], ['reader 1', 'reader 2'])
     >>> len(_readers([{"quote": "x", "direction": "human"}]))
     1
+    >>> len(_readers('[[], {"judgments": []}]'))
+    2
     """
-    if not judgments:
+    if judgments is None or (isinstance(judgments, (list, tuple)) and not judgments):
         return []
-    if isinstance(judgments, (str, dict)) or isinstance(judgments[0], dict):
-        judgments = [judgments]
 
     def name(i: int, source: Any) -> str:
         if isinstance(source, str) and len(source) < 4096 and os.path.isfile(source):
             return os.path.splitext(os.path.basename(source))[0]
         return f"reader {i + 1}"
 
-    return [(name(i, src), _load_judgments(src)) for i, src in enumerate(judgments)]
+    def load(label: str, source: Any) -> tuple[str, list[dict[str, Any]]]:
+        try:
+            return label, _load_judgments(source)
+        except ValueError as e:
+            raise ValueError(f"{label}: {e}") from e
+
+    top = _parsed(judgments)
+    if isinstance(top, dict) or (isinstance(top, list) and all(map(_is_record, top))):
+        return [load(name(0, judgments), top)]
+    if isinstance(top, list) and not any(map(_is_record, top)):
+        return [load(name(i, src), src) for i, src in enumerate(top)]
+    raise ValueError(
+        "judgments mixes single records with whole readers; give either one reader's "
+        "records, or one entry (a path, JSON text, or list of records) per reader"
+    )
 
 
 def _signals_from_judgments(text: str, judgments: Any) -> list[Signal]:
@@ -184,22 +222,45 @@ def _signals_from_judgments(text: str, judgments: Any) -> list[Signal]:
     return out
 
 
-def _compared(reading: dict[str, Any], reference: dict[str, Any]) -> dict[str, Any]:
+def _as_reference(reference: Any) -> dict[str, Any]:
+    """A baseline, from :func:`baseline`'s JSON, or a single earlier reading.
+
+    A previous report's ``meta["readers"]`` is accepted as a one-text baseline, so
+    comparing a rewrite with the version before it needs nothing new.
+    """
+    if isinstance(reference, str):
+        try:
+            reference = json.loads(_read_source(reference))
+        except json.JSONDecodeError as e:
+            raise ValueError(
+                "baseline must be the JSON from `ductus baseline` (its default format), "
+                "or a previous reading's meta['readers']"
+            ) from e
+    if isinstance(reference, dict) and "n_texts" in reference:
+        return reference
+    if isinstance(reference, dict) and "n_units" in reference:
+        return _pooled([reference])
+    raise ValueError("baseline is neither `ductus baseline` output nor a reading")
+
+
+def _compared(reading: dict[str, Any], reference: Any) -> dict[str, Any]:
     """The reference measure, plus whatever makes it not like-for-like with ``reading``.
 
     More readers at the same ``k`` agree more often by chance, and a different ``k`` is
     a different measure, so either is said out loud rather than silently compared.
     """
+    reference = _as_reference(reference)
     caveats = []
-    if reference.get("k") != reading["k"]:
+    if reference["k"] != reading["k"]:
         caveats.append(
-            f"the reference texts were read at k={reference.get('k')}, this one at "
+            f"the reference texts were read at k={reference['k']}, this one at "
             f"k={reading['k']}: different measures"
         )
-    if reference.get("n_readers") != [reading["n_readers"]]:
+    if set(reference["n_readers"]) != {reading["n_readers"]}:
+        each = ", ".join(map(str, reference["n_readers"]))
         caveats.append(
-            f"the reference texts had {reference.get('n_readers')} readers each, this "
-            f"one {reading['n_readers']}: more readers agree more often by chance"
+            f"the reference texts had {each} readers each, this one "
+            f"{reading['n_readers']}: more readers agree more often by chance"
         )
     return {**reference, "caveats": caveats}
 
@@ -213,7 +274,7 @@ def gauge(
     detectors: str | Sequence[str] | None = None,
     judgments: str | Sequence[str] | None = None,
     k: int = DEFAULT_K,
-    baseline: str | None = None,
+    baseline: str | dict[str, Any] | None = None,
     out: str | None = None,
     title: str | None = None,
 ) -> str:
@@ -229,8 +290,9 @@ def gauge(
     Give ``judgments`` several times -- one file per independent reader -- and what is
     folded in is no longer each reader's flags but the sentences at least ``k`` readers
     flag; the report shows each reader's count and that consensus per 1,000 words.
-    ``baseline`` is the output of :func:`baseline` on reference texts (a path or the
-    JSON itself), shown beside the consensus.
+    ``baseline`` is the output of :func:`baseline` on reference texts (a path, the
+    JSON text, or the parsed dict), shown beside the consensus; a previous reading's
+    ``meta["readers"]`` works too, as a one-text baseline.
 
     >>> gauge("Sent it Friday. Two sites, not five.").splitlines()[0]
     '# Reading'
@@ -240,6 +302,8 @@ def gauge(
     if isinstance(detectors, str):
         detectors = [d.strip() for d in detectors.split(",") if d.strip()]
 
+    if k < 1:
+        raise ValueError(f"k must be at least 1, got {k}")
     text = _read_source(source)
     readers = _readers(judgments)
     reading = None
@@ -260,7 +324,7 @@ def gauge(
     if reading is not None:
         meta = {"readers": reading}
         if baseline is not None:
-            meta["baseline"] = _compared(reading, json.loads(_read_source(baseline)))
+            meta["baseline"] = _compared(reading, baseline)
         report = dataclasses.replace(report, meta=meta)
     # Only override when asked: each renderer owns its own default title.
     titled = {} if title is None else {"title": title}
@@ -292,16 +356,22 @@ gauge._cw = {"params": {"judgments": {"action": "append"}}}
 def _readers_beside(source: str, judgments_dir: str | None) -> list[str]:
     """The judgment files for ``source``, by convention.
 
-    ``<stem>.*.json`` in ``judgments_dir`` (default: the source's own directory), and
-    every ``*.json`` in a ``<stem>/`` subdirectory of it. So ``essay.md`` is read by
-    ``essay.a.json`` and ``essay.b.json`` beside it, or by ``essay/*.json``.
+    ``<stem>.<reader>.json`` in ``judgments_dir`` (default: the source's own
+    directory), and every ``*.json`` in a ``<stem>/`` subdirectory of it. So
+    ``essay.md`` is read by ``essay.a.json`` and ``essay.b.json`` beside it, or by
+    ``essay/*.json``. ``<reader>`` has no dot, so ``essay.v2.a.json`` belongs to
+    ``essay.v2.md``, not to ``essay.md``. A file found here that is not a reader's
+    judgments is an error, not a reader who found nothing.
     """
     import glob
 
     stem = os.path.splitext(os.path.basename(source))[0]
     where = judgments_dir or os.path.dirname(os.path.abspath(source))
     esc = glob.escape
-    found = glob.glob(os.path.join(esc(where), esc(stem) + ".*.json"))
+    beside = glob.glob(os.path.join(esc(where), esc(stem) + ".*.json"))
+    found = [
+        f for f in beside if "." not in os.path.basename(f)[len(stem) + 1 : -len(".json")]
+    ]
     found += glob.glob(os.path.join(esc(where), esc(stem), "*.json"))
     return sorted(set(found))
 
@@ -368,6 +438,9 @@ def baseline(
     ``gauge(baseline=...)`` so a report can say *next to this author's own writing*
     instead of giving a bare number. ``format`` is json or markdown. Quotes from the
     reference texts are not included -- only counts.
+
+    It works on files only, so over HTTP (which refuses server paths) it always
+    refuses; it is for the CLI, a local MCP host, and the library.
     """
     if format not in ("json", "markdown"):
         raise ValueError(f"format must be json or markdown, got {format!r}")
