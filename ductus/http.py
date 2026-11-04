@@ -199,6 +199,9 @@ def _as_http_error(fn: Callable[..., Any]) -> Callable[..., Any]:
     will not do. A frontend that believes a 500 shows "something went wrong" in place
     of the reason, and a reader who is told the server crashed learns nothing.
 
+    A model-based detector asked of a server without the ``[local]`` extra is a 501:
+    the request was valid, the server cannot do it, and the detail names the extra.
+
     A status code is an HTTP concern, so the translation lives in the HTTP adapter and
     the core keeps raising plain ``ValueError`` for every surface. One generic
     wrapper: it knows no verb's name.
@@ -207,12 +210,20 @@ def _as_http_error(fn: Callable[..., Any]) -> Callable[..., Any]:
 
     from fastapi import HTTPException
 
+    # Deferred like everything model-based: importing the module loads no torch.
+    from ductus.curvature import ModelDetectorUnavailable
+
     @functools.wraps(fn)
     def translating(*args: Any, **kwargs: Any) -> Any:
         try:
             return fn(*args, **kwargs)
         except ValueError as e:
             raise HTTPException(status_code=422, detail=str(e)) from e
+        except ModelDetectorUnavailable as e:
+            # The caller asked for a real detector this server was not installed
+            # with: not their mistake (422) and not a crash (500). 501 says the
+            # server lacks the capability, and the detail says which extra adds it.
+            raise HTTPException(status_code=501, detail=str(e)) from e
 
     return translating
 
