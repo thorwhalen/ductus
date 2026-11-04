@@ -129,6 +129,21 @@ def test_a_bad_format_is_an_error_not_a_silent_default(client):
     assert "format must be one of" in r.text
 
 
+def test_a_model_detector_the_server_lacks_is_501_not_500(monkeypatch):
+    """A valid request for a capability this install does not have: 501, with the fix."""
+    from ductus import curvature, detect
+
+    def unavailable(text, span, **kw):
+        raise curvature.ModelDetectorUnavailable("needs the [local] extra")
+        yield  # pragma: no cover - makes this a generator, like a real detector
+
+    monkeypatch.setitem(detect.DETECTORS, "binoculars", unavailable)
+    with test_app(mk_app()) as c:
+        r = c.post("/gauge", json={"source": "Some text.", "detectors": ["binoculars"]})
+    assert r.status_code == 501
+    assert "[local]" in r.text
+
+
 # ------------------------------------------------------- the filesystem is not ours
 
 
