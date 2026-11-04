@@ -30,6 +30,17 @@ That last one works **from a git checkout**, where `frontend/dist` sits beside t
 DUCTUS_UI_DIR=/path/to/dist ductus-http
 ```
 
+Two build-time variables are for a host that mounts the UI somewhere other than beside the API, and both default to nothing:
+
+| Variable | Effect |
+|---|---|
+| `VITE_DUCTUS_API_BASE` | Prefix for every API call, e.g. `/api/ductus` when the API is mounted there. Empty means same origin, same path. |
+| `VITE_SITE_URL` | The page's public URL. When set, the build adds `og:image` and the other social-preview tags (they need an absolute URL, so none are written without it). |
+
+```bash
+VITE_DUCTUS_API_BASE=/api/ductus VITE_SITE_URL=https://example.com/ductus/ npm run build
+```
+
 ```bash
 npm test                          # the invalidation policy, in vitest
 npm run typecheck                 # tsc --noEmit
