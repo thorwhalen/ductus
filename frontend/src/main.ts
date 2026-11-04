@@ -17,9 +17,12 @@ import { findingsPanel, limitsPanel, staleBanner, verdictPanel } from './panels'
 import { applyEdit, initialState, track, type State } from './state'
 import { ACCEPT, openTextFile, type FileLike } from './upload'
 
-// Empty base URL: every request is relative, which is correct both when uvicorn serves
-// the built assets itself and when Vite proxies them in development.
-const api = new DuctusClient('')
+// Empty base URL by default: every request is relative, which is correct both when
+// uvicorn serves the built assets itself and when Vite proxies them in development. A
+// host that serves the UI and the API under different prefixes sets
+// VITE_DUCTUS_API_BASE at build time (see vite-env.d.ts); a trailing slash is dropped
+// so `${base}/gauge` never doubles it.
+const api = new DuctusClient((import.meta.env.VITE_DUCTUS_API_BASE ?? '').replace(/\/+$/, ''))
 
 const SAMPLE = `Great question! Let's delve into this rich tapestry.
 
